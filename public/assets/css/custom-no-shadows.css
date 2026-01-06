@@ -29,3 +29,9 @@ img {
     box-shadow: none !important;
 }
 
+/* Sidebar con background blanco */
+.sidenav {
+    background-color: #fff !important;
+}
+
+

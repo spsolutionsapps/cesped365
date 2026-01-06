@@ -44,6 +44,8 @@
   <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.0.3') }}" rel="stylesheet" />
   <!-- Custom CSS - Remove all shadows -->
   <link href="{{ asset('assets/css/custom-no-shadows.css') }}" rel="stylesheet" />
+  <!-- Garden Reports Styles -->
+  <link href="{{ asset('css/garden-reports.css') }}" rel="stylesheet" />
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">

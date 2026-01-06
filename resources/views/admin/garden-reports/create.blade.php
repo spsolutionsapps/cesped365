@@ -127,10 +127,22 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <label for="images" class="form-label">Imágenes</label>
-                        <input type="file" class="form-control @error('images') is-invalid @enderror" id="images" name="images[]" multiple accept="image/*">
+                        <label for="images-create" class="form-label">Imágenes</label>
+                        <p class="text-sm text-muted mb-2">Sube hasta 6 imágenes. La primera será la imagen principal.</p>
+                        <div class="image-uploader" id="image-uploader-create">
+                            <div class="image-dropzone" id="image-dropzone-create">
+                                <div class="add-card text-center">
+                                    <i class="fas fa-plus fa-2x mb-2 text-secondary"></i>
+                                    <p class="mb-0 fw-bold">Agregar</p>
+                                </div>
+                                <input type="file" class="d-none @error('images') is-invalid @enderror" id="images-create" name="images[]" accept="image/*" multiple>
+                            </div>
+                            <div class="image-previews-container" id="image-previews-create"></div>
+                            <p class="text-sm text-muted mt-2" id="image-counter-create">0 de 6 imágenes</p>
+                            <p class="text-xs text-muted mb-0">Formatos JPG o PNG, máximo 2 MB por imagen.</p>
+                        </div>
                         @error('images')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="d-flex gap-2">
@@ -142,6 +154,92 @@
         </div>
     </div>
 </div>
+
+
+@push('scripts')
+<script>
+    (function() {
+        function initImageUploader(dropId, inputId, previewsId, counterId) {
+            const dropzone = document.getElementById(dropId);
+            const input = document.getElementById(inputId);
+            const previews = document.getElementById(previewsId);
+            const counter = document.getElementById(counterId);
+            if (!dropzone || !input || !previews || !counter) return;
+
+            const dataTransfer = new DataTransfer();
+            const maxImages = 6;
+
+            function renderPreviews() {
+                previews.innerHTML = '';
+                Array.from(dataTransfer.files).forEach((file, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'image-preview-card';
+
+                    const img = document.createElement('img');
+                    img.className = 'image-preview';
+                    img.src = URL.createObjectURL(file);
+                    img.alt = file.name;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'image-preview-remove';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.onclick = function() {
+                        const files = Array.from(dataTransfer.files);
+                        files.splice(index, 1);
+                        dataTransfer.items.clear();
+                        files.forEach(f => dataTransfer.items.add(f));
+                        input.files = dataTransfer.files;
+                        renderPreviews();
+                    };
+
+                    card.appendChild(img);
+                    card.appendChild(removeBtn);
+                    previews.appendChild(card);
+                });
+                counter.textContent = dataTransfer.files.length + ' de ' + maxImages + ' imágenes';
+            }
+
+            function addFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (dataTransfer.files.length >= maxImages) return;
+                    if (!file.type.startsWith('image/')) return;
+                    if (file.size > 2 * 1024 * 1024) return;
+                    dataTransfer.items.add(file);
+                });
+                input.files = dataTransfer.files;
+                renderPreviews();
+            }
+
+            dropzone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropzone.classList.add('drag-over');
+            });
+
+            dropzone.addEventListener('dragleave', function() {
+                dropzone.classList.remove('drag-over');
+            });
+
+            dropzone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+                addFiles(e.dataTransfer.files);
+            });
+
+            dropzone.addEventListener('click', function() {
+                input.click();
+            });
+
+            input.addEventListener('change', function(e) {
+                addFiles(e.target.files);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initImageUploader('image-dropzone-create', 'images-create', 'image-previews-create', 'image-counter-create');
+        });
+    })();
+</script>
+@endpush
 
 @endsection
 

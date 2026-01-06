@@ -1,0 +1,31 @@
+/* Eliminar todas las sombras de la aplicación */
+*,
+*::before,
+*::after {
+    box-shadow: none !important;
+}
+
+.shadow,
+.shadow-sm,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-none,
+.shadow-blur,
+.blur-shadow-image,
+.blur-shadow-avatar {
+    box-shadow: none !important;
+}
+
+.card,
+.card-body,
+.card-header,
+.navbar,
+.navbar-brand,
+.btn,
+.icon-shape,
+.avatar,
+img {
+    box-shadow: none !important;
+}
+

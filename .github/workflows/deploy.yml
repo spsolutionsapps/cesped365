@@ -24,60 +24,44 @@ jobs:
 
     - name: Setup environment
       run: |
-        cat > .env << EOF
-        APP_NAME=Cesped365
-        APP_ENV=production
-        APP_KEY=
-        APP_DEBUG=false
-        APP_URL=https://cesped365.com
-
-        LOG_CHANNEL=stack
-        LOG_DEPRECATIONS_CHANNEL=null
-        LOG_LEVEL=error
-
-        DB_CONNECTION=mysql
-        DB_HOST=localhost
-        DB_PORT=3306
-        DB_DATABASE=cespvcyi_cesped365_d
-        DB_USERNAME=cespvcyi_cespvcyi_user
-        DB_PASSWORD=Gojira2019!
-
-        BROADCAST_DRIVER=log
-        CACHE_DRIVER=file
-        FILESYSTEM_DRIVER=local
-        QUEUE_CONNECTION=sync
-        SESSION_DRIVER=file
-        SESSION_LIFETIME=120
-
-        MEMCACHED_HOST=127.0.0.1
-
-        REDIS_HOST=127.0.0.1
-        REDIS_PASSWORD=null
-        REDIS_PORT=6379
-
-        MAIL_MAILER=smtp
-        MAIL_HOST=mail.cesped365.com
-        MAIL_PORT=587
-        MAIL_USERNAME=info@cesped365.com
-        MAIL_PASSWORD=tu_password_email
-        MAIL_ENCRYPTION=tls
-        MAIL_FROM_ADDRESS=info@cesped365.com
-        MAIL_FROM_NAME=Cesped365
-
-        AWS_ACCESS_KEY_ID=
-        AWS_SECRET_ACCESS_KEY=
-        AWS_DEFAULT_REGION=us-east-1
-        AWS_BUCKET=
-        AWS_USE_PATH_STYLE_ENDPOINT=false
-
-        PUSHER_APP_ID=
-        PUSHER_APP_KEY=
-        PUSHER_APP_SECRET=
-        PUSHER_APP_CLUSTER=mt1
-
-        MIX_PUSHER_APP_KEY=
-        MIX_PUSHER_APP_CLUSTER=mt1
-        EOF
+        echo "APP_NAME=Cesped365" > .env
+        echo "APP_ENV=production" >> .env
+        echo "APP_KEY=" >> .env
+        echo "APP_DEBUG=false" >> .env
+        echo "APP_URL=https://cesped365.com" >> .env
+        echo "" >> .env
+        echo "LOG_CHANNEL=stack" >> .env
+        echo "LOG_DEPRECATIONS_CHANNEL=null" >> .env
+        echo "LOG_LEVEL=error" >> .env
+        echo "" >> .env
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=localhost" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=cespvcyi_cesped365_d" >> .env
+        echo "DB_USERNAME=cespvcyi_cespvcyi_user" >> .env
+        echo "DB_PASSWORD=Gojira2019!" >> .env
+        echo "" >> .env
+        echo "BROADCAST_DRIVER=log" >> .env
+        echo "CACHE_DRIVER=file" >> .env
+        echo "FILESYSTEM_DRIVER=local" >> .env
+        echo "QUEUE_CONNECTION=sync" >> .env
+        echo "SESSION_DRIVER=file" >> .env
+        echo "SESSION_LIFETIME=120" >> .env
+        echo "" >> .env
+        echo "MEMCACHED_HOST=127.0.0.1" >> .env
+        echo "" >> .env
+        echo "REDIS_HOST=127.0.0.1" >> .env
+        echo "REDIS_PASSWORD=null" >> .env
+        echo "REDIS_PORT=6379" >> .env
+        echo "" >> .env
+        echo "MAIL_MAILER=smtp" >> .env
+        echo "MAIL_HOST=mail.cesped365.com" >> .env
+        echo "MAIL_PORT=587" >> .env
+        echo "MAIL_USERNAME=info@cesped365.com" >> .env
+        echo "MAIL_PASSWORD=tu_password_email" >> .env
+        echo "MAIL_ENCRYPTION=tls" >> .env
+        echo "MAIL_FROM_ADDRESS=info@cesped365.com" >> .env
+        echo "MAIL_FROM_NAME=Cesped365" >> .env
 
     - name: Generate application key
       run: php artisan key:generate

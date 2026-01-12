@@ -73,12 +73,10 @@ jobs:
         # Ensure proper line endings
         dos2unix .env || true
 
-    - name: Optimize Laravel (Optional - commented out due to parsing issues)
+    - name: Setup storage link
       run: |
-        # php artisan config:cache
-        # php artisan route:cache
-        # php artisan view:cache
-        echo "Skipping Laravel optimization due to .env parsing issues"
+        php artisan storage:link
+        echo "Storage link created for file uploads"
 
     - name: Install Node dependencies
       run: npm install

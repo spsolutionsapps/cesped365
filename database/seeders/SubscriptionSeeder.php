@@ -26,8 +26,9 @@ class SubscriptionSeeder extends Seeder
         // Crear suscripciones activas
         foreach ($clients->take(2) as $client) {
             $plan = $plans->random();
+            $durationMonths = (int) $plan->duration_months ?: 1; // Default to 1 month if null
             $startDate = Carbon::now()->subDays(rand(1, 30));
-            $endDate = $startDate->copy()->addMonths($plan->duration_months);
+            $endDate = $startDate->copy()->addMonths($durationMonths);
 
             Subscription::create([
                 'user_id' => $client->id,
@@ -41,8 +42,9 @@ class SubscriptionSeeder extends Seeder
         // Crear suscripción expirada
         if ($clients->count() > 2) {
             $plan = $plans->random();
+            $durationMonths = (int) $plan->duration_months ?: 1; // Default to 1 month if null
             $startDate = Carbon::now()->subMonths(2);
-            $endDate = $startDate->copy()->addMonths($plan->duration_months);
+            $endDate = $startDate->copy()->addMonths($durationMonths);
 
             Subscription::create([
                 'user_id' => $clients->skip(2)->first()->id,

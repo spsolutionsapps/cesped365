@@ -93,7 +93,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: ./  # Cambia si necesitas subir a un subdirectorio
+        server-dir: ./  # Sube a la raíz para reemplazar WordPress
         exclude: |
           **/.git*
           **/.git*/**

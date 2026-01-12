@@ -75,12 +75,19 @@ jobs:
         PUSHER_APP_SECRET=
         PUSHER_APP_CLUSTER=mt1
 
-        MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
-        MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+        MIX_PUSHER_APP_KEY=
+        MIX_PUSHER_APP_CLUSTER=mt1
         EOF
 
     - name: Generate application key
       run: php artisan key:generate
+
+    - name: Clean .env file
+      run: |
+        # Remove any BOM or invisible characters
+        sed -i '1s/^\xEF\xBB\xBF//' .env
+        # Ensure proper line endings
+        dos2unix .env || true
 
     - name: Optimize Laravel
       run: |

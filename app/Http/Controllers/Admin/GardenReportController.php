@@ -232,5 +232,22 @@ class GardenReportController extends Controller
         return redirect()->route('admin.garden-reports.index')
             ->with('success', 'Reporte eliminado exitosamente.');
     }
+
+    /**
+     * Delete a specific image from a garden report.
+     */
+    public function deleteImage($reportId, $imageId)
+    {
+        $gardenReport = GardenReport::findOrFail($reportId);
+        $image = $gardenReport->images()->findOrFail($imageId);
+
+        // Delete the file from storage
+        Storage::disk('public')->delete($image->image_path);
+
+        // Delete the database record
+        $image->delete();
+
+        return response()->json(['success' => true, 'message' => 'Imagen eliminada exitosamente.']);
+    }
 }
 

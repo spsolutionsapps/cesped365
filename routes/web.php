@@ -80,6 +80,7 @@ Route::group(['middleware' => 'auth'], function () {
         
         // Garden Reports
         Route::resource('garden-reports', GardenReportController::class);
+        Route::delete('garden-reports/{reportId}/images/{imageId}', [GardenReportController::class, 'deleteImage'])->name('garden-reports.images.delete');
     });
     
     // Legacy routes (keeping for compatibility)

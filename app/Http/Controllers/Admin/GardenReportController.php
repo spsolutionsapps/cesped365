@@ -14,13 +14,31 @@ class GardenReportController extends Controller
     /**
      * Display a listing of garden reports.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $reports = GardenReport::with(['user', 'subscription', 'images'])
-            ->orderBy('report_date', 'desc')
-            ->paginate(15);
-        
-        return view('admin.garden-reports.index', compact('reports'));
+        $query = GardenReport::with(['user', 'subscription', 'images']);
+
+        // Filtro por usuario
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Filtro por fecha desde
+        if ($request->filled('date_from')) {
+            $query->whereDate('report_date', '>=', $request->date_from);
+        }
+
+        // Filtro por fecha hasta
+        if ($request->filled('date_to')) {
+            $query->whereDate('report_date', '<=', $request->date_to);
+        }
+
+        $reports = $query->orderBy('report_date', 'desc')->paginate(15);
+
+        // Obtener usuarios para el filtro
+        $users = User::where('role', 'client')->orderBy('name')->get();
+
+        return view('admin.garden-reports.index', compact('reports', 'users'));
     }
 
     /**

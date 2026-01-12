@@ -34,4 +34,20 @@ img {
     background-color: #fff !important;
 }
 
+/* Modales con background blanco */
+.modal-content {
+    background-color: #fff !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Modal de confirmación de eliminación específicamente */
+#confirmDeleteModal .modal-content {
+    background-color: #fff !important;
+}
+
+/* Modal de éxito específicamente */
+#successModal .modal-content {
+    background-color: #fff !important;
+}
+
 

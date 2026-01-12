@@ -59,7 +59,7 @@
   @if(session()->has('success'))
     <!-- Modal de Éxito -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
           <div class="modal-header border-0 bg-gradient-success text-white">
             <h5 class="modal-title d-flex align-items-center" id="successModalLabel">

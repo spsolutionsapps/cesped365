@@ -13,6 +13,39 @@
                 </div>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
+                <!-- Filtros -->
+                <div class="px-4 py-3">
+                    <form method="GET" action="{{ route('admin.garden-reports.index') }}" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="user_id" class="form-label text-sm">Filtrar por Usuario</label>
+                            <select class="form-control form-control-sm" id="user_id" name="user_id">
+                                <option value="">Todos los usuarios</option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }} ({{ $user->email }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="date_from" class="form-label text-sm">Fecha Desde</label>
+                            <input type="date" class="form-control form-control-sm" id="date_from" name="date_from" value="{{ request('date_from') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="date_to" class="form-label text-sm">Fecha Hasta</label>
+                            <input type="date" class="form-control form-control-sm" id="date_to" name="date_to" value="{{ request('date_to') }}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary btn-sm me-2">
+                                <i class="fas fa-search me-1"></i>Filtrar
+                            </button>
+                            <a href="{{ route('admin.garden-reports.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="table-responsive p-0">
                     <table class="table align-items-center mb-0">
                         <thead>
@@ -80,7 +113,7 @@
 
 <!-- Modal de Confirmación de Eliminación -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header border-0 bg-gradient-danger text-white">
                 <h5 class="modal-title d-flex align-items-center" id="confirmDeleteModalLabel">

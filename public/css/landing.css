@@ -10,7 +10,7 @@
 
 /* Navbar Styles */
 .navbar-landing {
-    background-color: #1e7e34;
+    background-color: #000000;
     padding: 1rem 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;

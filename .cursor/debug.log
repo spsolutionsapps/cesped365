@@ -286,3 +286,125 @@
 {"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports\/7"},"timestamp":1767724018000}
 {"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724018000}
 {"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724018000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/plans"},"timestamp":1767724302000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724302000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724302000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724307000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724307000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724307000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users\/4\/edit"},"timestamp":1767724313000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724313000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724313000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users\/4"},"timestamp":1767724318000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724318000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724318000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724319000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724319000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724319000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users\/3\/edit"},"timestamp":1767724348000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724348000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724348000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724350000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724350000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724350000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724362000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724362000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724362000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724395000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724395000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724395000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724490000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724490000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724490000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724498000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724498000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724498000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724516000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724516000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724516000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724523000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724523000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724523000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports\/7"},"timestamp":1767724526000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724526000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724526000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724541000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724541000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724541000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports\/create"},"timestamp":1767724558000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724558000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724558000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724569000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724569000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724569000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724570000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724570000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724570000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports\/create"},"timestamp":1767724623000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724623000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724623000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724645000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724645000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724645000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports\/create"},"timestamp":1767724646000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724646000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724646000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724656000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724656000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724656000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports\/create"},"timestamp":1767724656000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724656000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724656000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724665000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724665000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724665000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724666000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724666000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724666000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/users"},"timestamp":1767724718000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724718000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724718000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"DashboardController.php:29","message":"DashboardController index() entry","data":[],"timestamp":1767724735000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"DashboardController.php:34","message":"Auth check before isAdmin()","data":{"auth_check":true,"user_id":1,"user_email":"admin@cesped365.com"},"timestamp":1767724735000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"DashboardController.php:37","message":"User is admin, redirecting","data":[],"timestamp":1767724735000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin"},"timestamp":1767724736000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724736000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724736000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724771000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724771000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724771000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin\/garden-reports"},"timestamp":1767724779000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767724779000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767724779000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"DashboardController.php:29","message":"DashboardController index() entry","data":[],"timestamp":1767725874000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"DashboardController.php:34","message":"Auth check before isAdmin()","data":{"auth_check":true,"user_id":1,"user_email":"admin@cesped365.com"},"timestamp":1767725874000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"DashboardController.php:37","message":"User is admin, redirecting","data":[],"timestamp":1767725874000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin"},"timestamp":1767725875000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767725875000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767725875000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:15","message":"LandingController home() entry","data":{"method":"home"},"timestamp":1767824006000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:20","message":"Checking route register exists","data":{"route_exists":true,"route_url":"\/register"},"timestamp":1767824006000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:26","message":"View created successfully","data":[],"timestamp":1767824008000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:15","message":"LandingController home() entry","data":{"method":"home"},"timestamp":1767824019000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:20","message":"Checking route register exists","data":{"route_exists":true,"route_url":"\/register"},"timestamp":1767824019000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:26","message":"View created successfully","data":[],"timestamp":1767824019000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:15","message":"LandingController home() entry","data":{"method":"home"},"timestamp":1767915749000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:20","message":"Checking route register exists","data":{"route_exists":true,"route_url":"\/register"},"timestamp":1767915749000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:26","message":"View created successfully","data":[],"timestamp":1767915751000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:15","message":"LandingController home() entry","data":{"method":"home"},"timestamp":1767915752000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:20","message":"Checking route register exists","data":{"route_exists":true,"route_url":"\/register"},"timestamp":1767915752000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:26","message":"View created successfully","data":[],"timestamp":1767915752000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"SessionsController.php:16","message":"SessionsController store() entry","data":[],"timestamp":1767916151000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"SessionsController.php:22","message":"Validation passed","data":{"email":"admin@softui.com"},"timestamp":1767916152000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"SessionsController.php:54","message":"Auth attempt failed","data":[],"timestamp":1767916154000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"SessionsController.php:16","message":"SessionsController store() entry","data":[],"timestamp":1767916154000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"SessionsController.php:22","message":"Validation passed","data":{"email":"admin@cesped365.com"},"timestamp":1767916154000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"SessionsController.php:25","message":"Auth attempt successful","data":[],"timestamp":1767916155000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"SessionsController.php:31","message":"Auth user retrieved","data":{"user_id":1,"user_role":"admin"},"timestamp":1767916155000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"SessionsController.php:37","message":"Redirecting admin","data":[],"timestamp":1767916155000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:16","message":"AdminMiddleware handle() entry","data":{"path":"admin"},"timestamp":1767916155000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:20","message":"Auth check in middleware","data":{"auth_check":true,"user_id":1,"user_role":"admin"},"timestamp":1767916155000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"AdminMiddleware.php:27","message":"Access granted, continuing","data":[],"timestamp":1767916155000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:15","message":"LandingController home() entry","data":{"method":"home"},"timestamp":1768232976000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:20","message":"Checking route register exists","data":{"route_exists":true,"route_url":"\/register"},"timestamp":1768232976000}
+{"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"LandingController.php:26","message":"View created successfully","data":[],"timestamp":1768232976000}

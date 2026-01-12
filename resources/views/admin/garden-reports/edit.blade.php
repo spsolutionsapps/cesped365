@@ -124,21 +124,43 @@
 
                 const imageId = this.getAttribute('data-image-id');
                 const imagePath = this.getAttribute('data-image-path');
+                const reportId = {{ $gardenReport->id }};
 
-                if (confirm('¿Estás seguro de que quieres eliminar esta imagen?')) {
-                    // For now, just hide the image. In production, you'd make an AJAX call to delete it
-                    this.closest('.existing-image-card').style.display = 'none';
-
-                    // You could add an AJAX call here to actually delete the image
-                    // fetch(`/admin/garden-reports/images/${imageId}`, {
-                    //     method: 'DELETE',
-                    //     headers: {
-                    //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    //     }
-                    // });
+                if (confirm('¿Estás seguro de que quieres eliminar esta imagen? Esta acción no se puede deshacer.')) {
+                    // Make AJAX call to delete the image
+                    fetch(`/admin/garden-reports/${reportId}/images/${imageId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Hide the image card
+                            this.closest('.existing-image-card').style.display = 'none';
+                            // Update counter if needed
+                            updateImageCounter();
+                        } else {
+                            alert('Error al eliminar la imagen: ' + (data.message || 'Error desconocido'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al eliminar la imagen. Inténtalo de nuevo.');
+                    });
                 }
             });
         });
+
+        function updateImageCounter() {
+            const visibleCards = document.querySelectorAll('.existing-image-card[style*="display: none"]').length;
+            const totalCards = document.querySelectorAll('.existing-image-card').length;
+            const actualVisible = totalCards - document.querySelectorAll('.existing-image-card[style*="display: none"]').length;
+            // You can update a counter display here if needed
+        }
     });
 
     (function() {

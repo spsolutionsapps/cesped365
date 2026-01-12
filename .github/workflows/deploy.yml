@@ -73,11 +73,12 @@ jobs:
         # Ensure proper line endings
         dos2unix .env || true
 
-    - name: Optimize Laravel
+    - name: Optimize Laravel (Optional - commented out due to parsing issues)
       run: |
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
+        # php artisan config:cache
+        # php artisan route:cache
+        # php artisan view:cache
+        echo "Skipping Laravel optimization due to .env parsing issues"
 
     - name: Install Node dependencies
       run: npm install

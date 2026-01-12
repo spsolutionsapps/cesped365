@@ -1,0 +1,64 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches: [ main, master ]  # Cambia según tu rama principal
+  workflow_dispatch:  # Permite ejecutar manualmente
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'  # Cambia según tu versión de PHP
+        extensions: mbstring, bcmath, gd, mysql, zip
+
+    - name: Install Composer dependencies
+      run: composer install --no-dev --optimize-autoloader
+
+    - name: Setup environment
+      run: cp .env.production.example .env
+
+    - name: Generate application key
+      run: php artisan key:generate
+
+    - name: Optimize Laravel
+      run: |
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+
+    - name: Install Node dependencies
+      run: npm install
+
+    - name: Build assets
+      run: npm run production
+
+    - name: Deploy to cPanel via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: ./  # Cambia si necesitas subir a un subdirectorio
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.env.example
+          **/storage/logs/**
+          **/tests/**
+          .github/
+          .gitignore
+          README.md
+          ISSUE_TEMPLATE.md
+          REQUISITOS.md
+          SETUP.md
+          *.bat

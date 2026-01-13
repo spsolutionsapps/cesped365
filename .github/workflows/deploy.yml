@@ -97,6 +97,10 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
+        # Evita problemas con servidores que bloquean "dotfiles" (archivos que empiezan con .)
+        # El action por defecto usa ".ftp-deploy-sync-state.json".
+        state-name: ftp-deploy-sync-state.json
+        log-level: verbose
         local-dir: ./
         # NOTE: en muchos cPanel el "FTP root" YA es public_html.
         # Si tu usuario FTP está chrooted a public_html, usar ./public_html/ falla con 553 (no existe).

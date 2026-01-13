@@ -53,12 +53,12 @@
                             @foreach($gardenReport->images as $index => $image)
                             <div class="existing-image-card" style="position: relative; width: 120px; height: 120px; border: 2px solid #e9ecef; border-radius: 8px; overflow: hidden;">
                                 <img src="{{ $image->public_url }}" alt="Imagen existente {{ $index + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                <button type="button" class="delete-image-btn"
+                                <button type="button" class="delete-image-btn btn btn-sm btn-danger rounded-circle position-absolute"
                                         data-image-id="{{ $image->id }}"
                                         data-image-path="{{ $image->image_path }}"
-                                        style="position: absolute; top: 8px; right: 8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s;"
+                                        style="top: 8px; right: 8px; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10;"
                                         title="Eliminar imagen">
-                                    <i class="fas fa-trash" style="font-size: 14px;"></i>
+                                    <i class="fas fa-trash" style="font-size: 12px;"></i>
                                 </button>
                             </div>
                             @endforeach
@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let pendingDelete = null; // { imageId: string, cardEl: Element }
 
+
     // Handle delete image buttons
     const deleteButtons = document.querySelectorAll('.delete-image-btn');
     deleteButtons.forEach(button => {
@@ -205,15 +206,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (cardEl) cardEl.style.display = 'none';
                 // Update counter if needed
                 updateImageCounter();
+                // Show success toast using the professional notification system
+                NotificationSystem.success(data.message || 'Imagen eliminada exitosamente.', 3000);
                 pendingDelete = null;
                 if (modalInstance) modalInstance.hide();
             } else {
-                alert('Error al eliminar la imagen: ' + (data.message || 'Error desconocido'));
+                NotificationSystem.error('Error al eliminar la imagen: ' + (data.message || 'Error desconocido'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error al eliminar la imagen. Inténtalo de nuevo.');
+            NotificationSystem.error('Error al eliminar la imagen. Inténtalo de nuevo.');
         });
     }
 

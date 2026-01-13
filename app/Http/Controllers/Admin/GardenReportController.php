@@ -212,30 +212,16 @@ class GardenReportController extends Controller
         ]);
 
         // Handle new image uploads
-        $hasAttemptedUpload = $request->files->has('images');
-        $files = $request->file('images', []);
-        if ($files instanceof UploadedFile) {
-            $files = [$files];
-        }
-        $files = array_values(array_filter((array) $files, fn ($f) => $f instanceof UploadedFile && $f->isValid()));
-
-        if (count($files) > 0) {
+        if ($request->hasFile('images')) {
             // With a proper storage link, always store on the standard "public" disk:
             // storage/app/public/garden-reports/*
-            foreach ($files as $image) {
+            foreach ($request->file('images') as $image) {
                 $path = $image->store('garden-reports', 'public');
                 $gardenReport->images()->create([
                     'image_path' => $path,
                     'image_date' => $validated['report_date'],
                 ]);
             }
-        } elseif ($hasAttemptedUpload) {
-            // User selected files but none arrived as valid uploads (usually size/server limits/WAF).
-            return redirect()->back()
-                ->withInput()
-                ->withErrors([
-                    'images' => 'No se pudieron subir las imágenes. Probá con fotos más livianas (<= 2MB) o revisá el límite de subida del servidor.',
-                ]);
         }
 
         // Redirect back to edit so the admin can immediately see new images

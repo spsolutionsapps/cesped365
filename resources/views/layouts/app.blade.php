@@ -47,6 +47,45 @@
   <link href="{{ asset('assets/css/custom-no-shadows.css') }}" rel="stylesheet" />
   <!-- Garden Reports Styles -->
   <link href="{{ asset('css/garden-reports.css') }}" rel="stylesheet" />
+  <!-- Notification System Styles -->
+  <style>
+    .notification-container {
+      z-index: 10600 !important;
+      pointer-events: none !important;
+    }
+
+    .fallback-toast {
+      pointer-events: auto !important;
+      font-family: 'Open Sans', sans-serif !important;
+      border: none !important;
+      outline: none !important;
+    }
+
+    .fallback-toast.fallback-success {
+      background: linear-gradient(135deg, #198754 0%, #20c997 100%) !important;
+      color: white !important;
+    }
+
+    .fallback-toast.fallback-error {
+      background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%) !important;
+      color: white !important;
+    }
+
+    .fallback-toast.fallback-warning {
+      background: linear-gradient(135deg, #fd7e14 0%, #f39c12 100%) !important;
+      color: white !important;
+    }
+
+    .fallback-toast.fallback-info {
+      background: linear-gradient(135deg, #0dcaf0 0%, #3498db 100%) !important;
+      color: white !important;
+    }
+
+    .fallback-toast:hover {
+      transform: translateX(-2px) !important;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.25) !important;
+    }
+  </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -58,24 +97,12 @@
   @endguest
 
   @if(session()->has('success'))
-    <!-- Success Toast -->
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
-      <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="polite" aria-atomic="true" data-bs-delay="3000">
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ session('success') }}
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
-        </div>
-      </div>
-    </div>
-
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        var el = document.getElementById('successToast');
-        if (!el || typeof bootstrap === 'undefined') return;
-        var toast = new bootstrap.Toast(el);
-        toast.show();
+        // Usar el sistema de notificaciones profesional
+        setTimeout(function() {
+          NotificationSystem.success({{ json_encode(session('success')) }}, 4000);
+        }, 100);
       });
     </script>
   @endif
@@ -97,6 +124,8 @@
     }
   </script>
 
+  <!-- Notification System -->
+  <script src="{{ asset('js/notifications.js') }}"></script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->

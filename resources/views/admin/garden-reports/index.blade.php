@@ -145,15 +145,15 @@
     function showDeleteModal(formId, itemName) {
         var modalElement = document.getElementById('confirmDeleteModal');
         var deleteItemName = document.getElementById('delete-item-name');
-        
+
         if (!modalElement) {
-            alert('Error: Modal no encontrado');
+            NotificationSystem.error('Error: Modal no encontrado');
             return;
         }
-        
+
         formToSubmit = document.getElementById(formId);
         if (!formToSubmit) {
-            alert('Error: Formulario no encontrado');
+            NotificationSystem.error('Error: Formulario no encontrado');
             return;
         }
         

@@ -1,0 +1,42 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # If request is already inside /public, do nothing
+    RewriteCond %{REQUEST_URI} ^/public/ [NC]
+    RewriteRule ^ - [L]
+
+    # -------------------------------------------------------------------------
+    # Definitive image access for shared hosting (no symlink required)
+    #
+    # When uploads are stored under:
+    #   /storage/app/public/garden-reports/<filename>
+    # but the app references:
+    #   /storage/garden-reports/<filename>
+    # this rewrite makes Apache serve the correct file directly.
+    # -------------------------------------------------------------------------
+    RewriteCond %{REQUEST_URI} ^/storage/garden-reports/([A-Za-z0-9._-]+)$ [NC]
+    RewriteCond %1 !\.\. [NC]
+    RewriteCond %{DOCUMENT_ROOT}/storage/app/public/garden-reports/%1 -f
+    RewriteRule ^storage/garden-reports/([A-Za-z0-9._-]+)$ storage/app/public/garden-reports/$1 [L]
+
+    # Serve existing files/folders from /public (assets, /storage if it exists, etc.)
+    RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -d
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Redirect trailing slashes if not a folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send all other requests to Laravel in /public
+    RewriteRule ^ public/index.php [L]
+</IfModule>

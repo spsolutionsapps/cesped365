@@ -85,6 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
     /**
      * Definitive garden report image serving (doesn't depend on /storage rewrites or symlinks).
      * Uses the image id and serves from either disk.
+     * (Deploy trigger: no functional change)
      */
     Route::get('/media/garden-report-images/{image}', function (GardenReportImage $image) {
         $user = auth()->user();

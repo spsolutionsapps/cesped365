@@ -105,22 +105,18 @@ Route::group(['middleware' => 'auth'], function () {
 
         $relativePath = (string) $image->image_path;
 
-        // Try public disk first (standard location)
-        if (Storage::disk('public')->exists($relativePath)) {
-            return response()->file(Storage::disk('public')->path($relativePath), [
+        // Prefer public_uploads disk first (production location)
+        if (config('filesystems.disks.public_uploads') && Storage::disk('public_uploads')->exists($relativePath)) {
+            return response()->file(Storage::disk('public_uploads')->path($relativePath), [
                 'Cache-Control' => 'public, max-age=31536000, immutable',
             ]);
         }
 
-        // Fallback to public_uploads disk
-        try {
-            if (Storage::disk('public_uploads')->exists($relativePath)) {
-                return response()->file(Storage::disk('public_uploads')->path($relativePath), [
-                    'Cache-Control' => 'public, max-age=31536000, immutable',
-                ]);
-            }
-        } catch (\Exception $e) {
-            \Log::warning('Error accessing public_uploads disk: ' . $e->getMessage());
+        // Fallback to public disk (development/standard location)
+        if (Storage::disk('public')->exists($relativePath)) {
+            return response()->file(Storage::disk('public')->path($relativePath), [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+            ]);
         }
 
         abort(404);

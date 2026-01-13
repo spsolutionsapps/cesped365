@@ -8,9 +8,8 @@
                 <h5 class="mb-0">Editar Reporte del Jardín</h5>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
-                <form action="{{ route('admin.garden-reports.update', $gardenReport) }}" method="POST" enctype="multipart/form-data" class="p-4">
+                <form action="{{ route('admin.garden-reports.update.post', $gardenReport) }}" method="POST" enctype="multipart/form-data" class="p-4">
                     @csrf
-                    @method('PUT')
                     <div class="mb-3">
                         <label for="user_id" class="form-label">Usuario</label>
                         <select class="form-control @error('user_id') is-invalid @enderror" id="user_id" name="user_id" required>

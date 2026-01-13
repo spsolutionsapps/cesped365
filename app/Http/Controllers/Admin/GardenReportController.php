@@ -9,6 +9,7 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
 class GardenReportController extends Controller
 {
@@ -211,37 +212,43 @@ class GardenReportController extends Controller
         ]);
 
         // Handle new image uploads
-        if ($request->hasFile('images')) {
-            $preferredDisk = config('filesystems.disks.public_uploads') ? 'public_uploads' : null;
-            if ($preferredDisk) {
-                try {
-                    File::ensureDirectoryExists(public_path('storage/garden-reports'));
-                } catch (\Throwable $e) {
-                    $preferredDisk = null;
-                }
-            }
+        $hasAttemptedUpload = $request->files->has('images');
+        $files = $request->file('images', []);
+        if ($files instanceof UploadedFile) {
+            $files = [$files];
+        }
+        $files = array_values(array_filter((array) $files, fn ($f) => $f instanceof UploadedFile && $f->isValid()));
 
-            foreach ($request->file('images') as $image) {
-                // Shared-hosting friendly: store directly under /public/storage (no symlink needed).
-                // Fallback to the standard "public" disk if the preferred disk isn't available or writable.
-                try {
-                    $path = $preferredDisk
-                        ? $image->store('garden-reports', $preferredDisk)
-                        : $image->store('garden-reports', 'public');
-                } catch (\Throwable $e) {
-                    $path = $image->store('garden-reports', 'public');
-                }
-
+        if (count($files) > 0) {
+            // With a proper storage link, always store on the standard "public" disk:
+            // storage/app/public/garden-reports/*
+            foreach ($files as $image) {
+                $path = $image->store('garden-reports', 'public');
                 $gardenReport->images()->create([
                     'image_path' => $path,
                     'image_date' => $validated['report_date'],
                 ]);
             }
+        } elseif ($hasAttemptedUpload) {
+            // User selected files but none arrived as valid uploads (usually size/server limits/WAF).
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'images' => 'No se pudieron subir las imágenes. Probá con fotos más livianas (<= 2MB) o revisá el límite de subida del servidor.',
+                ]);
         }
 
         // Redirect back to edit so the admin can immediately see new images
         return redirect()->route('admin.garden-reports.edit', $gardenReport)
             ->with('success', 'Reporte actualizado exitosamente.');
+    }
+
+    /**
+     * POST alternative to update() for shared hostings that break uploads with _method=PUT.
+     */
+    public function updatePost(Request $request, GardenReport $gardenReport)
+    {
+        return $this->update($request, $gardenReport);
     }
 
     /**

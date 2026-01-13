@@ -58,67 +58,24 @@
   @endguest
 
   @if(session()->has('success'))
-    <!-- Modal de Éxito -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header border-0 bg-gradient-success text-white">
-            <h5 class="modal-title d-flex align-items-center" id="successModalLabel">
-              <i class="ni ni-check-bold me-2"></i>Éxito
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    <!-- Success Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+      <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="polite" aria-atomic="true" data-bs-delay="3000">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ session('success') }}
           </div>
-          <div class="modal-body text-center py-4 px-4">
-            <div class="mb-3">
-              <i class="ni ni-check-bold text-success" style="font-size: 3.5rem;"></i>
-            </div>
-            <p class="mb-0 fs-6 fw-normal">{{ session('success') }}</p>
-          </div>
-          <div class="modal-footer border-0 justify-content-center pb-4">
-            <button type="button" class="btn bg-gradient-success text-white px-4" data-bs-dismiss="modal" aria-label="Aceptar">Aceptar</button>
-          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
         </div>
       </div>
     </div>
-    
+
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        var successModalElement = document.getElementById('successModal');
-        if (successModalElement) {
-          var successModal = new bootstrap.Modal(successModalElement, {
-            backdrop: 'static',
-            keyboard: false,
-            focus: true
-          });
-          
-          // Manejar eventos del modal para corregir aria-hidden
-          successModalElement.addEventListener('shown.bs.modal', function() {
-            // Asegurar que aria-hidden esté correctamente configurado
-            successModalElement.setAttribute('aria-hidden', 'false');
-            // Enfocar el botón de aceptar
-            var acceptBtn = successModalElement.querySelector('[data-bs-dismiss="modal"]');
-            if (acceptBtn) {
-              acceptBtn.focus();
-            }
-          });
-          
-          successModalElement.addEventListener('hide.bs.modal', function() {
-            // Restaurar aria-hidden antes de ocultar
-            successModalElement.setAttribute('aria-hidden', 'true');
-          });
-          
-          successModal.show();
-          
-          // Cerrar automáticamente después de 3 segundos
-          setTimeout(function() {
-            successModal.hide();
-          }, 3000);
-          
-          // Limpiar el modal del DOM cuando se cierre
-          successModalElement.addEventListener('hidden.bs.modal', function () {
-            successModalElement.remove();
-          });
-        }
+        var el = document.getElementById('successToast');
+        if (!el || typeof bootstrap === 'undefined') return;
+        var toast = new bootstrap.Toast(el);
+        toast.show();
       });
     </script>
   @endif

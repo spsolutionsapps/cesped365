@@ -152,6 +152,10 @@ Route::group(['middleware' => 'auth'], function () {
         
         // Garden Reports
         Route::resource('garden-reports', GardenReportController::class);
+        // Some shared hostings/WAFs break file uploads when using method spoofing (_method=PUT).
+        // This POST endpoint lets the edit form update + upload images reliably.
+        Route::post('garden-reports/{gardenReport}/update', [GardenReportController::class, 'updatePost'])
+            ->name('garden-reports.update.post');
         Route::delete('garden-reports/{reportId}/images/{imageId}', [GardenReportController::class, 'deleteImage'])->name('garden-reports.images.delete');
     });
     

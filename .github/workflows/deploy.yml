@@ -37,9 +37,9 @@ jobs:
         echo "DB_CONNECTION=mysql" >> .env
         echo "DB_HOST=localhost" >> .env
         echo "DB_PORT=3306" >> .env
-        echo "DB_DATABASE=cespvcyi_cesped365_d" >> .env
-        echo "DB_USERNAME=cespvcyi_cespvcyi_user" >> .env
-        echo "DB_PASSWORD=Gojira2019!" >> .env
+        echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
         echo "" >> .env
         echo "BROADCAST_DRIVER=log" >> .env
         echo "CACHE_DRIVER=file" >> .env
@@ -55,13 +55,13 @@ jobs:
         echo "REDIS_PORT=6379" >> .env
         echo "" >> .env
         echo "MAIL_MAILER=smtp" >> .env
-        echo "MAIL_HOST=mail.cesped365.com" >> .env
-        echo "MAIL_PORT=587" >> .env
-        echo "MAIL_USERNAME=info@cesped365.com" >> .env
-        echo "MAIL_PASSWORD=tu_password_email" >> .env
-        echo "MAIL_ENCRYPTION=tls" >> .env
-        echo "MAIL_FROM_ADDRESS=info@cesped365.com" >> .env
-        echo "MAIL_FROM_NAME=Cesped365" >> .env
+        echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> .env
+        echo "MAIL_PORT=${{ secrets.MAIL_PORT }}" >> .env
+        echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> .env
+        echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
+        echo "MAIL_ENCRYPTION=${{ secrets.MAIL_ENCRYPTION }}" >> .env
+        echo "MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}" >> .env
+        echo "MAIL_FROM_NAME=${{ secrets.MAIL_FROM_NAME }}" >> .env
 
     - name: Generate application key
       run: php artisan key:generate
@@ -73,10 +73,17 @@ jobs:
         # Ensure proper line endings
         dos2unix .env || true
 
-    - name: Setup storage link
+    - name: Setup storage link and permissions
       run: |
-        php artisan storage:link
-        echo "Storage link created for file uploads"
+        # Create storage link for file uploads
+        php artisan storage:link || echo "Storage link may already exist"
+
+        # Set proper permissions for storage
+        chmod -R 755 storage/
+        chmod -R 775 storage/logs/
+        chmod -R 775 storage/app/public/
+
+        echo "Storage link and permissions configured"
 
     - name: Install Node dependencies
       run: npm install

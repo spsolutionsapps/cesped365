@@ -36,7 +36,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="start_date" class="form-label">Fecha de Inicio</label>
-                        <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date') }}" required>
+                        <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date', now()->format('Y-m-d')) }}" required>
                         @error('start_date')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

@@ -54,14 +54,13 @@
                             @foreach($gardenReport->images as $index => $image)
                             <div class="existing-image-card" style="position: relative; width: 120px; height: 120px; border: 2px solid #e9ecef; border-radius: 8px; overflow: hidden;">
                                 <img src="{{ asset('storage/' . $image->image_path) }}" alt="Imagen existente {{ $index + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
-                                    <button type="button" class="btn btn-danger btn-sm delete-image-btn"
-                                            data-image-id="{{ $image->id }}"
-                                            data-image-path="{{ $image->image_path }}"
-                                            style="font-size: 12px;">
-                                        <i class="fas fa-trash"></i> Eliminar
-                                    </button>
-                                </div>
+                                <button type="button" class="delete-image-btn"
+                                        data-image-id="{{ $image->id }}"
+                                        data-image-path="{{ $image->image_path }}"
+                                        style="position: absolute; top: 8px; right: 8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s;"
+                                        title="Eliminar imagen">
+                                    <i class="fas fa-trash" style="font-size: 14px;"></i>
+                                </button>
                             </div>
                             @endforeach
                         </div>
@@ -97,71 +96,135 @@
     </div>
 </div>
 
+<!-- Modal de Confirmación de Eliminación de Imagen -->
+<div class="modal fade" id="confirmDeleteImageModal" tabindex="-1" aria-labelledby="confirmDeleteImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg bg-white" style="background-color: #fff;">
+            <div class="modal-header border-0 bg-gradient-danger text-white">
+                <h5 class="modal-title d-flex align-items-center" id="confirmDeleteImageModalLabel">
+                    <i class="ni ni-notification-70 me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4 px-4 bg-white">
+                <div class="mb-3">
+                    <i class="ni ni-notification-70 text-danger" style="font-size: 3.5rem;"></i>
+                </div>
+                <p class="mb-2 fs-6 fw-bold">¿Estás seguro?</p>
+                <p class="mb-0 fs-6 text-muted">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4 bg-white" style="background-color: #fff;">
+                <button type="button" class="btn bg-gradient-secondary text-white px-4 me-2" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn bg-gradient-danger text-white px-4" id="confirmDeleteImageBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @push('scripts')
 <script>
-    // Handle existing image hover effects
-    document.addEventListener('DOMContentLoaded', function() {
-        const imageCards = document.querySelectorAll('.existing-image-card');
+document.addEventListener('DOMContentLoaded', function() {
+    const reportId = {{ $gardenReport->id }};
+    const modalElement = document.getElementById('confirmDeleteImageModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteImageBtn');
+    const modalInstance = (typeof bootstrap !== 'undefined' && modalElement)
+        ? new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false })
+        : null;
 
-        imageCards.forEach(card => {
-            const overlay = card.querySelector('.image-overlay');
+    let pendingDelete = null; // { imageId: string, cardEl: Element }
 
-            card.addEventListener('mouseenter', function() {
-                overlay.style.opacity = '1';
-            });
+    // Handle delete image buttons
+    const deleteButtons = document.querySelectorAll('.delete-image-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
 
-            card.addEventListener('mouseleave', function() {
-                overlay.style.opacity = '0';
-            });
-        });
+            const imageId = this.getAttribute('data-image-id');
+            const cardEl = this.closest('.existing-image-card');
 
-        // Handle delete image buttons
-        const deleteButtons = document.querySelectorAll('.delete-image-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
+            pendingDelete = { imageId, cardEl };
 
-                const imageId = this.getAttribute('data-image-id');
-                const imagePath = this.getAttribute('data-image-path');
-                const reportId = {{ $gardenReport->id }};
-
+            if (modalInstance) {
+                modalInstance.show();
+            } else {
+                // Fallback (por si bootstrap no está disponible)
                 if (confirm('¿Estás seguro de que quieres eliminar esta imagen? Esta acción no se puede deshacer.')) {
-                    // Make AJAX call to delete the image
-                    fetch(`/admin/garden-reports/${reportId}/images/${imageId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Hide the image card
-                            this.closest('.existing-image-card').style.display = 'none';
-                            // Update counter if needed
-                            updateImageCounter();
-                        } else {
-                            alert('Error al eliminar la imagen: ' + (data.message || 'Error desconocido'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error al eliminar la imagen. Inténtalo de nuevo.');
-                    });
+                    doDeletePending();
                 }
-            });
+            }
         });
 
-        function updateImageCounter() {
-            const visibleCards = document.querySelectorAll('.existing-image-card[style*="display: none"]').length;
-            const totalCards = document.querySelectorAll('.existing-image-card').length;
-            const actualVisible = totalCards - document.querySelectorAll('.existing-image-card[style*="display: none"]').length;
-            // You can update a counter display here if needed
-        }
+        // Add hover effects for the delete button
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+        });
+
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        });
     });
+
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function() {
+            doDeletePending();
+        });
+    }
+
+    function doDeletePending() {
+        if (!pendingDelete?.imageId) return;
+
+        const imageId = pendingDelete.imageId;
+        const cardEl = pendingDelete.cardEl;
+
+        // Make AJAX call to delete the image
+        fetch(`/admin/garden-reports/${reportId}/images/${imageId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(async (response) => {
+            const contentType = response.headers.get('content-type') || '';
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`HTTP ${response.status}: ${text}`);
+            }
+            if (!contentType.includes('application/json')) {
+                const text = await response.text();
+                throw new Error(`Unexpected response: ${text}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Hide the image card
+                if (cardEl) cardEl.style.display = 'none';
+                // Update counter if needed
+                updateImageCounter();
+                pendingDelete = null;
+                if (modalInstance) modalInstance.hide();
+            } else {
+                alert('Error al eliminar la imagen: ' + (data.message || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar la imagen. Inténtalo de nuevo.');
+        });
+    }
+
+    function updateImageCounter() {
+        const visibleCards = document.querySelectorAll('.existing-image-card[style*="display: none"]').length;
+        const totalCards = document.querySelectorAll('.existing-image-card').length;
+        const actualVisible = totalCards - document.querySelectorAll('.existing-image-card[style*="display: none"]').length;
+        // You can update a counter display here if needed
+    }
+});
 
     (function() {
         function initImageUploader(dropId, inputId, previewsId, counterId) {

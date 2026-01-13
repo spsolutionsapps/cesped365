@@ -154,27 +154,6 @@ class GardenReportController extends Controller
             'user_id' => 'required|exists:users,id',
             'report_date' => 'required|date',
             'general_status' => 'required|in:good,regular,improve',
-            'grass_even' => 'boolean',
-            'grass_color' => 'required|in:ok,regular,bad',
-            'grass_spots' => 'boolean',
-            'worn_areas' => 'boolean',
-            'visible_weeds' => 'boolean',
-            'grass_note' => 'nullable|string',
-            'growth_cm' => 'required|numeric|min:0',
-            'growth_category' => 'required|in:low,normal,high',
-            'growth_estimated' => 'nullable|numeric|min:0',
-            'growth_note' => 'nullable|string',
-            'soil_condition' => 'required|in:loose,compact',
-            'aeration_recommended' => 'boolean',
-            'soil_note' => 'nullable|string',
-            'humidity_status' => 'required|in:dry,correct,excess',
-            'humidity_note' => 'nullable|string',
-            'pests_status' => 'required|in:none,mild,observe',
-            'pests_note' => 'nullable|string',
-            'flowerbeds_status' => 'required|in:clean,weeds,maintenance',
-            'flowerbeds_note' => 'nullable|string',
-            'seasonal_recommendations' => 'nullable|string',
-            'general_observations' => 'nullable|string',
             'images' => 'nullable|array',
             'images.*' => 'image|max:2048',
         ]);
@@ -199,7 +178,15 @@ class GardenReportController extends Controller
             $validated['subscription_id'] = $gardenReport->subscription_id;
         }
 
-        $gardenReport->update($validated);
+        // IMPORTANT:
+        // This edit form only updates user/date/status and uploads new images.
+        // Don't validate/overwrite the rest of the report fields here.
+        $gardenReport->update([
+            'user_id' => $validated['user_id'],
+            'subscription_id' => $validated['subscription_id'],
+            'report_date' => $validated['report_date'],
+            'general_status' => $validated['general_status'],
+        ]);
 
         // Handle new image uploads
         if ($request->hasFile('images')) {

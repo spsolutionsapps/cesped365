@@ -122,7 +122,19 @@
 
 
 @push('scripts')
-<script>
+<script data-version="{{ time() }}">
+/* Garden Reports Edit Script - Updated: 2026-01-13 16:30 - v1.0.2 */
+// Show validation errors as notifications
+@if($errors->any())
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            @foreach($errors->all() as $error)
+                NotificationSystem.error({{ json_encode($error) }}, 5000);
+            @endforeach
+        }, 100);
+    });
+@endif
+
 document.addEventListener('DOMContentLoaded', function() {
     const reportId = {{ $gardenReport->id }};
     const modalElement = document.getElementById('confirmDeleteImageModal');
@@ -133,42 +145,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let pendingDelete = null; // { imageId: string, cardEl: Element }
 
+    // Usar delegación de eventos para evitar listeners duplicados
+    // El contenedor padre escucha los clicks en lugar de cada botón individual
+    const imagesContainer = document.querySelector('.existing-images-container');
+    
+    if (imagesContainer) {
+        // Delegación de eventos para clicks
+        imagesContainer.addEventListener('click', function(e) {
+            const deleteBtn = e.target.closest('.delete-image-btn');
+            if (deleteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
 
-    // Handle delete image buttons
-    const deleteButtons = document.querySelectorAll('.delete-image-btn');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
+                const imageId = deleteBtn.getAttribute('data-image-id');
+                const cardEl = deleteBtn.closest('.existing-image-card');
 
-            const imageId = this.getAttribute('data-image-id');
-            const cardEl = this.closest('.existing-image-card');
+                pendingDelete = { imageId, cardEl };
 
-            pendingDelete = { imageId, cardEl };
-
-            if (modalInstance) {
-                modalInstance.show();
-            } else {
-                // Fallback (por si bootstrap no está disponible)
-                if (confirm('¿Estás seguro de que quieres eliminar esta imagen? Esta acción no se puede deshacer.')) {
-                    doDeletePending();
+                if (modalInstance) {
+                    modalInstance.show();
+                } else {
+                    // Fallback (por si bootstrap no está disponible)
+                    if (confirm('¿Estás seguro de que quieres eliminar esta imagen? Esta acción no se puede deshacer.')) {
+                        doDeletePending();
+                    }
                 }
             }
         });
 
-        // Add hover effects for the delete button
-        button.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1)';
-            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+        // Delegación de eventos para hover effects
+        imagesContainer.addEventListener('mouseover', function(e) {
+            const deleteBtn = e.target.closest('.delete-image-btn');
+            if (deleteBtn) {
+                deleteBtn.style.transform = 'scale(1.1)';
+                deleteBtn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+            }
         });
 
-        button.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-            this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        imagesContainer.addEventListener('mouseout', function(e) {
+            const deleteBtn = e.target.closest('.delete-image-btn');
+            if (deleteBtn) {
+                deleteBtn.style.transform = 'scale(1)';
+                deleteBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            }
         });
-    });
+    }
 
+    // Remover listener anterior si existe y agregar uno nuevo
     if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', function() {
+        const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
+        confirmDeleteBtn.parentNode.replaceChild(newConfirmBtn, confirmDeleteBtn);
+        
+        newConfirmBtn.addEventListener('click', function() {
             doDeletePending();
         });
     }
@@ -252,8 +280,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'image-preview-remove';
-                    removeBtn.innerHTML = '×';
-                    removeBtn.onclick = function() {
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '\u00D7';
+                    removeBtn.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         const files = Array.from(dataTransfer.files);
                         files.splice(index, 1);
                         dataTransfer.items.clear();
@@ -270,12 +301,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             function addFiles(files) {
+                let filesAdded = 0;
+                let filesRejected = 0;
+                let errorMessage = '';
+
                 Array.from(files).forEach(file => {
-                    if (dataTransfer.files.length >= maxImages) return;
-                    if (!file.type.startsWith('image/')) return;
-                    if (file.size > 2 * 1024 * 1024) return;
+                    if (dataTransfer.files.length >= maxImages) {
+                        filesRejected++;
+                        errorMessage = 'Máximo 6 imágenes permitidas';
+                        return;
+                    }
+                    if (!file.type.startsWith('image/')) {
+                        filesRejected++;
+                        errorMessage = 'Solo se permiten archivos de imagen';
+                        return;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        filesRejected++;
+                        errorMessage = 'Tamaño máximo de archivo: 2 MB';
+                        return;
+                    }
                     dataTransfer.items.add(file);
+                    filesAdded++;
                 });
+
+                if (filesRejected > 0 && typeof NotificationSystem !== 'undefined') {
+                    NotificationSystem.warning(errorMessage, 3000);
+                }
+
                 input.files = dataTransfer.files;
                 renderPreviews();
             }
@@ -306,6 +359,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.addEventListener('DOMContentLoaded', function() {
             initImageUploader('image-dropzone-edit', 'images-edit', 'image-previews-edit', 'image-counter-edit');
+
+            // Form validation
+            const form = document.querySelector('form[enctype="multipart/form-data"]');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let hasErrors = false;
+                    let errorMessages = [];
+
+                    requiredFields.forEach(function(field) {
+                        if (!field.value || field.value.trim() === '') {
+                            hasErrors = true;
+                            const label = form.querySelector('label[for="' + field.id + '"]');
+                            const fieldName = label ? label.textContent : field.name;
+                            errorMessages.push('El campo "' + fieldName + '" es requerido');
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+                    });
+
+                    if (hasErrors) {
+                        e.preventDefault();
+                        errorMessages.forEach(function(msg) {
+                            if (typeof NotificationSystem !== 'undefined') {
+                                NotificationSystem.error(msg, 4000);
+                            }
+                        });
+                        return false;
+                    }
+
+                    // Show loading notification
+                    if (typeof NotificationSystem !== 'undefined') {
+                        NotificationSystem.info('Actualizando reporte...', 2000);
+                    }
+                });
+            }
         });
     })();
 </script>

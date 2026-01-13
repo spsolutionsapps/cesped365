@@ -9,7 +9,7 @@
                     <div>
                         <h5 class="mb-0">Todos los Reportes del Jardín</h5>
                     </div>
-                    <a href="{{ route('admin.garden-reports.create') }}" class="btn bg-gradient-primary btn-sm mb-0" type="button">+&nbsp; Nuevo Reporte</a>
+                    <a href="{{ route('admin.garden-reports.create') }}" class="btn bg-gradient-primary btn-sm mb-0" type="button">+ Nuevo Reporte</a>
                 </div>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
@@ -212,7 +212,12 @@
         }
     }
     
+    var initialized = false; // Flag para evitar inicialización múltiple
+    
     function init() {
+        if (initialized) return; // Si ya se inicializó, no hacer nada
+        initialized = true;
+        
         attachDeleteHandlers();
         attachConfirmHandler();
     }
@@ -225,17 +230,12 @@
         }
     }
     
+    // Solo ejecutar una vez cuando el DOM esté listo
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(waitForBootstrap, 500);
-        });
+        document.addEventListener('DOMContentLoaded', waitForBootstrap);
     } else {
-        setTimeout(waitForBootstrap, 500);
+        waitForBootstrap();
     }
-    
-    window.addEventListener('load', function() {
-        setTimeout(waitForBootstrap, 1000);
-    });
 })();
 </script>
 @endpush

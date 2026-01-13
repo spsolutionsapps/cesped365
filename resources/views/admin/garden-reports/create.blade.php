@@ -158,6 +158,17 @@
 
 @push('scripts')
 <script>
+    // Show validation errors as notifications
+    @if($errors->any())
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                @foreach($errors->all() as $error)
+                    NotificationSystem.error({{ json_encode($error) }}, 5000);
+                @endforeach
+            }, 100);
+        });
+    @endif
+
     (function() {
         function initImageUploader(dropId, inputId, previewsId, counterId) {
             const dropzone = document.getElementById(dropId);
@@ -182,8 +193,11 @@
 
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'image-preview-remove';
-                    removeBtn.innerHTML = '×';
-                    removeBtn.onclick = function() {
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '\u00D7';
+                    removeBtn.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         const files = Array.from(dataTransfer.files);
                         files.splice(index, 1);
                         dataTransfer.items.clear();
@@ -200,12 +214,34 @@
             }
 
             function addFiles(files) {
+                let filesAdded = 0;
+                let filesRejected = 0;
+                let errorMessage = '';
+
                 Array.from(files).forEach(file => {
-                    if (dataTransfer.files.length >= maxImages) return;
-                    if (!file.type.startsWith('image/')) return;
-                    if (file.size > 2 * 1024 * 1024) return;
+                    if (dataTransfer.files.length >= maxImages) {
+                        filesRejected++;
+                        errorMessage = 'Máximo 6 imágenes permitidas';
+                        return;
+                    }
+                    if (!file.type.startsWith('image/')) {
+                        filesRejected++;
+                        errorMessage = 'Solo se permiten archivos de imagen';
+                        return;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        filesRejected++;
+                        errorMessage = 'Tamaño máximo de archivo: 2 MB';
+                        return;
+                    }
                     dataTransfer.items.add(file);
+                    filesAdded++;
                 });
+
+                if (filesRejected > 0 && typeof NotificationSystem !== 'undefined') {
+                    NotificationSystem.warning(errorMessage, 3000);
+                }
+
                 input.files = dataTransfer.files;
                 renderPreviews();
             }
@@ -236,6 +272,43 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             initImageUploader('image-dropzone-create', 'images-create', 'image-previews-create', 'image-counter-create');
+
+            // Form validation
+            const form = document.querySelector('form[enctype="multipart/form-data"]');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let hasErrors = false;
+                    let errorMessages = [];
+
+                    requiredFields.forEach(function(field) {
+                        if (!field.value || field.value.trim() === '') {
+                            hasErrors = true;
+                            const label = form.querySelector('label[for="' + field.id + '"]');
+                            const fieldName = label ? label.textContent : field.name;
+                            errorMessages.push('El campo "' + fieldName + '" es requerido');
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+                    });
+
+                    if (hasErrors) {
+                        e.preventDefault();
+                        errorMessages.forEach(function(msg) {
+                            if (typeof NotificationSystem !== 'undefined') {
+                                NotificationSystem.error(msg, 4000);
+                            }
+                        });
+                        return false;
+                    }
+
+                    // Show loading notification
+                    if (typeof NotificationSystem !== 'undefined') {
+                        NotificationSystem.info('Guardando reporte...', 2000);
+                    }
+                });
+            }
         });
     })();
 </script>

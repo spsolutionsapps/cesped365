@@ -58,94 +58,117 @@ class GardenReportController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'report_date' => 'required|date',
-            'general_status' => 'required|in:good,regular,improve',
-            'grass_even' => 'nullable|boolean',
-            'grass_color' => 'required|in:ok,regular,bad',
-            'grass_spots' => 'nullable|boolean',
-            'worn_areas' => 'nullable|boolean',
-            'visible_weeds' => 'nullable|boolean',
-            'grass_note' => 'nullable|string',
-            'growth_cm' => 'required|numeric|min:0',
-            'growth_category' => 'required|in:low,normal,high',
-            'growth_estimated' => 'nullable|numeric|min:0',
-            'growth_note' => 'nullable|string',
-            'soil_condition' => 'required|in:loose,compact',
-            'aeration_recommended' => 'nullable|boolean',
-            'soil_note' => 'nullable|string',
-            'humidity_status' => 'required|in:dry,correct,excess',
-            'humidity_note' => 'nullable|string',
-            'pests_status' => 'required|in:none,mild,observe',
-            'pests_note' => 'nullable|string',
-            'flowerbeds_status' => 'required|in:clean,weeds,maintenance',
-            'flowerbeds_note' => 'nullable|string',
-            'seasonal_recommendations' => 'nullable|string',
-            'general_observations' => 'nullable|string',
-            'images' => 'nullable|array',
-            'images.*' => 'image|max:2048',
+        \Log::info('Intento de crear reporte', [
+            'user_id' => $request->user_id,
+            'has_images' => $request->hasFile('images'),
+            'images_count' => $request->hasFile('images') ? count($request->file('images')) : 0,
         ]);
 
-        // Get active subscription for the user
-        $user = User::findOrFail($validated['user_id']);
-        $activeSubscription = $user->subscriptions()
-            ->where('status', 'active')
-            ->latest('end_date')
-            ->first();
+        try {
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'report_date' => 'required|date',
+                'general_status' => 'required|in:good,regular,improve',
+                'grass_even' => 'nullable|boolean',
+                'grass_color' => 'required|in:ok,regular,bad',
+                'grass_spots' => 'nullable|boolean',
+                'worn_areas' => 'nullable|boolean',
+                'visible_weeds' => 'nullable|boolean',
+                'grass_note' => 'nullable|string',
+                'growth_cm' => 'required|numeric|min:0',
+                'growth_category' => 'required|in:low,normal,high',
+                'growth_estimated' => 'nullable|numeric|min:0',
+                'growth_note' => 'nullable|string',
+                'soil_condition' => 'required|in:loose,compact',
+                'aeration_recommended' => 'nullable|boolean',
+                'soil_note' => 'nullable|string',
+                'humidity_status' => 'required|in:dry,correct,excess',
+                'humidity_note' => 'nullable|string',
+                'pests_status' => 'required|in:none,mild,observe',
+                'pests_note' => 'nullable|string',
+                'flowerbeds_status' => 'required|in:clean,weeds,maintenance',
+                'flowerbeds_note' => 'nullable|string',
+                'seasonal_recommendations' => 'nullable|string',
+                'general_observations' => 'nullable|string',
+                'images' => 'nullable|array|max:6',
+                'images.*' => 'image|mimes:jpeg,jpg,png|max:2048',
+            ]);
 
-        if (!$activeSubscription) {
+            // Get active subscription for the user
+            $user = User::findOrFail($validated['user_id']);
+            $activeSubscription = $user->subscriptions()
+                ->where('status', 'active')
+                ->latest('end_date')
+                ->first();
+
+            if (!$activeSubscription) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['user_id' => 'El usuario seleccionado no tiene una suscripción activa.']);
+            }
+
+            // Set subscription_id automatically
+            $validated['subscription_id'] = $activeSubscription->id;
+
+            // Set default values for boolean fields
+            $validated['grass_even'] = $request->has('grass_even') ? true : false;
+            $validated['grass_spots'] = $request->has('grass_spots') ? true : false;
+            $validated['worn_areas'] = $request->has('worn_areas') ? true : false;
+            $validated['visible_weeds'] = $request->has('visible_weeds') ? true : false;
+            $validated['aeration_recommended'] = $request->has('aeration_recommended') ? true : false;
+
+            $report = GardenReport::create($validated);
+
+            // Handle image uploads
+            $uploadedImages = 0;
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    if (!$image->isValid()) {
+                        \Log::warning('Invalid image file skipped during upload');
+                        continue;
+                    }
+
+                    try {
+                        // Store in the public disk
+                        $path = $image->store('garden-reports', 'public');
+                        
+                        $report->images()->create([
+                            'image_path' => $path,
+                            'image_date' => $validated['report_date'],
+                        ]);
+                        $uploadedImages++;
+                    } catch (\Exception $e) {
+                        \Log::error('Error uploading garden report image: ' . $e->getMessage());
+                        // Continue with other images even if one fails
+                    }
+                }
+            }
+
+            $message = 'Reporte creado exitosamente';
+            if ($uploadedImages > 0) {
+                $message .= ' con ' . $uploadedImages . ' imagen(es)';
+            }
+
+            return redirect()->route('admin.garden-reports.index')
+                ->with('success', $message . '.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('Validación fallida al crear reporte', [
+                'errors' => $e->errors(),
+                'user_id' => $request->user_id
+            ]);
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['user_id' => 'El usuario seleccionado no tiene una suscripción activa.']);
+                ->withErrors($e->errors())
+                ->with('error', 'Error de validación. Por favor revisa los campos marcados.');
+        } catch (\Exception $e) {
+            \Log::error('Error creating garden report: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Error al crear el reporte: ' . $e->getMessage()])
+                ->with('error', 'Error al crear el reporte: ' . $e->getMessage());
         }
-
-        // Set subscription_id automatically
-        $validated['subscription_id'] = $activeSubscription->id;
-
-        // Set default values for boolean fields
-        $validated['grass_even'] = $request->has('grass_even') ? true : false;
-        $validated['grass_spots'] = $request->has('grass_spots') ? true : false;
-        $validated['worn_areas'] = $request->has('worn_areas') ? true : false;
-        $validated['visible_weeds'] = $request->has('visible_weeds') ? true : false;
-        $validated['aeration_recommended'] = $request->has('aeration_recommended') ? true : false;
-
-        $report = GardenReport::create($validated);
-
-        // Handle image uploads
-        if ($request->hasFile('images')) {
-            // Prefer saving under /public/storage so Apache can serve files without relying on symlinks.
-            // On some shared hostings, creating symlinks is not possible, so we ensure the directory exists.
-            $preferredDisk = config('filesystems.disks.public_uploads') ? 'public_uploads' : null;
-            if ($preferredDisk) {
-                try {
-                    File::ensureDirectoryExists(public_path('storage/garden-reports'));
-                } catch (\Throwable $e) {
-                    // If we can't create/write in /public/storage, fallback to the standard disk.
-                    $preferredDisk = null;
-                }
-            }
-
-            foreach ($request->file('images') as $image) {
-                // Shared-hosting friendly: store directly under /public/storage (no symlink needed).
-                // Fallback to the standard "public" disk if the preferred disk isn't available or writable.
-                try {
-                    $path = $preferredDisk
-                        ? $image->store('garden-reports', $preferredDisk)
-                        : $image->store('garden-reports', 'public');
-                } catch (\Throwable $e) {
-                    $path = $image->store('garden-reports', 'public');
-                }
-
-                $report->images()->create([
-                    'image_path' => $path,
-                    'image_date' => $validated['report_date'],
-                ]);
-            }
-        }
-
-        return redirect()->route('admin.garden-reports.index')
-            ->with('success', 'Reporte creado exitosamente.');
     }
 
     /**
@@ -173,60 +196,104 @@ class GardenReportController extends Controller
      */
     public function update(Request $request, GardenReport $gardenReport)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'report_date' => 'required|date',
-            'general_status' => 'required|in:good,regular,improve',
-            'images' => 'nullable|array',
-            'images.*' => 'image|max:2048',
+        \Log::info('Intento de actualizar reporte', [
+            'report_id' => $gardenReport->id,
+            'user_id' => $request->user_id,
+            'has_images' => $request->hasFile('images'),
+            'images_count' => $request->hasFile('images') ? count($request->file('images')) : 0,
         ]);
 
-        // Get active subscription for the user (or keep current if user hasn't changed)
-        if ($validated['user_id'] != $gardenReport->user_id) {
-            $user = User::findOrFail($validated['user_id']);
-            $activeSubscription = $user->subscriptions()
-                ->where('status', 'active')
-                ->latest('end_date')
-                ->first();
+        try {
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'report_date' => 'required|date',
+                'general_status' => 'required|in:good,regular,improve',
+                'images' => 'nullable|array|max:6',
+                'images.*' => 'image|mimes:jpeg,jpg,png|max:2048',
+            ]);
 
-            if (!$activeSubscription) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['user_id' => 'El usuario seleccionado no tiene una suscripción activa.']);
+            // Get active subscription for the user (or keep current if user hasn't changed)
+            if ($validated['user_id'] != $gardenReport->user_id) {
+                $user = User::findOrFail($validated['user_id']);
+                $activeSubscription = $user->subscriptions()
+                    ->where('status', 'active')
+                    ->latest('end_date')
+                    ->first();
+
+                if (!$activeSubscription) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['user_id' => 'El usuario seleccionado no tiene una suscripción activa.']);
+                }
+
+                $validated['subscription_id'] = $activeSubscription->id;
+            } else {
+                // Keep the current subscription if user hasn't changed
+                $validated['subscription_id'] = $gardenReport->subscription_id;
             }
 
-            $validated['subscription_id'] = $activeSubscription->id;
-        } else {
-            // Keep the current subscription if user hasn't changed
-            $validated['subscription_id'] = $gardenReport->subscription_id;
-        }
+            // IMPORTANT:
+            // This edit form only updates user/date/status and uploads new images.
+            // Don't validate/overwrite the rest of the report fields here.
+            $gardenReport->update([
+                'user_id' => $validated['user_id'],
+                'subscription_id' => $validated['subscription_id'],
+                'report_date' => $validated['report_date'],
+                'general_status' => $validated['general_status'],
+            ]);
 
-        // IMPORTANT:
-        // This edit form only updates user/date/status and uploads new images.
-        // Don't validate/overwrite the rest of the report fields here.
-        $gardenReport->update([
-            'user_id' => $validated['user_id'],
-            'subscription_id' => $validated['subscription_id'],
-            'report_date' => $validated['report_date'],
-            'general_status' => $validated['general_status'],
-        ]);
+            // Handle new image uploads
+            $uploadedImages = 0;
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    if (!$image->isValid()) {
+                        \Log::warning('Invalid image file skipped during upload');
+                        continue;
+                    }
 
-        // Handle new image uploads
-        if ($request->hasFile('images')) {
-            // With a proper storage link, always store on the standard "public" disk:
-            // storage/app/public/garden-reports/*
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('garden-reports', 'public');
-                $gardenReport->images()->create([
-                    'image_path' => $path,
-                    'image_date' => $validated['report_date'],
-                ]);
+                    try {
+                        // Store in the public disk
+                        $path = $image->store('garden-reports', 'public');
+                        
+                        $gardenReport->images()->create([
+                            'image_path' => $path,
+                            'image_date' => $validated['report_date'],
+                        ]);
+                        $uploadedImages++;
+                    } catch (\Exception $e) {
+                        \Log::error('Error uploading garden report image: ' . $e->getMessage());
+                        // Continue with other images even if one fails
+                    }
+                }
             }
-        }
 
-        // Redirect back to edit so the admin can immediately see new images
-        return redirect()->route('admin.garden-reports.edit', $gardenReport)
-            ->with('success', 'Reporte actualizado exitosamente.');
+            $message = 'Reporte actualizado exitosamente';
+            if ($uploadedImages > 0) {
+                $message .= ' con ' . $uploadedImages . ' nueva(s) imagen(es)';
+            }
+
+            // Redirect back to edit so the admin can immediately see new images
+            return redirect()->route('admin.garden-reports.edit', $gardenReport)
+                ->with('success', $message . '.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('Validación fallida al actualizar reporte', [
+                'report_id' => $gardenReport->id,
+                'errors' => $e->errors()
+            ]);
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors())
+                ->with('error', 'Error de validación. Por favor revisa los campos marcados.');
+        } catch (\Exception $e) {
+            \Log::error('Error updating garden report: ' . $e->getMessage(), [
+                'report_id' => $gardenReport->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Error al actualizar el reporte: ' . $e->getMessage()])
+                ->with('error', 'Error al actualizar el reporte: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -96,17 +96,7 @@
     @yield('guest')
   @endguest
 
-  @if(session()->has('success'))
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Usar el sistema de notificaciones profesional
-        setTimeout(function() {
-          NotificationSystem.success({{ json_encode(session('success')) }}, 4000);
-        }, 100);
-      });
-    </script>
-  @endif
-    <!--   Core JS Files   -->
+  <!--   Core JS Files   -->
   <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
   <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
   <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
@@ -126,6 +116,76 @@
 
   <!-- Notification System -->
   <script src="{{ asset('js/notifications.js?v=1.0.1') }}"></script>
+  
+  <!-- Session Notifications -->
+  @if(session()->has('success'))
+    <script>
+      (function() {
+        var successMessage = {{ json_encode(session('success')) }};
+        console.log('🟢 Mensaje de éxito detectado:', successMessage);
+        
+        // Como notifications.js ya está cargado, debería estar disponible
+        if (typeof NotificationSystem !== 'undefined') {
+          console.log('✅ NotificationSystem disponible inmediatamente');
+          NotificationSystem.success(successMessage, 6000);
+        } else {
+          // Si no está, esperamos un poco (en caso de que esté inicializándose)
+          console.warn('⚠️ NotificationSystem no disponible, esperando...');
+          setTimeout(function() {
+            if (typeof NotificationSystem !== 'undefined') {
+              NotificationSystem.success(successMessage, 6000);
+            } else {
+              console.error('❌ NotificationSystem nunca se cargó - usando alert');
+              alert(successMessage);
+            }
+          }, 500);
+        }
+      })();
+    </script>
+  @endif
+  
+  @if(session()->has('error'))
+    <script>
+      (function() {
+        var errorMessage = {{ json_encode(session('error')) }};
+        console.log('🔴 Mensaje de error detectado:', errorMessage);
+        
+        if (typeof NotificationSystem !== 'undefined') {
+          NotificationSystem.error(errorMessage, 5000);
+        } else {
+          setTimeout(function() {
+            if (typeof NotificationSystem !== 'undefined') {
+              NotificationSystem.error(errorMessage, 5000);
+            } else {
+              alert(errorMessage);
+            }
+          }, 500);
+        }
+      })();
+    </script>
+  @endif
+  
+  @if(session()->has('warning'))
+    <script>
+      (function() {
+        var warningMessage = {{ json_encode(session('warning')) }};
+        console.log('🟡 Mensaje de advertencia detectado:', warningMessage);
+        
+        if (typeof NotificationSystem !== 'undefined') {
+          NotificationSystem.warning(warningMessage, 5000);
+        } else {
+          setTimeout(function() {
+            if (typeof NotificationSystem !== 'undefined') {
+              NotificationSystem.warning(warningMessage, 5000);
+            } else {
+              alert(warningMessage);
+            }
+          }, 500);
+        }
+      })();
+    </script>
+  @endif
+  
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\GardenReportController;
+use App\Models\GardenReportImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +82,43 @@ Route::group(['middleware' => 'guest'], function () {
 
 // Authenticated Routes
 Route::group(['middleware' => 'auth'], function () {
+    /**
+     * Definitive garden report image serving (doesn't depend on /storage rewrites or symlinks).
+     * Uses the image id and serves from either disk.
+     */
+    Route::get('/media/garden-report-images/{image}', function (GardenReportImage $image) {
+        $user = auth()->user();
+        if (!$user) {
+            abort(403);
+        }
+
+        // Authorization: admin can view, otherwise only the owner of the report.
+        $report = $image->gardenReport;
+        if (!$report) {
+            abort(404);
+        }
+
+        if (!$user->isAdmin() && (int) $report->user_id !== (int) $user->id) {
+            abort(403);
+        }
+
+        $relativePath = (string) $image->image_path;
+
+        if (config('filesystems.disks.public_uploads') && Storage::disk('public_uploads')->exists($relativePath)) {
+            return response()->file(Storage::disk('public_uploads')->path($relativePath), [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+            ]);
+        }
+
+        if (Storage::disk('public')->exists($relativePath)) {
+            return response()->file(Storage::disk('public')->path($relativePath), [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+            ]);
+        }
+
+        abort(404);
+    })->name('garden-report-images.show');
+
     Route::get('/logout', [SessionsController::class, 'destroy'])->name('logout');
     Route::get('/user-profile', [InfoUserController::class, 'create']);
     Route::post('/user-profile', [InfoUserController::class, 'store']);

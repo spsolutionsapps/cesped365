@@ -35,12 +35,11 @@ class GardenReportImage extends Model
      */
     public function getPublicUrlAttribute(): ?string
     {
-        $filename = basename((string) ($this->image_path ?? ''));
-        if ($filename === '') {
+        if (!$this->getKey()) {
             return null;
         }
 
-        return route('storage.garden-reports.show', ['filename' => $filename]);
+        return route('garden-report-images.show', ['image' => $this->getKey()]);
     }
 }
 

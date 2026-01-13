@@ -201,7 +201,8 @@ class GardenReportController extends Controller
             }
         }
 
-        return redirect()->route('admin.garden-reports.index')
+        // Redirect back to edit so the admin can immediately see new images
+        return redirect()->route('admin.garden-reports.edit', $gardenReport)
             ->with('success', 'Reporte actualizado exitosamente.');
     }
 

@@ -72,26 +72,6 @@ Route::group(['middleware' => 'guest'], function () {
 
 // Authenticated Routes
 Route::group(['middleware' => 'auth'], function () {
-    /**
-     * Shared-hosting friendly image serving for garden reports.
-     * If /public/storage symlink is not available, Apache will rewrite missing files to Laravel.
-     * This route serves files from storage/app/public/garden-reports.
-     */
-    Route::get('/storage/garden-reports/{filename}', function (string $filename) {
-        if (str_contains($filename, '..') || str_contains($filename, '/')) {
-            abort(404);
-        }
-
-        $path = 'garden-reports/' . $filename;
-        if (!Storage::disk('public')->exists($path)) {
-            abort(404);
-        }
-
-        return response()->file(Storage::disk('public')->path($path), [
-            'Cache-Control' => 'public, max-age=31536000, immutable',
-        ]);
-    })->where('filename', '[^/]+')->name('storage.garden-reports.show');
-
     Route::get('/logout', [SessionsController::class, 'destroy'])->name('logout');
     Route::get('/user-profile', [InfoUserController::class, 'create']);
     Route::post('/user-profile', [InfoUserController::class, 'store']);

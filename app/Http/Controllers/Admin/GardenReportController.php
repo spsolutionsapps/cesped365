@@ -7,6 +7,7 @@ use App\Models\GardenReport;
 use App\Models\User;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class GardenReportController extends Controller
@@ -112,9 +113,29 @@ class GardenReportController extends Controller
 
         // Handle image uploads
         if ($request->hasFile('images')) {
+            // Prefer saving under /public/storage so Apache can serve files without relying on symlinks.
+            // On some shared hostings, creating symlinks is not possible, so we ensure the directory exists.
+            $preferredDisk = config('filesystems.disks.public_uploads') ? 'public_uploads' : null;
+            if ($preferredDisk) {
+                try {
+                    File::ensureDirectoryExists(public_path('storage/garden-reports'));
+                } catch (\Throwable $e) {
+                    // If we can't create/write in /public/storage, fallback to the standard disk.
+                    $preferredDisk = null;
+                }
+            }
+
             foreach ($request->file('images') as $image) {
-                // Shared-hosting friendly: store directly under /public/storage (no symlink needed)
-                $path = $image->store('garden-reports', 'public_uploads');
+                // Shared-hosting friendly: store directly under /public/storage (no symlink needed).
+                // Fallback to the standard "public" disk if the preferred disk isn't available or writable.
+                try {
+                    $path = $preferredDisk
+                        ? $image->store('garden-reports', $preferredDisk)
+                        : $image->store('garden-reports', 'public');
+                } catch (\Throwable $e) {
+                    $path = $image->store('garden-reports', 'public');
+                }
+
                 $report->images()->create([
                     'image_path' => $path,
                     'image_date' => $validated['report_date'],
@@ -191,9 +212,26 @@ class GardenReportController extends Controller
 
         // Handle new image uploads
         if ($request->hasFile('images')) {
+            $preferredDisk = config('filesystems.disks.public_uploads') ? 'public_uploads' : null;
+            if ($preferredDisk) {
+                try {
+                    File::ensureDirectoryExists(public_path('storage/garden-reports'));
+                } catch (\Throwable $e) {
+                    $preferredDisk = null;
+                }
+            }
+
             foreach ($request->file('images') as $image) {
-                // Shared-hosting friendly: store directly under /public/storage (no symlink needed)
-                $path = $image->store('garden-reports', 'public_uploads');
+                // Shared-hosting friendly: store directly under /public/storage (no symlink needed).
+                // Fallback to the standard "public" disk if the preferred disk isn't available or writable.
+                try {
+                    $path = $preferredDisk
+                        ? $image->store('garden-reports', $preferredDisk)
+                        : $image->store('garden-reports', 'public');
+                } catch (\Throwable $e) {
+                    $path = $image->store('garden-reports', 'public');
+                }
+
                 $gardenReport->images()->create([
                     'image_path' => $path,
                     'image_date' => $validated['report_date'],

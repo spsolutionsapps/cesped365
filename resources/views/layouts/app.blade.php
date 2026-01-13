@@ -115,7 +115,7 @@
   </script>
 
   <!-- Notification System -->
-  <script src="{{ asset('js/notifications.js?v=1.0.1') }}"></script>
+  <script src="{{ asset('js/notifications.js?v=' . time()) }}"></script>
   
   <!-- Session Notifications -->
   @if(session()->has('success'))

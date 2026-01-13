@@ -36,14 +36,12 @@ class NotificationSystem {
 
         this.container = document.createElement('div');
         this.container.className = 'notification-container';
-        this.container.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10600;
-            pointer-events: none;
-            font-family: 'Open Sans', sans-serif;
-        `;
+        this.container.style.setProperty('position', 'fixed', 'important');
+        this.container.style.setProperty('top', '20px', 'important');
+        this.container.style.setProperty('right', '20px', 'important');
+        this.container.style.setProperty('z-index', '10600', 'important');
+        this.container.style.setProperty('pointer-events', 'none', 'important');
+        this.container.style.setProperty('font-family', "'Open Sans', sans-serif", 'important');
 
         document.body.appendChild(this.container);
     }
@@ -147,66 +145,72 @@ class NotificationSystem {
         toast.id = id;
         toast.className = `fallback-toast fallback-${type}`;
 
-        // Aplicar estilos de manera más directa
-        Object.assign(toast.style, {
-            background: this.getBackgroundColor(type),
-            color: 'white',
-            padding: '16px 20px',
-            borderRadius: '8px',
-            marginBottom: '12px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-            pointerEvents: 'auto',
-            minWidth: '320px',
-            maxWidth: '450px',
-            position: 'relative',
-            fontSize: '15px',
-            lineHeight: '1.5',
-            fontFamily: "'Open Sans', sans-serif",
-            fontWeight: '400',
-            opacity: '0',
-            transform: 'translateX(100%)',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            border: 'none',
-            wordWrap: 'break-word',
-            zIndex: '10601'
-        });
+        // Aplicar estilos de manera más directa usando setProperty para !important
+        const styles = {
+            'background': this.getBackgroundColor(type),
+            'color': 'white',
+            'padding': '16px 20px',
+            'border-radius': '8px',
+            'margin-bottom': '12px',
+            'box-shadow': '0 4px 20px rgba(0,0,0,0.2)',
+            'pointer-events': 'auto',
+            'min-width': '320px',
+            'max-width': '450px',
+            'position': 'relative',
+            'font-size': '15px',
+            'line-height': '1.5',
+            'font-family': "'Open Sans', sans-serif",
+            'font-weight': '400',
+            'opacity': '0',
+            'transform': 'translateX(100%)',
+            'transition': 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            'border': 'none',
+            'word-wrap': 'break-word',
+            'z-index': '10601'
+        };
+
+        for (const [prop, value] of Object.entries(styles)) {
+            toast.style.setProperty(prop, value, 'important');
+        }
 
         toast.innerHTML = `
             <div style="
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 12px;
+                display: flex !important;
+                align-items: flex-start !important;
+                justify-content: space-between !important;
+                gap: 12px !important;
             ">
                 <div style="
-                    flex: 1;
-                    font-weight: 500;
-                    line-height: 1.4;
+                    flex: 1 !important;
+                    font-weight: 500 !important;
+                    line-height: 1.4 !important;
+                    color: white !important;
                 ">
                     <i class="${this.getIconClass(type)}" style="
-                        margin-right: 8px;
-                        font-size: 16px;
-                        opacity: 0.9;
+                        margin-right: 8px !important;
+                        font-size: 16px !important;
+                        opacity: 0.9 !important;
+                        color: white !important;
                     "></i>
                     ${message}
                 </div>
                 <button onclick="event.stopPropagation(); this.parentElement.parentElement.remove()"
                         style="
-                            background: none;
-                            border: none;
-                            color: white;
-                            cursor: pointer;
-                            padding: 4px;
-                            margin: 0;
-                            border-radius: 50%;
-                            width: 24px;
-                            height: 24px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            opacity: 0.8;
-                            transition: opacity 0.2s;
-                            flex-shrink: 0;
+                            background: none !important;
+                            border: none !important;
+                            color: white !important;
+                            cursor: pointer !important;
+                            padding: 4px !important;
+                            margin: 0 !important;
+                            border-radius: 50% !important;
+                            width: 24px !important;
+                            height: 24px !important;
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            opacity: 0.8 !important;
+                            transition: opacity 0.2s !important;
+                            flex-shrink: 0 !important;
                         "
                         onmouseover="this.style.opacity='1'"
                         onmouseout="this.style.opacity='0.8'">
@@ -222,15 +226,15 @@ class NotificationSystem {
 
         // Animación de entrada
         setTimeout(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateX(0)';
+            toast.style.setProperty('opacity', '1', 'important');
+            toast.style.setProperty('transform', 'translateX(0)', 'important');
         }, 50);
 
         // Auto-remover con animación de salida
         setTimeout(() => {
             if (toast.parentElement) {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
+                toast.style.setProperty('opacity', '0', 'important');
+                toast.style.setProperty('transform', 'translateX(100%)', 'important');
                 setTimeout(() => {
                     if (toast.parentElement) {
                         toast.remove();

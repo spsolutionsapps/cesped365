@@ -35,6 +35,29 @@ Route::get('/', [LandingController::class, 'home'])->name('landing.home');
 Route::get('/planes', [LandingController::class, 'plans'])->name('landing.plans');
 Route::get('/contacto', [LandingController::class, 'contact'])->name('landing.contact');
 
+/**
+ * Fallback public image serving for shared hosting (no symlink required).
+ *
+ * If /public/storage symlink is not available or the FTP deploy can't create it,
+ * this route serves garden report images from storage/app/public.
+ *
+ * Note: images are already treated as public assets in this app.
+ */
+Route::get('/storage/garden-reports/{filename}', function (string $filename) {
+    if (str_contains($filename, '..') || str_contains($filename, '/')) {
+        abort(404);
+    }
+
+    $path = 'garden-reports/' . $filename;
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    return response()->file(Storage::disk('public')->path($path), [
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+    ]);
+})->where('filename', '[^/]+')->name('storage.garden-reports.show');
+
 // Auth Routes
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/register', [RegisterController::class, 'create'])->name('register');

@@ -32,8 +32,8 @@
                         <strong>Imágenes ({{ $gardenReport->images->count() }}):</strong>
                         <div class="image-gallery-container mt-2" style="display: flex; gap: 10px; flex-wrap: wrap;">
                             @foreach($gardenReport->images as $index => $image)
-                            <div class="gallery-image-thumbnail" data-index="{{ $index }}" data-src="{{ asset('storage/' . $image->image_path) }}" style="width: 130px; height: 130px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; cursor: pointer;">
-                                <img src="{{ asset('storage/' . $image->image_path) }}" alt="Imagen {{ $index + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div class="gallery-image-thumbnail" data-index="{{ $index }}" data-src="{{ asset('storage/app/public/' . $image->image_path) }}" style="width: 130px; height: 130px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; cursor: pointer;">
+                                <img src="{{ asset('storage/app/public/' . $image->image_path) }}" alt="Imagen {{ $index + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
                             @endforeach
                         </div>
@@ -78,8 +78,8 @@
                                         @foreach($gardenReport->images as $index => $image)
                                         <div class="gallery-thumbnail {{ $index === 0 ? 'active' : '' }}"
                                              data-image-index="{{ $index }}"
-                                             data-image-src="{{ asset('storage/' . $image->image_path) }}">
-                                            <img src="{{ asset('storage/' . $image->image_path) }}" alt="Miniatura {{ $index + 1 }}">
+                                             data-image-src="{{ asset('storage/app/public/' . $image->image_path) }}">
+                                            <img src="{{ asset('storage/app/public/' . $image->image_path) }}" alt="Miniatura {{ $index + 1 }}">
                                         </div>
                                         @endforeach
                                     </div>

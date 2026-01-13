@@ -104,6 +104,8 @@ jobs:
         exclude: |
           **/.git*
           **/.git*/**
+          **/.cursor/**
+          .cursor/
           **/node_modules/**
           **/.env.example
           **/public/storage/**

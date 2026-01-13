@@ -105,6 +105,7 @@ jobs:
         # NOTE: en muchos cPanel el "FTP root" YA es public_html.
         # Si tu usuario FTP está chrooted a public_html, usar ./public_html/ falla con 553 (no existe).
         server-dir: ./
+        dangerous-clean-slate: false
         exclude: |
           **/.git*
           **/.git*/**
@@ -112,9 +113,11 @@ jobs:
           .cursor/
           **/node_modules/**
           **/.env.example
-          **/public/storage/**
-          **/public/storage
+          **/storage/app/public/**
           **/storage/logs/**
+          **/storage/framework/cache/**
+          **/storage/framework/sessions/**
+          **/storage/framework/views/**
           **/tests/**
           .github/
           .gitignore
@@ -122,4 +125,26 @@ jobs:
           ISSUE_TEMPLATE.md
           REQUISITOS.md
           SETUP.md
-          *.bat
+          CLEAR_CACHE_INSTRUCTIONS.md
+          DOUBLE_CLICK_FIX.md
+          GARDEN_REPORTS_FIX.md
+          INTERMITTENT_SAVE_FIX.md
+          TESTING_CHECKLIST.md
+          DEPLOY_PRODUCCION.md
+          clear-all-cache.bat
+          INSTALACION_COMPLETA.bat
+          public/check-php-limits.php
+          public/test-notifications.html
+          docs/**
+    
+    - name: Post-deployment summary
+      run: |
+        echo "✅ Deploy completed successfully!"
+        echo "📦 Files uploaded to production server"
+        echo "⚠️  IMPORTANT: Run these commands on the server:"
+        echo "   cd /home/cespvcyi/public_html"
+        echo "   php artisan optimize:clear"
+        echo "   php artisan config:clear"
+        echo "   php artisan route:clear"
+        echo "   php artisan cache:clear"
+        echo "   php artisan view:clear"

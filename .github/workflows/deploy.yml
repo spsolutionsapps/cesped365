@@ -98,12 +98,16 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: ./public_html/  # Sube a public_html
+        # NOTE: en muchos cPanel el "FTP root" YA es public_html.
+        # Si tu usuario FTP está chrooted a public_html, usar ./public_html/ falla con 553 (no existe).
+        server-dir: ./
         exclude: |
           **/.git*
           **/.git*/**
           **/node_modules/**
           **/.env.example
+          **/public/storage/**
+          **/public/storage
           **/storage/logs/**
           **/tests/**
           .github/

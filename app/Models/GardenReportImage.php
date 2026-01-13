@@ -26,5 +26,21 @@ class GardenReportImage extends Model
     {
         return $this->belongsTo(GardenReport::class);
     }
+
+    /**
+     * Public URL to serve this image reliably on shared hosting.
+     *
+     * We use the /storage/garden-reports/{filename} route so images work even when
+     * the /public/storage symlink is missing.
+     */
+    public function getPublicUrlAttribute(): ?string
+    {
+        $filename = basename((string) ($this->image_path ?? ''));
+        if ($filename === '') {
+            return null;
+        }
+
+        return route('storage.garden-reports.show', ['filename' => $filename]);
+    }
 }
 

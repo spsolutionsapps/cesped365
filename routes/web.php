@@ -48,14 +48,23 @@ Route::get('/storage/garden-reports/{filename}', function (string $filename) {
         abort(404);
     }
 
-    $path = 'garden-reports/' . $filename;
-    if (!Storage::disk('public')->exists($path)) {
-        abort(404);
+    $relativePath = 'garden-reports/' . $filename;
+
+    // 1) Prefer /public/storage (public_uploads disk) if present (fast static-like path).
+    if (config('filesystems.disks.public_uploads') && Storage::disk('public_uploads')->exists($relativePath)) {
+        return response()->file(Storage::disk('public_uploads')->path($relativePath), [
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+        ]);
     }
 
-    return response()->file(Storage::disk('public')->path($path), [
-        'Cache-Control' => 'public, max-age=31536000, immutable',
-    ]);
+    // 2) Fallback: storage/app/public (public disk), served via Laravel when symlink isn't available.
+    if (Storage::disk('public')->exists($relativePath)) {
+        return response()->file(Storage::disk('public')->path($relativePath), [
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+        ]);
+    }
+
+    abort(404);
 })->where('filename', '[^/]+')->name('storage.garden-reports.show');
 
 // Auth Routes

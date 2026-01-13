@@ -113,7 +113,8 @@ class GardenReportController extends Controller
         // Handle image uploads
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('garden-reports', 'public');
+                // Shared-hosting friendly: store directly under /public/storage (no symlink needed)
+                $path = $image->store('garden-reports', 'public_uploads');
                 $report->images()->create([
                     'image_path' => $path,
                     'image_date' => $validated['report_date'],
@@ -191,7 +192,8 @@ class GardenReportController extends Controller
         // Handle new image uploads
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('garden-reports', 'public');
+                // Shared-hosting friendly: store directly under /public/storage (no symlink needed)
+                $path = $image->store('garden-reports', 'public_uploads');
                 $gardenReport->images()->create([
                     'image_path' => $path,
                     'image_date' => $validated['report_date'],
@@ -210,6 +212,8 @@ class GardenReportController extends Controller
     {
         // Delete associated images
         foreach ($gardenReport->images as $image) {
+            // Prefer deleting from /public/storage, but keep fallback for older files
+            Storage::disk('public_uploads')->delete($image->image_path);
             Storage::disk('public')->delete($image->image_path);
             $image->delete();
         }
@@ -229,6 +233,8 @@ class GardenReportController extends Controller
         $image = $gardenReport->images()->findOrFail($imageId);
 
         // Delete the file from storage
+        // Prefer deleting from /public/storage, but keep fallback for older files
+        Storage::disk('public_uploads')->delete($image->image_path);
         Storage::disk('public')->delete($image->image_path);
 
         // Delete the database record

@@ -53,7 +53,7 @@
                         <div class="existing-images-container" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
                             @foreach($gardenReport->images as $index => $image)
                             <div class="existing-image-card" style="position: relative; width: 120px; height: 120px; border: 2px solid #e9ecef; border-radius: 8px; overflow: hidden;">
-                                <img src="{{ asset('storage/app/public/' . $image->image_path) }}" alt="Imagen existente {{ $index + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img src="{{ asset('storage/' . $image->image_path) }}" alt="Imagen existente {{ $index + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
                                 <button type="button" class="delete-image-btn"
                                         data-image-id="{{ $image->id }}"
                                         data-image-path="{{ $image->image_path }}"

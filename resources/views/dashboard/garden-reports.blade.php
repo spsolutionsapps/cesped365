@@ -48,7 +48,7 @@
                                     <div class="row">
                                         @foreach($report->images->take(3) as $image)
                                         <div class="col-4 mb-2">
-                                            <img src="{{ asset('storage/app/public/' . $image->image_path) }}" class="img-fluid rounded" alt="Reporte">
+                                            <img src="{{ asset('storage/' . $image->image_path) }}" class="img-fluid rounded" alt="Reporte">
                                         </div>
                                         @endforeach
                                     </div>

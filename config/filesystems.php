@@ -42,6 +42,17 @@ return [
             'visibility' => 'public',
         ],
 
+        /**
+         * Shared-hosting friendly public disk (no symlinks required).
+         * Stores files directly under /public/storage so they are reachable at /storage/*.
+         */
+        'public_uploads' => [
+            'driver' => 'local',
+            'root' => public_path('storage'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -24,6 +24,24 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Verify build output
+        run: |
+          echo "=== Verifying build output ==="
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ ERROR: dist/index.html not found!"
+            exit 1
+          else
+            echo "✅ dist/index.html exists"
+          fi
+          if [ ! -f "dist/.htaccess" ]; then
+            echo "⚠️  WARNING: dist/.htaccess not found, creating it..."
+            cp public/.htaccess dist/.htaccess 2>/dev/null || echo "# .htaccess will be created" > dist/.htaccess
+          else
+            echo "✅ dist/.htaccess exists"
+          fi
+          echo "Files in dist/:"
+          ls -la dist/ | head -20
+
       - name: Debug FTP Configuration
         run: |
           echo "=== Checking FTP Configuration ==="
@@ -97,6 +115,8 @@ jobs:
           local-dir: dist/
           server-dir: ${{ secrets.FTP_SERVER_DIR || 'public_html/' }}
           dangerous-clean-slate: true
+          include: |
+            **/.htaccess
           exclude: |
             **/.git*
             **/.git*/**

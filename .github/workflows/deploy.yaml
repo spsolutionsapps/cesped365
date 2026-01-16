@@ -26,33 +26,66 @@ jobs:
 
       - name: Debug FTP Configuration
         run: |
-          echo "Checking FTP configuration..."
+          echo "=== Checking FTP Configuration ==="
+          
+          # Verificar FTP_SERVER
           if [ -z "${{ secrets.FTP_SERVER }}" ]; then
             echo "❌ ERROR: FTP_SERVER secret is not set or is empty"
+            echo "   Go to: Settings → Secrets and variables → Actions"
+            echo "   Create a secret named: FTP_SERVER"
             exit 1
           else
             echo "✅ FTP_SERVER is set"
-            # Mostrar solo los primeros y últimos caracteres para debug (sin exponer todo)
             SERVER="${{ secrets.FTP_SERVER }}"
-            echo "Server format check: starts with 'ftp://' or 'http://'? (should be NO)"
-            if [[ "$SERVER" == ftp://* ]] || [[ "$SERVER" == http://* ]]; then
-              echo "⚠️  WARNING: Server should NOT include protocol (ftp:// or http://)"
-              echo "   Remove 'ftp://' or 'http://' from FTP_SERVER secret"
+            
+            # Verificar formato común incorrecto
+            if [[ "$SERVER" == ftp://* ]] || [[ "$SERVER" == http://* ]] || [[ "$SERVER" == https://* ]]; then
+              echo "❌ ERROR: FTP_SERVER contains protocol (ftp://, http://, https://)"
+              echo "   Current format: $SERVER"
+              echo "   Correct format: Remove 'ftp://' or 'http://' prefix"
+              echo "   Example: If you have 'ftp://ftp.example.com', use only 'ftp.example.com'"
+              exit 1
+            fi
+            
+            if [[ "$SERVER" == *"/"* ]]; then
+              echo "⚠️  WARNING: FTP_SERVER contains '/' (path)"
+              echo "   Server should only be domain/IP, not include paths"
+              echo "   Example: 'ftp.example.com' not 'ftp.example.com/public_html'"
+            fi
+            
+            # Intentar resolver el DNS (advertencia, no error fatal)
+            echo "Testing DNS resolution for: $SERVER"
+            if nslookup "$SERVER" > /dev/null 2>&1; then
+              echo "✅ DNS resolution successful"
+            else
+              echo "⚠️  WARNING: Cannot resolve DNS for '$SERVER' from GitHub Actions"
+              echo "   This might be OK if:"
+              echo "   - Server uses internal DNS"
+              echo "   - FTP server is accessible via IP"
+              echo "   - DNS propagation is still in progress"
+              echo "   Will attempt connection anyway..."
             fi
           fi
+          
+          # Verificar otros secrets
           if [ -z "${{ secrets.FTP_USERNAME }}" ]; then
-            echo "❌ ERROR: FTP_USERNAME secret is not set or is empty"
+            echo "❌ ERROR: FTP_USERNAME secret is not set"
             exit 1
           else
             echo "✅ FTP_USERNAME is set"
           fi
+          
           if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
-            echo "❌ ERROR: FTP_PASSWORD secret is not set or is empty"
+            echo "❌ ERROR: FTP_PASSWORD secret is not set"
             exit 1
           else
             echo "✅ FTP_PASSWORD is set"
           fi
-          echo "FTP_PORT: ${{ secrets.FTP_PORT || 21 }}"
+          
+          PORT="${{ secrets.FTP_PORT || 21 }}"
+          echo "✅ FTP_PORT: $PORT"
+          echo ""
+          echo "=== Configuration looks good! Proceeding with deployment... ==="
 
       - name: Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -62,5 +95,10 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT || 21 }}
           local-dir: dist/
-          server-dir: public_html/
+          server-dir: ${{ secrets.FTP_SERVER_DIR || 'public_html/' }}
           dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**

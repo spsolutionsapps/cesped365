@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .bgAmigo {
+  background-image: url('/bgPasto.jpg');
+  background-size: cover;
+  background-position: center;
+  }
+
+
+  .tandil {
+    font-size: 24px;
+
+  }
+  .subheading {
+    font-size: 25px;
+    display: block;
+    width: 94%;
+    line-height: normal;
+    margin: 24px 0 0;
+  }
+  .logo {
+    width: 150px;
+  }
+}
+
+/* Custom styles */
+body {
+  @apply bg-gray-50;
+}
+
+/* Smooth transitions */
+* {
+  @apply transition-colors duration-200;
+}

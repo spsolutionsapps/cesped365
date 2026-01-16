@@ -1,23 +1,22 @@
-/node_modules
-/public/hot
-/public/storage
-/storage/*.key
-/vendor
+# Frontend
+node_modules
+dist
+.DS_Store
+*.log
 .env
-.env.backup
-!.env.production.example
-.phpunit.result.cache
-docker-compose.override.yml
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
-/.idea
-/.vscode
-.cursor/debug.log
+.env.local
+.vscode
 
-
-
-
-
-
+# Backend (CodeIgniter)
+api/vendor/
+api/writable/cache/*
+api/writable/logs/*
+api/writable/session/*
+api/writable/uploads/*
+!api/writable/cache/index.html
+!api/writable/logs/index.html
+!api/writable/session/index.html
+!api/writable/uploads/index.html
+api/.env
+api/phpunit*.xml
+api/.phpunit.*.cache

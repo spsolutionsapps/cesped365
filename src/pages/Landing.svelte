@@ -295,7 +295,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           
           <!-- Main heading -->
           <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-8">
-            Un problema menos <br> tods los meses <br>
+            Un problema menos <br> todos los meses <br>
             <span class="subheading"> Mantenimiento de jardines <br> durante todo el año.</span>
 
             <span class="text-[#f8fd6c] tandil inline-flex items-center">

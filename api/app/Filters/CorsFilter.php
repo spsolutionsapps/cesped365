@@ -22,22 +22,49 @@ class CorsFilter implements FilterInterface
         
         $origin = $request->getHeaderLine('Origin');
         
-        if (in_array($origin, $allowedOrigins)) {
-            header('Access-Control-Allow-Origin: ' . $origin);
+        // Manejar preflight OPTIONS request
+        if (strtolower($request->getMethod()) === 'options') {
+            $response = service('response');
+            
+            if (in_array($origin, $allowedOrigins)) {
+                $response->setHeader('Access-Control-Allow-Origin', $origin);
+            }
+            
+            $response->setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            $response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+            $response->setHeader('Access-Control-Allow-Credentials', 'true');
+            $response->setHeader('Access-Control-Max-Age', '86400');
+            $response->setStatusCode(200);
+            $response->setBody('');
+            
+            return $response;
         }
         
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Max-Age: 86400'); // Cache preflight por 24 horas
-        
-        if ($request->getMethod() === 'options') {
-            exit(0);
-        }
+        return $request;
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // No action needed
+        // Permitir múltiples orígenes de desarrollo
+        $allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:5173'
+        ];
+        
+        $origin = $request->getHeaderLine('Origin');
+        
+        if (in_array($origin, $allowedOrigins)) {
+            $response->setHeader('Access-Control-Allow-Origin', $origin);
+        }
+        
+        $response->setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        $response->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        $response->setHeader('Access-Control-Allow-Credentials', 'true');
+        
+        return $response;
     }
 }

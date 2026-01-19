@@ -6,8 +6,6 @@
   import Card from '../../components/Card.svelte';
   import Badge from '../../components/Badge.svelte';
   
-  console.log('🔵 Resumen.svelte: SCRIPT EJECUTADO');
-  
   let userRole;
   let userName;
   let loading = true;
@@ -19,51 +17,36 @@
   let proximasVisitas = [];
   
   auth.subscribe(value => {
-    console.log('🔵 Resumen.svelte: auth.subscribe ejecutado', value);
     userRole = value.role;
     userName = value.user?.name;
   });
   
   // Cargar datos del backend
   onMount(async () => {
-    console.log('🔵 Resumen.svelte: onMount iniciado');
-    console.log('🔵 userRole:', userRole);
-    console.log('🔵 userName:', userName);
-    
     try {
       loading = true;
       
       // Cargar dashboard stats
-      console.log('🔵 Llamando dashboardAPI.getDashboard()...');
       const dashboardResponse = await dashboardAPI.getDashboard();
-      console.log('🔵 dashboardResponse:', dashboardResponse);
       if (dashboardResponse.success) {
         estadisticas = dashboardResponse.data.estadisticas || {};
-        console.log('🔵 estadisticas:', estadisticas);
       }
       
       // Cargar reportes
-      console.log('🔵 Llamando reportesAPI.getAll()...');
       const reportesResponse = await reportesAPI.getAll();
-      console.log('🔵 reportesResponse:', reportesResponse);
       if (reportesResponse.success && reportesResponse.data.length > 0) {
         ultimoReporte = reportesResponse.data[0];
-        console.log('🔵 ultimoReporte:', ultimoReporte);
       }
       
       // Cargar historial
-      console.log('🔵 Llamando historialAPI.getHistorial()...');
       const historialResponse = await historialAPI.getHistorial();
-      console.log('🔵 historialResponse:', historialResponse);
       if (historialResponse.success) {
         proximasVisitas = historialResponse.data.slice(0, 3);
-        console.log('🔵 proximasVisitas:', proximasVisitas);
       }
       
       loading = false;
-      console.log('🔵 Resumen.svelte: Carga completada');
     } catch (err) {
-      console.error('❌ Error cargando dashboard:', err);
+      console.error('Error cargando dashboard:', err);
       error = 'Error al cargar los datos. Verifica que el backend esté corriendo.';
       loading = false;
     }

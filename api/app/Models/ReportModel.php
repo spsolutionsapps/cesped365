@@ -48,6 +48,9 @@ class ReportModel extends Model
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
+    
+    // NO convertir el campo 'date' automáticamente
+    protected $dates = [];
 
     // Validation
     protected $validationRules      = [

@@ -3,11 +3,17 @@
   import { clientesAPI } from '../../../services/api';
   import Card from '../../../components/Card.svelte';
   import Badge from '../../../components/Badge.svelte';
+  import ClienteModal from '../../../components/ClienteModal.svelte';
   
   let clientes = [];
   let searchTerm = '';
   let loading = true;
   let error = null;
+  let selectedCliente = null;
+  let showClienteModal = false;
+  let clienteToEdit = null;
+  let showDetailModal = false;
+  let clienteDetail = null;
   
   onMount(async () => {
     await loadClientes();
@@ -27,7 +33,6 @@
       loading = false;
     }
   }
-  let selectedCliente = null;
   
   $: filteredClientes = clientes.filter(cliente => 
     cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,12 +46,55 @@
     return 'danger';
   }
   
-  function viewCliente(cliente) {
-    selectedCliente = cliente;
+  function openCreateModal() {
+    clienteToEdit = null;
+    showClienteModal = true;
+  }
+  
+  function openEditModal(cliente) {
+    clienteToEdit = cliente;
+    showClienteModal = true;
+  }
+  
+  async function viewCliente(cliente) {
+    try {
+      const response = await clientesAPI.getById(cliente.id);
+      if (response.success) {
+        clienteDetail = response.data;
+        showDetailModal = true;
+      }
+    } catch (err) {
+      console.error('Error cargando detalle del cliente:', err);
+      alert('Error al cargar el detalle del cliente');
+    }
+  }
+  
+  async function deleteCliente(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      const response = await clientesAPI.delete(id);
+      if (response.success) {
+        await loadClientes();
+      }
+    } catch (err) {
+      console.error('Error eliminando cliente:', err);
+      alert('Error al eliminar el cliente');
+    }
   }
   
   function closeModal() {
     selectedCliente = null;
+    showDetailModal = false;
+    clienteDetail = null;
+  }
+  
+  async function handleClienteSaved() {
+    showClienteModal = false;
+    clienteToEdit = null;
+    await loadClientes();
   }
 </script>
 
@@ -55,8 +103,14 @@
     <h2 class="text-2xl font-semibold text-gray-700">
       Gestión de Clientes
     </h2>
-    <button class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 font-medium">
-      + Nuevo Cliente
+    <button
+      on:click={openCreateModal}
+      class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 font-medium flex items-center gap-2"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Nuevo Cliente
     </button>
   </div>
 
@@ -166,6 +220,7 @@
                     </svg>
                   </button>
                   <button
+                    on:click={() => openEditModal(cliente)}
                     class="text-blue-600 hover:text-blue-700"
                     title="Editar"
                   >
@@ -174,6 +229,7 @@
                     </svg>
                   </button>
                   <button
+                    on:click={() => deleteCliente(cliente.id)}
                     class="text-red-600 hover:text-red-700"
                     title="Eliminar"
                   >
@@ -273,8 +329,19 @@
   </div>
 </div>
 
+<!-- Modal de Crear/Editar Cliente -->
+<ClienteModal
+  isOpen={showClienteModal}
+  cliente={clienteToEdit}
+  onClose={() => {
+    showClienteModal = false;
+    clienteToEdit = null;
+  }}
+  onSuccess={handleClienteSaved}
+/>
+
 <!-- Modal de detalles del cliente -->
-{#if selectedCliente}
+{#if showDetailModal && clienteDetail}
   <div class="fixed inset-0 z-50 overflow-y-auto" on:click={closeModal}>
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
@@ -287,8 +354,8 @@
           <!-- Header -->
           <div class="flex justify-between items-start mb-6">
             <div>
-              <h3 class="text-2xl font-bold text-gray-900">{selectedCliente.nombre}</h3>
-              <p class="text-sm text-gray-500 mt-1">Cliente ID: {selectedCliente.id}</p>
+              <h3 class="text-2xl font-bold text-gray-900">{clienteDetail.nombre}</h3>
+              <p class="text-sm text-gray-500 mt-1">Cliente ID: {clienteDetail.id}</p>
             </div>
             <button
               on:click={closeModal}
@@ -308,15 +375,15 @@
               <div class="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div class="flex justify-between">
                   <span class="text-sm text-gray-600">Email:</span>
-                  <span class="text-sm font-medium text-gray-900">{selectedCliente.email}</span>
+                  <span class="text-sm font-medium text-gray-900">{clienteDetail.email}</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-sm text-gray-600">Teléfono:</span>
-                  <span class="text-sm font-medium text-gray-900">{selectedCliente.telefono}</span>
+                  <span class="text-sm font-medium text-gray-900">{clienteDetail.telefono}</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-sm text-gray-600">Dirección:</span>
-                  <span class="text-sm font-medium text-gray-900">{selectedCliente.direccion}</span>
+                  <span class="text-sm font-medium text-gray-900">{clienteDetail.direccion}</span>
                 </div>
               </div>
             </div>
@@ -327,14 +394,14 @@
               <div class="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-gray-600">Plan:</span>
-                  <Badge type={selectedCliente.plan === 'Premium' ? 'info' : 'default'}>
-                    {selectedCliente.plan}
+                  <Badge type={clienteDetail.plan === 'Premium' ? 'info' : 'default'}>
+                    {clienteDetail.plan}
                   </Badge>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-gray-600">Estado:</span>
-                  <Badge type={getBadgeType(selectedCliente.estado)}>
-                    {selectedCliente.estado}
+                  <Badge type={getBadgeType(clienteDetail.estado)}>
+                    {clienteDetail.estado}
                   </Badge>
                 </div>
               </div>
@@ -347,13 +414,13 @@
                 <div class="flex justify-between">
                   <span class="text-sm text-gray-600">Última visita:</span>
                   <span class="text-sm font-medium text-gray-900">
-                    {new Date(selectedCliente.ultimaVisita).toLocaleDateString('es-AR')}
+                    {clienteDetail.ultimaVisita ? new Date(clienteDetail.ultimaVisita).toLocaleDateString('es-AR') : 'Sin visitas'}
                   </span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-sm text-gray-600">Próxima visita:</span>
                   <span class="text-sm font-medium text-primary-600">
-                    {new Date(selectedCliente.proximaVisita).toLocaleDateString('es-AR')}
+                    {clienteDetail.proximaVisita ? new Date(clienteDetail.proximaVisita).toLocaleDateString('es-AR') : 'No programada'}
                   </span>
                 </div>
               </div>

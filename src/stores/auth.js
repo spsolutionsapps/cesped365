@@ -55,14 +55,10 @@ function createAuthStore() {
     },
     // Verificar sesión al cargar la app
     checkAuth: async () => {
-      console.log('🟢 auth.checkAuth(): Iniciando...');
       update(state => ({ ...state, isChecking: true }));
       try {
-        console.log('🟢 auth.checkAuth(): Llamando authAPI.getCurrentUser()...');
         const response = await authAPI.getCurrentUser();
-        console.log('🟢 auth.checkAuth(): response =', response);
         if (response.success && response.user) {
-          console.log('🟢 auth.checkAuth(): Usuario autenticado =', response.user);
           set({
             isAuthenticated: true,
             user: {
@@ -79,9 +75,8 @@ function createAuthStore() {
           return true;
         }
       } catch (error) {
-        console.log('❌ auth.checkAuth(): Error =', error);
+        console.log('No hay sesión activa');
       }
-      console.log('🟢 auth.checkAuth(): No hay sesión activa');
       set({
         isAuthenticated: false,
         user: null,

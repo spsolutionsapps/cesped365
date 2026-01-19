@@ -9,6 +9,11 @@ $routes->get('/', 'Home::index');
 
 // API Routes
 $routes->group('api', ['filter' => 'corscustom'], function($routes) {
+    // Manejar OPTIONS para todas las rutas (preflight CORS)
+    $routes->options('(:any)', function() {
+        return service('response')->setStatusCode(200);
+    });
+    
     // Rutas públicas (sin autenticación)
     $routes->post('login', 'Api\AuthController::login');
     
@@ -28,6 +33,9 @@ $routes->group('api', ['filter' => 'corscustom'], function($routes) {
         // Historial (accesible para admin y cliente)
         $routes->get('historial', 'Api\HistorialController::index');
         
+        // Jardines (accesible para admin y cliente)
+        $routes->get('jardines', 'Api\JardinesController::index');
+        
         // Planes de suscripción (público para clientes)
         $routes->get('subscriptions/plans', 'Api\SubscriptionsController::plans');
         $routes->get('subscriptions/plans/(:num)', 'Api\SubscriptionsController::showPlan/$1');
@@ -43,9 +51,10 @@ $routes->group('api', ['filter' => 'corscustom'], function($routes) {
             $routes->delete('clientes/(:num)', 'Api\ClientesController::delete/$1');
             $routes->get('clientes/(:num)/historial', 'Api\ClientesController::historial/$1');
             
-            // Reportes - Crear y subir imágenes
+            // Reportes - Crear, subir imágenes y eliminar
             $routes->post('reportes', 'Api\ReportesController::create');
             $routes->post('reportes/(:num)/imagen', 'Api\ReportesController::uploadImage/$1');
+            $routes->delete('reportes/(:num)', 'Api\ReportesController::delete/$1');
             
             // Suscripciones - Gestión completa
             $routes->get('subscriptions', 'Api\SubscriptionsController::index');

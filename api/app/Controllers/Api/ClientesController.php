@@ -61,8 +61,8 @@ class ClientesController extends ResourceController
                 'email' => $cliente['email'],
                 'telefono' => $cliente['phone'] ?? 'Sin teléfono',
                 'direccion' => $cliente['address'] ?? 'Sin dirección',
-                'plan' => 'Premium', // Por ahora, todos tienen Premium (implementar en Fase 5)
-                'estado' => 'Activo', // Por ahora, todos activos (implementar en Fase 5)
+                'plan' => $cliente['plan'] ?? 'Urbano',
+                'estado' => $cliente['estado'] ?? 'Pendiente',
                 'ultimaVisita' => $ultimoReporte ? $ultimoReporte['date'] : null,
                 'proximaVisita' => null // Por implementar
             ];
@@ -101,8 +101,8 @@ class ClientesController extends ResourceController
             'email' => $cliente['email'],
             'telefono' => $cliente['phone'] ?? 'Sin teléfono',
             'direccion' => $cliente['address'] ?? 'Sin dirección',
-            'plan' => 'Premium',
-            'estado' => 'Activo',
+            'plan' => $cliente['plan'] ?? 'Urbano',
+            'estado' => $cliente['estado'] ?? 'Pendiente',
             'ultimaVisita' => $ultimoReporte ? $ultimoReporte['date'] : null,
             'proximaVisita' => null
         ];
@@ -135,7 +135,9 @@ class ClientesController extends ResourceController
             'password' => $this->request->getPost('password'), // El modelo lo hasheará automáticamente
             'role' => 'cliente',
             'phone' => $this->request->getPost('phone'),
-            'address' => $this->request->getPost('address')
+            'address' => $this->request->getPost('address'),
+            'plan' => $this->request->getPost('plan') ?? 'Urbano',
+            'estado' => 'Pendiente' // Siempre pendiente hasta que se active con MercadoPago
         ];
         
         $userId = $this->userModel->insert($userData);
@@ -174,6 +176,20 @@ class ClientesController extends ResourceController
     
     public function update($id = null)
     {
+        // Obtener datos del request usando getVar() que funciona con PUT
+        $input = [
+            'name' => $this->request->getVar('name'),
+            'email' => $this->request->getVar('email'),
+            'password' => $this->request->getVar('password'),
+            'phone' => $this->request->getVar('phone'),
+            'address' => $this->request->getVar('address'),
+            'plan' => $this->request->getVar('plan'),
+        ];
+        
+        // Log de datos recibidos
+        log_message('info', 'UPDATE Cliente - ID: ' . $id);
+        log_message('info', 'Input recibido: ' . json_encode($input));
+        
         // Verificar que el cliente existe
         $cliente = $this->userModel->where('id', $id)->where('role', 'cliente')->first();
         
@@ -197,42 +213,50 @@ class ClientesController extends ResourceController
         // Preparar datos para actualizar
         $userData = [];
         
-        if ($this->request->getPost('name')) {
-            $userData['name'] = $this->request->getPost('name');
+        if (!empty($input['name'])) {
+            $userData['name'] = $input['name'];
         }
-        if ($this->request->getPost('email')) {
-            $userData['email'] = $this->request->getPost('email');
+        if (!empty($input['email'])) {
+            $userData['email'] = $input['email'];
         }
-        if ($this->request->getPost('password')) {
-            $userData['password'] = $this->request->getPost('password');
+        if (!empty($input['password'])) {
+            $userData['password'] = $input['password'];
         }
-        if ($this->request->getPost('phone') !== null) {
-            $userData['phone'] = $this->request->getPost('phone');
+        if (isset($input['phone'])) {
+            $userData['phone'] = $input['phone'];
         }
-        if ($this->request->getPost('address') !== null) {
-            $userData['address'] = $this->request->getPost('address');
+        if (isset($input['address'])) {
+            $userData['address'] = $input['address'];
         }
+        if (isset($input['plan'])) {
+            $userData['plan'] = $input['plan'];
+            log_message('info', 'Plan a actualizar: ' . $input['plan']);
+        }
+        
+        // Log de datos a actualizar
+        log_message('info', 'Datos a actualizar: ' . json_encode($userData));
         
         // Actualizar usuario
         if (!empty($userData)) {
-            $this->userModel->update($id, $userData);
+            $result = $this->userModel->update($id, $userData);
+            log_message('info', 'Resultado actualización: ' . ($result ? 'éxito' : 'fallo'));
         }
         
         // Actualizar jardín si existe
-        if ($this->request->getPost('address')) {
+        if (!empty($input['address'])) {
             $garden = $this->gardenModel->where('user_id', $id)->first();
             
             if ($garden) {
                 $this->gardenModel->update($garden['id'], [
-                    'address' => $this->request->getPost('address'),
-                    'notes' => $this->request->getPost('garden_notes') ?? $garden['notes']
+                    'address' => $input['address'],
+                    'notes' => $input['garden_notes'] ?? $garden['notes']
                 ]);
             } else {
                 // Crear jardín si no existe
                 $this->gardenModel->insert([
                     'user_id' => $id,
-                    'address' => $this->request->getPost('address'),
-                    'notes' => $this->request->getPost('garden_notes') ?? ''
+                    'address' => $input['address'],
+                    'notes' => $input['garden_notes'] ?? ''
                 ]);
             }
         }

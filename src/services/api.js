@@ -18,7 +18,11 @@ async function request(endpoint, options = {}) {
     if (typeof options.body === 'object') {
       const formData = new URLSearchParams();
       Object.keys(options.body).forEach(key => {
-        formData.append(key, options.body[key]);
+        const value = options.body[key];
+        // Solo agregar si el valor no es null, undefined o cadena vacía
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value);
+        }
       });
       config.body = formData;
       config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -79,6 +83,24 @@ export const reportesAPI = {
     return await request('/reportes', {
       method: 'POST',
       body: reporteData
+    });
+  },
+
+  // POST /api/reportes/:id/imagen (admin only)
+  uploadImage: async (reporteId, imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    return await request(`/reportes/${reporteId}/imagen`, {
+      method: 'POST',
+      body: formData
+    });
+  },
+
+  // DELETE /api/reportes/:id (admin only)
+  delete: async (id) => {
+    return await request(`/reportes/${id}`, {
+      method: 'DELETE'
     });
   }
 };
@@ -145,5 +167,13 @@ export const suscripcionesAPI = {
   // GET /api/subscriptions/plans
   getPlanes: async () => {
     return await request('/subscriptions/plans');
+  }
+};
+
+// Jardines endpoints
+export const jardinesAPI = {
+  // GET /api/jardines
+  getAll: async () => {
+    return await request('/jardines');
   }
 };

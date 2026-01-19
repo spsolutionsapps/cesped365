@@ -9,10 +9,7 @@
   let isChecking = true;
   let sidebarOpen = false;
   
-  console.log('🟡 Dashboard.svelte: SCRIPT EJECUTADO');
-  
   auth.subscribe(value => {
-    console.log('🟡 Dashboard.svelte: auth.subscribe', { isAuthenticated: value.isAuthenticated, isChecking: value.isChecking });
     isAuthenticated = value.isAuthenticated;
     isChecking = value.isChecking;
   });
@@ -46,11 +43,7 @@
       <!-- Main content area -->
       <main class="h-full overflow-y-auto">
         <div class="container px-6 mx-auto grid">
-          <slot>
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-              ⚠️ SLOT VACÍO: No se está renderizando ninguna ruta hija
-            </div>
-          </slot>
+          <slot />
         </div>
       </main>
     </div>

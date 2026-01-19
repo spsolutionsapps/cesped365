@@ -21,11 +21,11 @@ class ReportesController extends ResourceController
     public function index()
     {
         $page = $this->request->getGet('page') ?? 1;
-        $limit = $this->request->getGet('limit') ?? 10;
+        $limit = $this->request->getGet('limit') ?? 100; // Aumentar límite para mostrar todos
         
-        // Obtener reportes con paginación
+        // Obtener reportes con paginación, ordenados por fecha DESC (más recientes primero)
         $reports = $this->reportModel
-            ->orderBy('date', 'DESC')
+            ->orderBy('id', 'DESC') // Ordenar por ID para que los nuevos aparezcan primero
             ->paginate($limit);
         
         $total = $this->reportModel->countAll();
@@ -53,7 +53,9 @@ class ReportesController extends ResourceController
                 'humedad' => $report['humedad'],
                 'plagas' => (bool)$report['plagas'],
                 'notaJardinero' => $report['observaciones'],
+                'observaciones' => $report['observaciones'], // Agregar para búsqueda
                 'jardinero' => $report['jardinero'],
+                'garden_id' => $report['garden_id'], // Agregar para filtro por jardín
                 'imagenes' => $imageUrls
             ];
         }
@@ -99,7 +101,9 @@ class ReportesController extends ResourceController
             'humedad' => $report['humedad'],
             'plagas' => (bool)$report['plagas'],
             'notaJardinero' => $report['observaciones'],
+            'observaciones' => $report['observaciones'], // Agregar para búsqueda
             'jardinero' => $report['jardinero'],
+            'garden_id' => $report['garden_id'], // Agregar para filtro por jardín
             'imagenes' => $imageUrls
         ];
         
@@ -111,6 +115,9 @@ class ReportesController extends ResourceController
     
     public function create()
     {
+        // Log de datos recibidos
+        log_message('info', 'POST data: ' . json_encode($this->request->getPost()));
+        
         // Validar datos de entrada
         $rules = [
             'garden_id' => 'required|is_natural_no_zero',
@@ -120,13 +127,24 @@ class ReportesController extends ResourceController
         ];
         
         if (!$this->validate($rules)) {
+            log_message('error', 'Validation errors: ' . json_encode($this->validator->getErrors()));
             return $this->fail($this->validator->getErrors(), 400);
         }
         
-        // Preparar datos
+        // Preparar datos - Sumar 1 día a la fecha recibida
+        $dateReceived = $this->request->getPost('date');
+        log_message('info', 'Fecha recibida del frontend: ' . $dateReceived);
+        
+        // Sumar 1 día para compensar la conversión de timezone
+        $date = new \DateTime($dateReceived);
+        $date->modify('+1 day');
+        $dateFinal = $date->format('Y-m-d');
+        
+        log_message('info', 'Fecha después de +1 día: ' . $dateFinal);
+        
         $data = [
             'garden_id' => $this->request->getPost('garden_id'),
-            'date' => $this->request->getPost('date'),
+            'date' => $dateFinal, // Fecha con +1 día
             'estado_general' => $this->request->getPost('estado_general'),
             'cesped_parejo' => $this->request->getPost('cesped_parejo') ? 1 : 0,
             'color_ok' => $this->request->getPost('color_ok') ? 1 : 0,
@@ -160,6 +178,35 @@ class ReportesController extends ResourceController
                 'date' => $report['date'],
                 'estado_general' => $report['estado_general']
             ]
+        ]);
+    }
+    
+    public function delete($id = null)
+    {
+        $report = $this->reportModel->find($id);
+        
+        if (!$report) {
+            return $this->fail('Reporte no encontrado', 404);
+        }
+        
+        // Eliminar imágenes asociadas del disco
+        $images = $this->imageModel->getByReport($id);
+        foreach ($images as $image) {
+            $filePath = FCPATH . $image['image_path'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+        
+        // Eliminar imágenes de la base de datos
+        $this->imageModel->where('report_id', $id)->delete();
+        
+        // Eliminar reporte
+        $this->reportModel->delete($id);
+        
+        return $this->respond([
+            'success' => true,
+            'message' => 'Reporte eliminado exitosamente'
         ]);
     }
     

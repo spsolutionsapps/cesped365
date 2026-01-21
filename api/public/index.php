@@ -53,8 +53,9 @@ require FCPATH . '../app/Config/Paths.php';
 
 $paths = new Paths();
 
-// LOAD COMPOSER AUTOLOADER (CRÍTICO)
-require $paths->systemDirectory . '/../../../autoload.php';
+// LOAD COMPOSER AUTOLOADER (CRÍTICO - DEBE IR ANTES DE Boot.php)
+// La ruta correcta es desde la raíz del proyecto
+require FCPATH . '../vendor/autoload.php';
 
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';

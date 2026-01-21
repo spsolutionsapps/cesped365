@@ -53,6 +53,9 @@ require FCPATH . '../app/Config/Paths.php';
 
 $paths = new Paths();
 
+// LOAD COMPOSER AUTOLOADER (CRÍTICO)
+require $paths->systemDirectory . '/../../../autoload.php';
+
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';
 

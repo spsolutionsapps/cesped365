@@ -1,8 +1,5 @@
 <?php
 
-use CodeIgniter\Boot;
-use Config\Paths;
-
 /*
  *---------------------------------------------------------------
  * CHECK PHP VERSION
@@ -51,13 +48,12 @@ if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 require FCPATH . '../app/Config/Paths.php';
 // ^^^ Change this line if you move your application folder
 
-$paths = new Paths();
+$paths = new Config\Paths();
 
-// LOAD COMPOSER AUTOLOADER (CRÍTICO - DEBE IR ANTES DE Boot.php)
-// La ruta correcta es desde la raíz del proyecto
+// LOAD COMPOSER AUTOLOADER (CRÍTICO - DEBE IR ANTES DE usar clases de CodeIgniter)
 require FCPATH . '../vendor/autoload.php';
 
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';
 
-exit(Boot::bootWeb($paths));
+exit(CodeIgniter\Boot::bootWeb($paths));

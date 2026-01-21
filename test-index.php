@@ -1,126 +1,69 @@
 <?php
-// Activar todos los errores
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 
-echo "<h2>🔍 Test de index.php con errores visibles</h2>";
+echo "<!DOCTYPE html><html><head><title>Test Index.php</title>";
+echo "<style>body{font-family:monospace;padding:20px;background:#1a1a1a;color:#0f0;} .error{color:#f00;} .ok{color:#0f0;} pre{background:#000;padding:10px;border:1px solid #0f0;overflow-x:auto;}</style>";
+echo "</head><body>";
 
-echo "<h3>📊 Información del Sistema</h3>";
-echo "PHP Version: " . phpversion() . "<br>";
-echo "Current Directory: " . __DIR__ . "<br>";
-echo "FCPATH: " . __DIR__ . DIRECTORY_SEPARATOR . "<br><br>";
+echo "<h1>🔍 TEST INDEX.PHP</h1><hr>";
 
-define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
+$indexPath = __DIR__ . '/index.php';
 
-echo "<h3>✅ FCPATH definido correctamente</h3><br>";
-
-$pathsFile = FCPATH . '../app/Config/Paths.php';
-echo "<strong>Intentando cargar:</strong> <code>$pathsFile</code><br>";
-
-if (file_exists($pathsFile)) {
-    echo "✅ <strong>Archivo Paths.php existe</strong><br><br>";
+echo "<h2>1. Verificar que index.php existe</h2>";
+if (file_exists($indexPath)) {
+    echo "<div class='ok'>✅ index.php EXISTE</div>";
+    echo "<div>Ruta: $indexPath</div>";
+    echo "<div>Tamaño: " . filesize($indexPath) . " bytes</div><br>";
     
-    try {
-        require $pathsFile;
-        echo "✅ <strong>Paths.php cargado sin errores</strong><br><br>";
+    echo "<h2>2. Contenido de index.php</h2>";
+    $content = file_get_contents($indexPath);
+    
+    echo "<div>Total caracteres: " . strlen($content) . "</div>";
+    echo "<div>Total líneas: " . substr_count($content, "\n") . "</div><br>";
+    
+    echo "<h2>3. Verificar que tiene el require del autoloader</h2>";
+    
+    if (strpos($content, "require FCPATH . '../vendor/autoload.php';") !== false) {
+        echo "<div class='ok'>✅ Tiene require FCPATH . '../vendor/autoload.php'</div>";
+    } elseif (strpos($content, "vendor/autoload.php") !== false) {
+        echo "<div class='error'>⚠️ Tiene vendor/autoload.php pero con sintaxis diferente</div>";
         
-        if (class_exists('Config\Paths')) {
-            echo "✅ <strong>Clase Config\Paths existe</strong><br><br>";
-            
-            $paths = new Config\Paths();
-            echo "✅ <strong>Instancia de Paths creada</strong><br><br>";
-            
-            echo "<h3>📁 Rutas Configuradas</h3>";
-            echo "<strong>systemDirectory:</strong> " . $paths->systemDirectory . "<br>";
-            echo "<strong>appDirectory:</strong> " . $paths->appDirectory . "<br>";
-            echo "<strong>writableDirectory:</strong> " . $paths->writableDirectory . "<br>";
-            echo "<strong>testsDirectory:</strong> " . $paths->testsDirectory . "<br>";
-            echo "<strong>viewDirectory:</strong> " . $paths->viewDirectory . "<br><br>";
-            
-            // Verificar que los directorios existen
-            echo "<h3>🔍 Verificando Directorios</h3>";
-            
-            $dirs = [
-                'systemDirectory' => $paths->systemDirectory,
-                'appDirectory' => $paths->appDirectory,
-                'writableDirectory' => $paths->writableDirectory,
-            ];
-            
-            foreach ($dirs as $name => $dir) {
-                $exists = is_dir($dir);
-                $status = $exists ? '✅' : '❌';
-                echo "$status <strong>$name:</strong> <code>$dir</code><br>";
+        // Encontrar la línea exacta
+        $lines = explode("\n", $content);
+        foreach ($lines as $num => $line) {
+            if (strpos($line, 'vendor/autoload.php') !== false) {
+                echo "<div class='error'>Línea " . ($num + 1) . ": <code>" . htmlspecialchars(trim($line)) . "</code></div>";
             }
-            
-            echo "<br>";
-            
-            // Intentar cargar Boot.php
-            $bootFile = $paths->systemDirectory . '/Boot.php';
-            echo "<h3>🚀 Intentando cargar Boot.php</h3>";
-            echo "<strong>Ruta:</strong> <code>$bootFile</code><br>";
-            
-            if (file_exists($bootFile)) {
-                echo "✅ <strong>Boot.php existe</strong><br><br>";
-                
-                try {
-                    require $bootFile;
-                    echo "✅ <strong>Boot.php cargado sin errores</strong><br><br>";
-                    
-                    if (class_exists('CodeIgniter\Boot')) {
-                        echo "✅ <strong>Clase CodeIgniter\Boot existe</strong><br><br>";
-                        
-                        echo "<h3>🎯 Todo está correcto hasta aquí</h3>";
-                        echo "<div style='padding: 15px; background: #d1fae5; border-left: 4px solid green;'>";
-                        echo "El problema puede estar en <strong>Boot::bootWeb()</strong><br>";
-                        echo "O en alguna configuración específica del servidor.";
-                        echo "</div>";
-                    } else {
-                        echo "❌ <strong>Clase CodeIgniter\Boot NO existe</strong><br>";
-                    }
-                } catch (Exception $e) {
-                    echo "<div style='padding: 15px; background: #fee2e2; border-left: 4px solid red;'>";
-                    echo "❌ <strong>ERROR al cargar Boot.php:</strong><br>";
-                    echo "<code>" . htmlspecialchars($e->getMessage()) . "</code><br>";
-                    echo "<strong>Trace:</strong><br><pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
-                    echo "</div>";
-                }
-            } else {
-                echo "❌ <strong>Boot.php NO existe en la ruta especificada</strong><br>";
-            }
-            
-        } else {
-            echo "❌ <strong>Clase Config\Paths NO existe después de cargar el archivo</strong><br>";
         }
-        
-    } catch (Exception $e) {
-        echo "<div style='padding: 15px; background: #fee2e2; border-left: 4px solid red;'>";
-        echo "❌ <strong>ERROR al cargar Paths.php:</strong><br>";
-        echo "<code>" . htmlspecialchars($e->getMessage()) . "</code><br>";
-        echo "<strong>Trace:</strong><br><pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
-        echo "</div>";
+    } else {
+        echo "<div class='error'>❌ NO tiene require del autoloader</div>";
     }
+    
+    echo "<br><h2>4. Buscar otros requires</h2>";
+    $lines = explode("\n", $content);
+    foreach ($lines as $num => $line) {
+        if (stripos($line, 'require') !== false && stripos($line, '//') === false) {
+            echo "<div>Línea " . ($num + 1) . ": <code>" . htmlspecialchars(trim($line)) . "</code></div>";
+        }
+    }
+    
+    echo "<br><h2>5. Mostrar index.php completo (primeras 40 líneas)</h2>";
+    echo "<pre>" . htmlspecialchars(implode("\n", array_slice($lines, 0, 40))) . "</pre>";
+    
+    if (count($lines) > 40) {
+        echo "<br><h2>6. Últimas 30 líneas</h2>";
+        echo "<pre>" . htmlspecialchars(implode("\n", array_slice($lines, -30))) . "</pre>";
+    }
+    
 } else {
-    echo "❌ <strong>Archivo Paths.php NO existe en la ruta especificada</strong><br>";
+    echo "<div class='error'>❌ index.php NO EXISTE</div>";
+    echo "<div class='error'>Ruta buscada: $indexPath</div>";
 }
-?>
 
-<style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    padding: 20px;
-    background: #f3f4f6;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-code {
-    background: #1f2937;
-    color: #10b981;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: monospace;
-}
-h2, h3 {
-    color: #1f2937;
-}
-</style>
+echo "<br><h2>7. Información del sistema</h2>";
+echo "<div>__DIR__: " . __DIR__ . "</div>";
+echo "<div>DOCUMENT_ROOT: " . ($_SERVER['DOCUMENT_ROOT'] ?? 'N/A') . "</div>";
+echo "<div>SCRIPT_FILENAME: " . ($_SERVER['SCRIPT_FILENAME'] ?? 'N/A') . "</div>";
+
+echo "</body></html>";

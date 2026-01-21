@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API - Cesped365</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { background: #d1fae5; border-color: #10b981; }
+        .error { background: #fee2e2; border-color: #ef4444; }
+        .info { background: #dbeafe; border-color: #3b82f6; }
+        .input-group {
+            margin: 10px 0;
+        }
+        input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        label {
+            display: inline-block;
+            width: 80px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test API - Cesped365</h1>
+        <p style="color: #6b7280; margin-bottom: 20px;">
+            Prueba la conectividad con el backend en producción
+        </p>
+
+        <!-- Test 1: Conectividad básica -->
+        <div class="test-section">
+            <h3>1. Test de Conectividad Básica</h3>
+            <p>Verifica que el servidor responda</p>
+            <button onclick="testBasicConnectivity()">Probar Conectividad</button>
+            <div id="test1-result" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test 2: API Root -->
+        <div class="test-section">
+            <h3>2. Test API Root</h3>
+            <p>GET /api/</p>
+            <button onclick="testAPIRoot()">Probar API Root</button>
+            <div id="test2-result" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test 3: Login -->
+        <div class="test-section">
+            <h3>3. Test Login</h3>
+            <p>POST /api/login</p>
+            <div class="input-group">
+                <label>Email:</label>
+                <input type="email" id="email" value="admin@cesped365.com" style="width: 300px;">
+            </div>
+            <div class="input-group">
+                <label>Password:</label>
+                <input type="password" id="password" value="password" style="width: 300px;">
+            </div>
+            <button onclick="testLogin()">Probar Login</button>
+            <div id="test3-result" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test 4: Current User (requiere login) -->
+        <div class="test-section">
+            <h3>4. Test Current User</h3>
+            <p>GET /api/me (requiere estar logueado)</p>
+            <button onclick="testCurrentUser()">Probar /me</button>
+            <div id="test4-result" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Información -->
+        <div class="test-section info">
+            <h3>ℹ️ Información</h3>
+            <p><strong>URL Base de API:</strong> <span id="api-url"></span></p>
+            <p><strong>Navegador:</strong> <span id="browser-info"></span></p>
+            <p><strong>Dominio actual:</strong> <span id="current-domain"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Detectar si estamos en producción o desarrollo
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8080/api'
+            : 'https://cesped365.com/api';
+
+        // Mostrar información
+        document.getElementById('api-url').textContent = API_BASE_URL;
+        document.getElementById('browser-info').textContent = navigator.userAgent;
+        document.getElementById('current-domain').textContent = window.location.origin;
+
+        function showResult(elementId, message, type = 'info') {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = `result ${type}`;
+            el.style.display = 'block';
+        }
+
+        async function testBasicConnectivity() {
+            const resultId = 'test1-result';
+            showResult(resultId, '⏳ Probando conectividad...', 'info');
+
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const text = await response.text();
+                const result = `✅ Servidor responde!
+                
+Status: ${response.status} ${response.statusText}
+Content-Type: ${response.headers.get('content-type')}
+
+Response (primeros 500 caracteres):
+${text.substring(0, 500)}
+${text.length > 500 ? '...' : ''}`;
+
+                showResult(resultId, result, response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult(resultId, `❌ Error de conectividad:
+                
+${error.message}
+
+Posibles causas:
+- El servidor no está accesible
+- CORS bloqueando la petición
+- URL incorrecta: ${API_BASE_URL}`, 'error');
+            }
+        }
+
+        async function testAPIRoot() {
+            const resultId = 'test2-result';
+            showResult(resultId, '⏳ Probando API root...', 'info');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const contentType = response.headers.get('content-type');
+                let result = `Status: ${response.status} ${response.statusText}\nContent-Type: ${contentType}\n\n`;
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    result += 'Response JSON:\n' + JSON.stringify(data, null, 2);
+                } else {
+                    const text = await response.text();
+                    result += 'Response (text):\n' + text.substring(0, 500);
+                }
+
+                showResult(resultId, result, response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult(resultId, `❌ Error:\n\n${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            const resultId = 'test3-result';
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            showResult(resultId, '⏳ Intentando login...', 'info');
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('email', email);
+                formData.append('password', password);
+
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData
+                });
+
+                const contentType = response.headers.get('content-type');
+                let result = `Status: ${response.status} ${response.statusText}\nContent-Type: ${contentType}\n\n`;
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    result += 'Response JSON:\n' + JSON.stringify(data, null, 2);
+                    
+                    if (data.success) {
+                        result += '\n\n✅ Login exitoso!';
+                        showResult(resultId, result, 'success');
+                    } else {
+                        result += '\n\n❌ Login falló: ' + (data.message || 'Error desconocido');
+                        showResult(resultId, result, 'error');
+                    }
+                } else {
+                    const text = await response.text();
+                    result += 'Response (text):\n' + text.substring(0, 500);
+                    result += '\n\n❌ El servidor no devolvió JSON';
+                    showResult(resultId, result, 'error');
+                }
+            } catch (error) {
+                showResult(resultId, `❌ Error:\n\n${error.message}\n\nStack:\n${error.stack}`, 'error');
+            }
+        }
+
+        async function testCurrentUser() {
+            const resultId = 'test4-result';
+            showResult(resultId, '⏳ Obteniendo usuario actual...', 'info');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/me`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const contentType = response.headers.get('content-type');
+                let result = `Status: ${response.status} ${response.statusText}\nContent-Type: ${contentType}\n\n`;
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    result += 'Response JSON:\n' + JSON.stringify(data, null, 2);
+                } else {
+                    const text = await response.text();
+                    result += 'Response (text):\n' + text.substring(0, 500);
+                }
+
+                showResult(resultId, result, response.ok ? 'success' : 'error');
+            } catch (error) {
+                showResult(resultId, `❌ Error:\n\n${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

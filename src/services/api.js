@@ -31,11 +31,25 @@ async function request(endpoint, options = {}) {
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    
+    // Log para debugging
+    console.log(`API Request: ${config.method || 'GET'} ${API_BASE_URL}${endpoint}`);
+    console.log('Response status:', response.status);
+    
+    // Verificar si la respuesta tiene contenido
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      // Si no es JSON, leer como texto para debugging
+      const text = await response.text();
+      console.error('Response no es JSON:', text.substring(0, 200));
+      throw new Error(`El servidor no devolvió JSON. Status: ${response.status}. Response: ${text.substring(0, 100)}`);
+    }
+    
     const data = await response.json();
     
     // Manejar respuestas de error del backend
     if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Error en la petición');
+      throw new Error(data.message || `Error en la petición (${response.status})`);
     }
     
     return data;

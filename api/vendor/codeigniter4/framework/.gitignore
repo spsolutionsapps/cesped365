@@ -84,8 +84,7 @@ phpunit
 #-------------------------
 # Composer
 #-------------------------
-# vendor/ # ← Comentado para incluir vendor en el repo (evita problemas de deploy)
-# NOTA: vendor/ se incluye para que GitHub Actions no necesite ejecutar composer install
+vendor/
 
 #-------------------------
 # IDE / Development Files

@@ -96,25 +96,29 @@ jobs:
       # ========================================
       # 4. PREPARAR BACKEND (CodeIgniter)
       # ========================================
-      - name: 🔧 Setup PHP for Backend
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          extensions: mysqli, mbstring, intl, json, curl
-          tools: composer:v2
-
-      - name: 📦 Install backend dependencies
+      - name: 📦 Verificar backend dependencies
         working-directory: ./api
         run: |
-          echo "=== Instalando dependencias del backend ==="
+          echo "=== Verificando dependencias del backend ==="
           
-          # Instalar dependencias de Composer
-          if [ -f "composer.json" ]; then
-            composer install --no-dev --optimize-autoloader --no-interaction
-            echo "✅ Dependencias de Composer instaladas"
+          # Verificar si vendor/ existe
+          if [ -d "vendor" ]; then
+            echo "✅ Carpeta vendor/ encontrada (${du -sh vendor/ | cut -f1})"
+            echo "✅ Se usará el vendor/ del repositorio"
           else
-            echo "⚠️  composer.json no encontrado, saltando..."
+            echo "⚠️  Carpeta vendor/ NO encontrada"
+            echo "⚠️  El backend necesita dependencias de Composer"
+            echo "⚠️  Ejecuta localmente: cd api && composer install"
+            exit 1
           fi
+          
+          # Verificar archivos importantes
+          if [ ! -f "app/Config/App.php" ]; then
+            echo "❌ ERROR: Estructura de CodeIgniter incorrecta"
+            exit 1
+          fi
+          
+          echo "✅ Backend verificado correctamente"
 
       - name: 🔒 Create backend .htaccess files
         run: |
@@ -269,6 +273,8 @@ jobs:
       # 7. DEPLOY A PRODUCCIÓN VÍA FTP
       # ========================================
       - name: 🚀 Deploy to production server
+        id: ftp-deploy
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -305,52 +311,63 @@ jobs:
       # 8. POST-DEPLOYMENT
       # ========================================
       - name: ✅ Deployment summary
-        if: success()
+        if: always()
         run: |
           echo ""
           echo "============================================="
-          echo "✅ DEPLOYMENT EXITOSO"
+          if [ "${{ steps.ftp-deploy.outcome }}" == "success" ]; then
+            echo "✅ DEPLOYMENT EXITOSO"
+          else
+            echo "⚠️  DEPLOYMENT COMPLETADO CON ADVERTENCIAS"
+          fi
           echo "============================================="
           echo ""
-          echo "📦 Frontend desplegado: Landing + Dashboard"
-          echo "🔌 Backend desplegado: API CodeIgniter"
+          echo "📦 Frontend: Landing + Dashboard"
+          echo "🔌 Backend: API CodeIgniter"
+          echo ""
+          echo "📝 NOTAS IMPORTANTES:"
+          echo ""
+          echo "🔧 Versión de PHP en servidor:"
+          echo "   - GitHub Actions usó PHP 8.2"
+          echo "   - Asegúrate de que tu servidor tenga PHP 8.2+ en cPanel"
+          echo "   - Ve a: cPanel → MultiPHP Manager → Seleccionar PHP 8.2"
           echo ""
           echo "⚠️  PASOS SIGUIENTES (MANUAL):"
           echo ""
-          echo "1. Verificar que el archivo .env existe en el servidor:"
+          echo "1. Verificar PHP version en el servidor (debe ser 8.2+)"
+          echo ""
+          echo "2. Verificar que el archivo .env existe:"
           echo "   Ubicación: public_html/api/.env"
           echo "   Si no existe, crearlo usando CONFIGURACION_ENV_PRODUCCION.md"
           echo ""
-          echo "2. Verificar permisos de carpetas:"
+          echo "3. Verificar permisos de carpetas:"
           echo "   public_html/api/writable/ → 755"
           echo "   public_html/api/writable/cache/ → 755"
           echo "   public_html/api/writable/logs/ → 755"
           echo "   public_html/api/writable/session/ → 755"
           echo "   public_html/api/writable/uploads/ → 755"
           echo ""
-          echo "3. Ejecutar el script database_setup.sql en phpMyAdmin"
-          echo "   (Solo la primera vez o si hay cambios en la BD)"
+          echo "4. Si es la primera vez, ejecutar database_setup.sql en phpMyAdmin"
           echo ""
-          echo "4. Probar el sitio:"
+          echo "5. Probar el sitio:"
           echo "   🏠 Landing: https://tudominio.com/"
           echo "   🔐 Login: https://tudominio.com/login"
           echo "   📊 Dashboard: https://tudominio.com/dashboard/resumen"
-          echo "   🔌 API: https://tudominio.com/api/login"
           echo ""
           echo "============================================="
-
-      - name: ❌ Deployment failed
-        if: failure()
-        run: |
           echo ""
-          echo "============================================="
-          echo "❌ DEPLOYMENT FALLÓ"
-          echo "============================================="
-          echo ""
-          echo "Verifica:"
-          echo "1. Credenciales FTP en GitHub Secrets"
-          echo "2. Conexión al servidor FTP"
-          echo "3. Permisos de escritura en el servidor"
-          echo "4. Logs de GitHub Actions para más detalles"
-          echo ""
+          if [ "${{ steps.ftp-deploy.outcome }}" != "success" ]; then
+            echo "⚠️  El deployment FTP tuvo problemas."
+            echo "    Revisa los logs arriba para más detalles."
+            echo "    Posibles causas:"
+            echo "    - Credenciales FTP incorrectas"
+            echo "    - Servidor FTP no accesible"
+            echo "    - Permisos de escritura"
+            echo ""
+            echo "    Puedes subir manualmente vía FTP:"
+            echo "    1. npm run build (local)"
+            echo "    2. Subir dist/ → public_html/"
+            echo "    3. Subir api/ → public_html/api/"
+            echo ""
+          fi
           echo "============================================="

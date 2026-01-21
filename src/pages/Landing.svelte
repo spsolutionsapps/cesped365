@@ -971,7 +971,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div>
           <h4 class="text-white text-lg font-semibold mb-4">Contacto</h4>
           <div class="space-y-3 mb-6">
-            <div class="flex gap-6">
+            <div class="flex flex-col md:flex-row gap-6">
               <a
                 href="https://wa.me/5491170985242"
                 target="_blank"

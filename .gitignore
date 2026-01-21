@@ -8,7 +8,8 @@ dist
 .vscode
 
 # Backend (CodeIgniter)
-api/vendor/
+# NOTA: vendor/ NO está ignorado para que se suba al servidor automáticamente
+# Esto evita problemas de compatibilidad de versiones de PHP
 api/writable/cache/*
 api/writable/logs/*
 api/writable/session/*

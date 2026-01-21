@@ -1,0 +1,56 @@
+#--------------------------------------------------------------------
+# CESPED365 - Configuración de Producción
+#--------------------------------------------------------------------
+# IMPORTANTE: Renombrar este archivo a .env y colocarlo en: api/.env
+#--------------------------------------------------------------------
+
+CI_ENVIRONMENT = production
+
+#--------------------------------------------------------------------
+# APP
+#--------------------------------------------------------------------
+app.baseURL = 'https://cesped365.com/api/'
+app.indexPage = ''
+app.defaultTimezone = 'America/Argentina/Buenos_Aires'
+app.forceGlobalSecureRequests = true
+
+#--------------------------------------------------------------------
+# DATABASE
+#--------------------------------------------------------------------
+database.default.hostname = localhost
+database.default.database = cespvcyi_cesped365_db
+database.default.username = cespvcyi_cesped365_user
+database.default.password = 'TU_PASSWORD_AQUI'
+database.default.DBDriver = MySQLi
+database.default.port = 3306
+database.default.charset = utf8mb4
+database.default.DBCollat = utf8mb4_general_ci
+
+#--------------------------------------------------------------------
+# ENCRYPTION
+#--------------------------------------------------------------------
+encryption.key = 'hex2bin:TU_ENCRYPTION_KEY_AQUI'
+
+#--------------------------------------------------------------------
+# SESSION
+#--------------------------------------------------------------------
+session.driver = 'CodeIgniter\Session\Handlers\FileHandler'
+session.cookieName = 'ci_session'
+session.expiration = 7200
+session.savePath = 'writable/session'
+session.matchIP = false
+session.timeToUpdate = 300
+session.regenerateDestroy = false
+
+#--------------------------------------------------------------------
+# LOGGER
+#--------------------------------------------------------------------
+logger.threshold = 4
+
+#--------------------------------------------------------------------
+# CORS
+#--------------------------------------------------------------------
+cors.allowedOrigins = 'https://cesped365.com'
+cors.allowedMethods = 'GET,POST,PUT,DELETE,OPTIONS'
+cors.allowedHeaders = 'Content-Type,Authorization,X-Requested-With'
+cors.allowCredentials = true

@@ -48,12 +48,13 @@ if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 require FCPATH . '../app/Config/Paths.php';
 // ^^^ Change this line if you move your application folder
 
-$paths = new Config\Paths();
-
-// LOAD COMPOSER AUTOLOADER (CRÍTICO - DEBE IR ANTES DE usar clases de CodeIgniter)
+// LOAD COMPOSER AUTOLOADER (CRÍTICO - DEBE CARGARSE ANTES DE INSTANCIAR CLASES)
 require FCPATH . '../vendor/autoload.php';
+
+// Now we can use namespaced classes
+$paths = new \Config\Paths();
 
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';
 
-exit(CodeIgniter\Boot::bootWeb($paths));
+exit(\CodeIgniter\Boot::bootWeb($paths));

@@ -8,7 +8,8 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 // API Routes
-$routes->group('api', ['filter' => 'corscustom'], function($routes) {
+// NOTA: No usar group('api') porque app.baseURL ya incluye /api/
+$routes->group('', ['filter' => 'corscustom'], function($routes) {
     // Manejar OPTIONS para todas las rutas (preflight CORS)
     $routes->options('(:any)', function() {
         return service('response')->setStatusCode(200);

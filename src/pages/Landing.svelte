@@ -604,7 +604,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
             <span class="text-3xl font-bold text-green-600">$60.000</span>
             <span class="text-gray-600">/mes</span>
           </div>
-          <p class="text-gray-600 mb-6 text-xl">500 a 2.500 m²</p>
+          <p class="text-gray-600 mb-6 text-xl">500 a 2.500 m² de tu jardín</p>
           <div class="mt-auto">
             <a
             href="https://wa.me/5491170985242"

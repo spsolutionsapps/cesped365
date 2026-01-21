@@ -92,6 +92,18 @@ jobs:
           echo ""
           echo "📁 Archivos en dist/:"
           ls -lah dist/ | head -20
+          
+          # Verificar que la API URL sea de producción
+          echo ""
+          echo "🔍 Verificando configuración de API..."
+          if grep -r "localhost:8080" dist/assets/*.js 2>/dev/null; then
+            echo "⚠️  ADVERTENCIA: Se encontró 'localhost:8080' en el build"
+            echo "⚠️  El frontend podría estar usando URL de desarrollo"
+            echo "⚠️  Verifica que .env.production esté configurado correctamente"
+          else
+            echo "✅ No se encontró 'localhost:8080' en el build"
+            echo "✅ La API URL parece estar correcta para producción"
+          fi
 
       # ========================================
       # 4. PREPARAR BACKEND (CodeIgniter)

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Hosting - Cesped365</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .info {
+            background: #f3f4f6;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .test-list {
+            list-style: none;
+            padding: 0;
+        }
+        .test-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9fafb;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .check { color: #10b981; font-weight: bold; }
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover { text-decoration: underline; }
+        .note {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Hosting Funcionando!</h1>
+        
+        <div class="success">
+            Si ves esto, tu servidor está activo y sirviendo archivos HTML correctamente.
+        </div>
+        
+        <div class="info">
+            <strong>Dominio:</strong> cesped365.com<br>
+            <strong>Fecha:</strong> <script>document.write(new Date().toLocaleDateString('es-AR'));</script><br>
+            <strong>Ubicación:</strong> public_html/
+        </div>
+        
+        <h3 style="margin: 20px 0 10px 0; color: #1f2937;">Próximos tests:</h3>
+        
+        <ul class="test-list">
+            <li>
+                <span class="check">✓</span>
+                <span>Archivo HTML funcionando</span>
+            </li>
+            <li>
+                <span class="check">→</span>
+                <a href="/index.html">Test: index.html principal</a>
+            </li>
+            <li>
+                <span class="check">→</span>
+                <a href="/api/">Test: Backend API</a>
+            </li>
+            <li>
+                <span class="check">→</span>
+                <a href="/login">Test: Routing SPA (/login)</a>
+            </li>
+        </ul>
+        
+        <div class="note">
+            <strong>⚠️ Próximos pasos:</strong><br><br>
+            1. Si este archivo funciona pero index.html no, verifica que index.html exista en public_html/<br>
+            2. Si /login da 404, verifica el archivo .htaccess<br>
+            3. Sigue la guía: <strong>DIAGNOSTICO_404.md</strong>
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280;">
+            <strong>Cesped365</strong> - Sistema de Gestión de Jardinería
+        </div>
+    </div>
+</body>
+</html>

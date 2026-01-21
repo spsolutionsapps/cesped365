@@ -5,6 +5,8 @@ dist
 *.log
 .env
 .env.local
+.env.development
+# NO ignorar .env.production (se necesita para el build)
 .vscode
 
 # Backend (CodeIgniter)

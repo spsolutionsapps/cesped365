@@ -103,7 +103,8 @@ jobs:
           
           # Verificar si vendor/ existe
           if [ -d "vendor" ]; then
-            echo "✅ Carpeta vendor/ encontrada (${du -sh vendor/ | cut -f1})"
+            VENDOR_SIZE=$(du -sh vendor/ 2>/dev/null | cut -f1 || echo "unknown")
+            echo "✅ Carpeta vendor/ encontrada ($VENDOR_SIZE)"
             echo "✅ Se usará el vendor/ del repositorio"
           else
             echo "⚠️  Carpeta vendor/ NO encontrada"

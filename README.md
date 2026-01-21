@@ -2,6 +2,26 @@
 
 Sistema web completo para gestión de servicios de jardinería por suscripción, con dashboard para clientes y administradores.
 
+## 🚀 DESPLIEGUE A PRODUCCIÓN
+
+### ¿Acabas de subir el sitio?
+**Empieza aquí:** [`INICIO_RAPIDO_PRODUCCION.md`](./INICIO_RAPIDO_PRODUCCION.md) ⭐
+
+Te tomará 30 minutos configurar:
+- ✅ Base de datos MySQL
+- ✅ Login funcional (admin@cesped365.com)
+- ✅ Dashboard de administrador
+
+### Otros archivos útiles:
+- 📋 [`CHECKLIST_PRODUCCION.md`](./CHECKLIST_PRODUCCION.md) - Lista de verificación completa
+- 📖 [`DESPLIEGUE_PRODUCCION.md`](./DESPLIEGUE_PRODUCCION.md) - Guía detallada + troubleshooting
+- 🗄️ [`database_setup.sql`](./database_setup.sql) - Script SQL para crear tablas
+- ⚙️ [`CONFIGURACION_ENV_PRODUCCION.md`](./CONFIGURACION_ENV_PRODUCCION.md) - Plantilla del .env
+- 🛠️ [`COMANDOS_UTILES.md`](./COMANDOS_UTILES.md) - Comandos de administración
+- 📚 [`ARCHIVOS_DESPLIEGUE_README.md`](./ARCHIVOS_DESPLIEGUE_README.md) - Guía de qué archivo usar
+
+---
+
 ## 🚀 Tecnologías
 
 ### Frontend

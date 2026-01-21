@@ -10,15 +10,23 @@ class CorsFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Permitir múltiples orígenes de desarrollo
-        $allowedOrigins = [
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'http://localhost:5173', // Vite default
-            'http://localhost:5174',
-            'http://127.0.0.1:3000',
-            'http://127.0.0.1:5173'
-        ];
+        // Obtener orígenes permitidos desde .env (producción) o usar defaults (desarrollo)
+        $envOrigins = env('cors.allowedOrigins', '');
+        
+        if (!empty($envOrigins)) {
+            // En producción, usar los orígenes del .env
+            $allowedOrigins = array_map('trim', explode(',', $envOrigins));
+        } else {
+            // En desarrollo, permitir orígenes locales
+            $allowedOrigins = [
+                'http://localhost:3000',
+                'http://localhost:3001',
+                'http://localhost:5173', // Vite default
+                'http://localhost:5174',
+                'http://127.0.0.1:3000',
+                'http://127.0.0.1:5173'
+            ];
+        }
         
         $origin = $request->getHeaderLine('Origin');
         
@@ -45,15 +53,23 @@ class CorsFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Permitir múltiples orígenes de desarrollo
-        $allowedOrigins = [
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'http://127.0.0.1:3000',
-            'http://127.0.0.1:5173'
-        ];
+        // Obtener orígenes permitidos desde .env (producción) o usar defaults (desarrollo)
+        $envOrigins = env('cors.allowedOrigins', '');
+        
+        if (!empty($envOrigins)) {
+            // En producción, usar los orígenes del .env
+            $allowedOrigins = array_map('trim', explode(',', $envOrigins));
+        } else {
+            // En desarrollo, permitir orígenes locales
+            $allowedOrigins = [
+                'http://localhost:3000',
+                'http://localhost:3001',
+                'http://localhost:5173',
+                'http://localhost:5174',
+                'http://127.0.0.1:3000',
+                'http://127.0.0.1:5173'
+            ];
+        }
         
         $origin = $request->getHeaderLine('Origin');
         

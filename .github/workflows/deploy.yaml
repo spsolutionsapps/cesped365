@@ -1,124 +1,356 @@
-name: Deploy Landing to FTP
+name: Deploy Cesped365 to Production
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch: # Permite ejecutar manualmente desde GitHub
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout repository
+      # ========================================
+      # 1. CHECKOUT DEL CÓDIGO
+      # ========================================
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      # ========================================
+      # 2. CONFIGURAR NODE.JS PARA EL FRONTEND
+      # ========================================
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
+      # ========================================
+      # 3. BUILD DEL FRONTEND (Svelte)
+      # ========================================
+      - name: 📦 Install frontend dependencies
+        run: npm ci
 
-      - name: Build project
+      - name: 🏗️ Build frontend
         run: npm run build
+        env:
+          NODE_ENV: production
 
-      - name: Verify build output
+      - name: ✅ Verify build output
         run: |
-          echo "=== Verifying build output ==="
+          echo "=== Verificando build del frontend ==="
+          
+          # Verificar que dist existe
+          if [ ! -d "dist" ]; then
+            echo "❌ ERROR: carpeta dist/ no fue creada"
+            exit 1
+          fi
+          
+          # Verificar index.html
           if [ ! -f "dist/index.html" ]; then
-            echo "❌ ERROR: dist/index.html not found!"
+            echo "❌ ERROR: dist/index.html no existe"
             exit 1
           else
-            echo "✅ dist/index.html exists"
+            echo "✅ dist/index.html existe"
           fi
+          
+          # Copiar .htaccess si no existe
           if [ ! -f "dist/.htaccess" ]; then
-            echo "⚠️  WARNING: dist/.htaccess not found, creating it..."
-            cp public/.htaccess dist/.htaccess 2>/dev/null || echo "# .htaccess will be created" > dist/.htaccess
+            echo "⚠️  Creando .htaccess para el frontend..."
+            cat > dist/.htaccess << 'EOF'
+          <IfModule mod_rewrite.c>
+            RewriteEngine On
+            
+            # Redirigir HTTP a HTTPS
+            RewriteCond %{HTTPS} off
+            RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+            
+            # No redirigir si es API
+            RewriteCond %{REQUEST_URI} ^/api/
+            RewriteRule ^ - [L]
+            
+            # Servir archivos estáticos
+            RewriteCond %{REQUEST_FILENAME} -f [OR]
+            RewriteCond %{REQUEST_FILENAME} -d
+            RewriteRule ^ - [L]
+            
+            # SPA routing
+            RewriteRule ^ index.html [L]
+          </IfModule>
+          
+          <IfModule mod_headers.c>
+            Header set X-Content-Type-Options "nosniff"
+            Header set X-Frame-Options "SAMEORIGIN"
+            Header set X-XSS-Protection "1; mode=block"
+          </IfModule>
+          EOF
           else
-            echo "✅ dist/.htaccess exists"
+            echo "✅ dist/.htaccess existe"
           fi
-          echo "Files in dist/:"
-          ls -la dist/ | head -20
+          
+          echo ""
+          echo "📁 Archivos en dist/:"
+          ls -lah dist/ | head -20
 
-      - name: Debug FTP Configuration
+      # ========================================
+      # 4. PREPARAR BACKEND (CodeIgniter)
+      # ========================================
+      - name: 🔧 Setup PHP for Backend
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mysqli, mbstring, intl, json, curl
+          tools: composer:v2
+
+      - name: 📦 Install backend dependencies
+        working-directory: ./api
         run: |
-          echo "=== Checking FTP Configuration ==="
+          echo "=== Instalando dependencias del backend ==="
+          
+          # Instalar dependencias de Composer
+          if [ -f "composer.json" ]; then
+            composer install --no-dev --optimize-autoloader --no-interaction
+            echo "✅ Dependencias de Composer instaladas"
+          else
+            echo "⚠️  composer.json no encontrado, saltando..."
+          fi
+
+      - name: 🔒 Create backend .htaccess files
+        run: |
+          echo "=== Creando archivos .htaccess para el backend ==="
+          
+          # .htaccess en api/public/
+          mkdir -p api/public
+          cat > api/public/.htaccess << 'EOF'
+          <IfModule mod_rewrite.c>
+              Options -Indexes
+              RewriteEngine On
+              
+              RewriteCond %{REQUEST_FILENAME} !-f
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteRule ^(.*)$ index.php/$1 [L]
+          </IfModule>
+          
+          <IfModule !mod_rewrite.c>
+              ErrorDocument 404 index.php
+          </IfModule>
+          
+          Options -Indexes
+          
+          <FilesMatch "^\.">
+              Order allow,deny
+              Deny from all
+          </FilesMatch>
+          EOF
+          
+          # .htaccess en api/ (raíz del backend)
+          cat > api/.htaccess << 'EOF'
+          <IfModule mod_rewrite.c>
+              RewriteEngine On
+              RewriteRule ^(.*)$ public/$1 [L]
+          </IfModule>
+          
+          <FilesMatch "^\.env|composer\.(json|lock)|phpunit\.xml">
+              Order allow,deny
+              Deny from all
+          </FilesMatch>
+          
+          RedirectMatch 403 ^/api/(app|writable|vendor|\.git)(/|$)
+          EOF
+          
+          echo "✅ Archivos .htaccess creados"
+
+      - name: 🗂️ Verify backend structure
+        run: |
+          echo "=== Verificando estructura del backend ==="
+          
+          if [ ! -d "api/app" ]; then
+            echo "❌ ERROR: api/app/ no existe"
+            exit 1
+          fi
+          
+          if [ ! -f "api/public/index.php" ]; then
+            echo "❌ ERROR: api/public/index.php no existe"
+            exit 1
+          fi
+          
+          echo "✅ Estructura del backend correcta"
+          echo ""
+          echo "📁 Estructura de api/:"
+          ls -lah api/ | grep -E '^d|app|public|writable'
+
+      # ========================================
+      # 5. PREPARAR ARCHIVOS PARA DEPLOYMENT
+      # ========================================
+      - name: 📋 Prepare deployment files
+        run: |
+          echo "=== Preparando archivos para deployment ==="
+          
+          # Crear carpeta temporal para deployment
+          mkdir -p deploy_temp
+          
+          # Copiar frontend (dist/) a deploy_temp/
+          cp -r dist/* deploy_temp/
+          
+          # Copiar backend (api/) a deploy_temp/api/
+          mkdir -p deploy_temp/api
+          
+          # Copiar solo archivos necesarios del backend
+          cp -r api/app deploy_temp/api/
+          cp -r api/public deploy_temp/api/
+          cp -r api/writable deploy_temp/api/
+          
+          # Copiar vendor si existe
+          if [ -d "api/vendor" ]; then
+            cp -r api/vendor deploy_temp/api/
+          fi
+          
+          # Copiar archivos de configuración del backend
+          [ -f "api/spark" ] && cp api/spark deploy_temp/api/
+          [ -f "api/.htaccess" ] && cp api/.htaccess deploy_temp/api/
+          
+          # Crear carpetas necesarias en writable/
+          mkdir -p deploy_temp/api/writable/cache
+          mkdir -p deploy_temp/api/writable/logs
+          mkdir -p deploy_temp/api/writable/session
+          mkdir -p deploy_temp/api/writable/uploads
+          
+          # Crear .gitkeep en carpetas vacías para que se suban
+          touch deploy_temp/api/writable/cache/.gitkeep
+          touch deploy_temp/api/writable/logs/.gitkeep
+          touch deploy_temp/api/writable/session/.gitkeep
+          touch deploy_temp/api/writable/uploads/.gitkeep
+          
+          echo "✅ Archivos preparados"
+          echo ""
+          echo "📁 Contenido de deploy_temp/:"
+          ls -lah deploy_temp/
+          echo ""
+          echo "📁 Contenido de deploy_temp/api/:"
+          ls -lah deploy_temp/api/
+
+      # ========================================
+      # 6. VALIDAR CONFIGURACIÓN FTP
+      # ========================================
+      - name: 🔍 Validate FTP configuration
+        run: |
+          echo "=== Validando configuración FTP ==="
           
           # Verificar FTP_SERVER
           if [ -z "${{ secrets.FTP_SERVER }}" ]; then
-            echo "❌ ERROR: FTP_SERVER secret is not set or is empty"
-            echo "   Go to: Settings → Secrets and variables → Actions"
-            echo "   Create a secret named: FTP_SERVER"
+            echo "❌ ERROR: FTP_SERVER no está configurado"
+            echo "   Ve a: Settings → Secrets and variables → Actions"
             exit 1
           else
-            echo "✅ FTP_SERVER is set"
-            SERVER="${{ secrets.FTP_SERVER }}"
-            
-            # Verificar formato común incorrecto
-            if [[ "$SERVER" == ftp://* ]] || [[ "$SERVER" == http://* ]] || [[ "$SERVER" == https://* ]]; then
-              echo "❌ ERROR: FTP_SERVER contains protocol (ftp://, http://, https://)"
-              echo "   Current format: $SERVER"
-              echo "   Correct format: Remove 'ftp://' or 'http://' prefix"
-              echo "   Example: If you have 'ftp://ftp.example.com', use only 'ftp.example.com'"
-              exit 1
-            fi
-            
-            if [[ "$SERVER" == *"/"* ]]; then
-              echo "⚠️  WARNING: FTP_SERVER contains '/' (path)"
-              echo "   Server should only be domain/IP, not include paths"
-              echo "   Example: 'ftp.example.com' not 'ftp.example.com/public_html'"
-            fi
-            
-            # Intentar resolver el DNS (advertencia, no error fatal)
-            echo "Testing DNS resolution for: $SERVER"
-            if nslookup "$SERVER" > /dev/null 2>&1; then
-              echo "✅ DNS resolution successful"
-            else
-              echo "⚠️  WARNING: Cannot resolve DNS for '$SERVER' from GitHub Actions"
-              echo "   This might be OK if:"
-              echo "   - Server uses internal DNS"
-              echo "   - FTP server is accessible via IP"
-              echo "   - DNS propagation is still in progress"
-              echo "   Will attempt connection anyway..."
-            fi
+            echo "✅ FTP_SERVER configurado"
           fi
           
-          # Verificar otros secrets
+          # Verificar FTP_USERNAME
           if [ -z "${{ secrets.FTP_USERNAME }}" ]; then
-            echo "❌ ERROR: FTP_USERNAME secret is not set"
+            echo "❌ ERROR: FTP_USERNAME no está configurado"
             exit 1
           else
-            echo "✅ FTP_USERNAME is set"
+            echo "✅ FTP_USERNAME configurado"
           fi
           
+          # Verificar FTP_PASSWORD
           if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
-            echo "❌ ERROR: FTP_PASSWORD secret is not set"
+            echo "❌ ERROR: FTP_PASSWORD no está configurado"
             exit 1
           else
-            echo "✅ FTP_PASSWORD is set"
+            echo "✅ FTP_PASSWORD configurado"
           fi
           
-          PORT="${{ secrets.FTP_PORT || 21 }}"
-          echo "✅ FTP_PORT: $PORT"
           echo ""
-          echo "=== Configuration looks good! Proceeding with deployment... ==="
+          echo "✅ Configuración FTP válida"
 
-      - name: Deploy to FTP
+      # ========================================
+      # 7. DEPLOY A PRODUCCIÓN VÍA FTP
+      # ========================================
+      - name: 🚀 Deploy to production server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT || 21 }}
-          local-dir: dist/
+          local-dir: deploy_temp/
           server-dir: ${{ secrets.FTP_SERVER_DIR || 'public_html/' }}
-          dangerous-clean-slate: true
-          include: |
-            **/.htaccess
+          dangerous-clean-slate: false # IMPORTANTE: No borrar todo el servidor
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             **/.github/**
+            **/tests/**
+            **/.env.example
+            **/README.md
+            **/package.json
+            **/package-lock.json
+            **/composer.json
+            **/composer.lock
+            **/.editorconfig
+            **/.gitignore
+            **/.prettierrc
+          include: |
+            **/.htaccess
+            deploy_temp/api/writable/.gitkeep
+            deploy_temp/api/writable/cache/.gitkeep
+            deploy_temp/api/writable/logs/.gitkeep
+            deploy_temp/api/writable/session/.gitkeep
+            deploy_temp/api/writable/uploads/.gitkeep
+
+      # ========================================
+      # 8. POST-DEPLOYMENT
+      # ========================================
+      - name: ✅ Deployment summary
+        if: success()
+        run: |
+          echo ""
+          echo "============================================="
+          echo "✅ DEPLOYMENT EXITOSO"
+          echo "============================================="
+          echo ""
+          echo "📦 Frontend desplegado: Landing + Dashboard"
+          echo "🔌 Backend desplegado: API CodeIgniter"
+          echo ""
+          echo "⚠️  PASOS SIGUIENTES (MANUAL):"
+          echo ""
+          echo "1. Verificar que el archivo .env existe en el servidor:"
+          echo "   Ubicación: public_html/api/.env"
+          echo "   Si no existe, crearlo usando CONFIGURACION_ENV_PRODUCCION.md"
+          echo ""
+          echo "2. Verificar permisos de carpetas:"
+          echo "   public_html/api/writable/ → 755"
+          echo "   public_html/api/writable/cache/ → 755"
+          echo "   public_html/api/writable/logs/ → 755"
+          echo "   public_html/api/writable/session/ → 755"
+          echo "   public_html/api/writable/uploads/ → 755"
+          echo ""
+          echo "3. Ejecutar el script database_setup.sql en phpMyAdmin"
+          echo "   (Solo la primera vez o si hay cambios en la BD)"
+          echo ""
+          echo "4. Probar el sitio:"
+          echo "   🏠 Landing: https://tudominio.com/"
+          echo "   🔐 Login: https://tudominio.com/login"
+          echo "   📊 Dashboard: https://tudominio.com/dashboard/resumen"
+          echo "   🔌 API: https://tudominio.com/api/login"
+          echo ""
+          echo "============================================="
+
+      - name: ❌ Deployment failed
+        if: failure()
+        run: |
+          echo ""
+          echo "============================================="
+          echo "❌ DEPLOYMENT FALLÓ"
+          echo "============================================="
+          echo ""
+          echo "Verifica:"
+          echo "1. Credenciales FTP en GitHub Secrets"
+          echo "2. Conexión al servidor FTP"
+          echo "3. Permisos de escritura en el servidor"
+          echo "4. Logs de GitHub Actions para más detalles"
+          echo ""
+          echo "============================================="

@@ -36,7 +36,7 @@ class ReportesController extends ResourceController
             // Obtener imágenes del reporte
             $images = $this->imageModel->getByReport($report['id']);
             $imageUrls = array_map(function($img) {
-                return 'https://cesped365.com/' . $img['image_path'];
+                return 'https://cesped365.com/api/' . $img['image_path'];
             }, $images);
             
             $formatted[] = [
@@ -45,10 +45,17 @@ class ReportesController extends ResourceController
                 'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
                 'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
                 'plagas' => (bool)($report['pest_detected'] ?? false),
-                'notaJardinero' => $report['technician_notes'] ?? '',
+                'notaJardinero' => $report['technician_notes'] ?? 'Sin notas',
+                'jardinero' => $report['technician_notes'] ?? 'Sin notas',
                 'observaciones' => $report['recommendations'] ?? '',
                 'garden_id' => $report['garden_id'],
-                'imagenes' => $imageUrls
+                'imagenes' => $imageUrls,
+                // Campos adicionales para compatibilidad
+                'cespedParejo' => true,
+                'colorOk' => true,
+                'manchas' => false,
+                'zonasDesgastadas' => false,
+                'malezasVisibles' => false
             ];
         }
         
@@ -75,7 +82,7 @@ class ReportesController extends ResourceController
         // Obtener imágenes
         $images = $this->imageModel->getByReport($id);
         $imageUrls = array_map(function($img) {
-            return 'https://cesped365.com/' . $img['image_path'];
+            return 'https://cesped365.com/api/' . $img['image_path'];
         }, $images);
         
         // Formatear respuesta
@@ -85,10 +92,17 @@ class ReportesController extends ResourceController
             'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
             'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
             'plagas' => (bool)($report['pest_detected'] ?? false),
-            'notaJardinero' => $report['technician_notes'] ?? '',
+            'notaJardinero' => $report['technician_notes'] ?? 'Sin notas',
+            'jardinero' => $report['technician_notes'] ?? 'Sin notas',
             'observaciones' => $report['recommendations'] ?? '',
             'garden_id' => $report['garden_id'],
-            'imagenes' => $imageUrls
+            'imagenes' => $imageUrls,
+            // Campos adicionales para compatibilidad
+            'cespedParejo' => true,
+            'colorOk' => true,
+            'manchas' => false,
+            'zonasDesgastadas' => false,
+            'malezasVisibles' => false
         ];
         
         return $this->respond([
@@ -142,20 +156,36 @@ class ReportesController extends ResourceController
             'user_id' => $garden['user_id'],
             'visit_date' => $this->request->getVar('visit_date'),
             'status' => 'completado',
-            'grass_height_cm' => ($grassHeight !== '' && $grassHeight !== null) ? $grassHeight : null,
             'grass_health' => $this->request->getVar('grass_health') ?: 'bueno',
             'watering_status' => $this->request->getVar('watering_status') ?: 'optimo',
             'pest_detected' => $this->request->getVar('pest_detected') ? 1 : 0,
-            'pest_description' => ($pestDesc !== '' && $pestDesc !== null) ? $pestDesc : null,
             'work_done' => $this->request->getVar('work_done') ?: '',
             'recommendations' => $this->request->getVar('recommendations') ?: '',
-            'next_visit' => ($nextVisit !== '' && $nextVisit !== null && $nextVisit !== '0000-00-00') ? $nextVisit : null,
-            'growth_cm' => ($growthCm !== '' && $growthCm !== null) ? $growthCm : null,
-            'fertilizer_applied' => $this->request->getVar('fertilizer_applied') ? 1 : 0,
-            'fertilizer_type' => ($fertType !== '' && $fertType !== null) ? $fertType : null,
-            'weather_conditions' => $this->request->getVar('weather_conditions') ?: '',
             'technician_notes' => $this->request->getVar('technician_notes') ?: ''
         ];
+        
+        // Solo agregar campos opcionales si tienen valor
+        if ($grassHeight !== '' && $grassHeight !== null && $grassHeight !== '0') {
+            $data['grass_height_cm'] = $grassHeight;
+        }
+        if ($growthCm !== '' && $growthCm !== null && $growthCm !== '0') {
+            $data['growth_cm'] = $growthCm;
+        }
+        if ($nextVisit !== '' && $nextVisit !== null && $nextVisit !== '0000-00-00') {
+            $data['next_visit'] = $nextVisit;
+        }
+        if ($pestDesc !== '' && $pestDesc !== null) {
+            $data['pest_description'] = $pestDesc;
+        }
+        if ($fertType !== '' && $fertType !== null) {
+            $data['fertilizer_type'] = $fertType;
+        }
+        
+        $data['fertilizer_applied'] = $this->request->getVar('fertilizer_applied') ? 1 : 0;
+        $weatherCond = $this->request->getVar('weather_conditions');
+        if ($weatherCond !== '' && $weatherCond !== null) {
+            $data['weather_conditions'] = $weatherCond;
+        }
         
         log_message('info', 'Datos preparados para insertar: ' . json_encode($data));
         

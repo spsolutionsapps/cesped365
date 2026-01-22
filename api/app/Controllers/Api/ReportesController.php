@@ -36,26 +36,18 @@ class ReportesController extends ResourceController
             // Obtener imágenes del reporte
             $images = $this->imageModel->getByReport($report['id']);
             $imageUrls = array_map(function($img) {
-                return 'http://localhost:8080/' . $img['image_path'];
+                return 'https://cesped365.com/' . $img['image_path'];
             }, $images);
             
             $formatted[] = [
                 'id' => $report['id'],
-                'fecha' => $report['date'],
-                'estadoGeneral' => $report['estado_general'],
-                'cespedParejo' => (bool)$report['cesped_parejo'],
-                'colorOk' => (bool)$report['color_ok'],
-                'manchas' => (bool)$report['manchas'],
-                'zonasDesgastadas' => (bool)$report['zonas_desgastadas'],
-                'malezasVisibles' => (bool)$report['malezas_visibles'],
-                'crecimientoCm' => (float)$report['crecimiento_cm'],
-                'compactacion' => $report['compactacion'],
-                'humedad' => $report['humedad'],
-                'plagas' => (bool)$report['plagas'],
-                'notaJardinero' => $report['observaciones'],
-                'observaciones' => $report['observaciones'], // Agregar para búsqueda
-                'jardinero' => $report['jardinero'],
-                'garden_id' => $report['garden_id'], // Agregar para filtro por jardín
+                'fecha' => $report['visit_date'],
+                'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
+                'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
+                'plagas' => (bool)($report['pest_detected'] ?? false),
+                'notaJardinero' => $report['technician_notes'] ?? '',
+                'observaciones' => $report['recommendations'] ?? '',
+                'garden_id' => $report['garden_id'],
                 'imagenes' => $imageUrls
             ];
         }
@@ -83,27 +75,19 @@ class ReportesController extends ResourceController
         // Obtener imágenes
         $images = $this->imageModel->getByReport($id);
         $imageUrls = array_map(function($img) {
-            return 'http://localhost:8080/' . $img['image_path'];
+            return 'https://cesped365.com/' . $img['image_path'];
         }, $images);
         
         // Formatear respuesta
         $formatted = [
             'id' => $report['id'],
-            'fecha' => $report['date'],
-            'estadoGeneral' => $report['estado_general'],
-            'cespedParejo' => (bool)$report['cesped_parejo'],
-            'colorOk' => (bool)$report['color_ok'],
-            'manchas' => (bool)$report['manchas'],
-            'zonasDesgastadas' => (bool)$report['zonas_desgastadas'],
-            'malezasVisibles' => (bool)$report['malezas_visibles'],
-            'crecimientoCm' => (float)$report['crecimiento_cm'],
-            'compactacion' => $report['compactacion'],
-            'humedad' => $report['humedad'],
-            'plagas' => (bool)$report['plagas'],
-            'notaJardinero' => $report['observaciones'],
-            'observaciones' => $report['observaciones'], // Agregar para búsqueda
-            'jardinero' => $report['jardinero'],
-            'garden_id' => $report['garden_id'], // Agregar para filtro por jardín
+            'fecha' => $report['visit_date'],
+            'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
+            'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
+            'plagas' => (bool)($report['pest_detected'] ?? false),
+            'notaJardinero' => $report['technician_notes'] ?? '',
+            'observaciones' => $report['recommendations'] ?? '',
+            'garden_id' => $report['garden_id'],
             'imagenes' => $imageUrls
         ];
         
@@ -121,9 +105,7 @@ class ReportesController extends ResourceController
         // Validar datos de entrada
         $rules = [
             'garden_id' => 'required|is_natural_no_zero',
-            'date' => 'required|valid_date',
-            'estado_general' => 'required|in_list[Bueno,Regular,Malo]',
-            'jardinero' => 'required|min_length[3]'
+            'visit_date' => 'required|valid_date'
         ];
         
         if (!$this->validate($rules)) {
@@ -131,32 +113,32 @@ class ReportesController extends ResourceController
             return $this->fail($this->validator->getErrors(), 400);
         }
         
-        // Preparar datos - Sumar 1 día a la fecha recibida
-        $dateReceived = $this->request->getPost('date');
-        log_message('info', 'Fecha recibida del frontend: ' . $dateReceived);
+        // Obtener user_id del garden
+        $db = \Config\Database::connect();
+        $garden = $db->table('gardens')->where('id', $this->request->getPost('garden_id'))->get()->getRowArray();
         
-        // Sumar 1 día para compensar la conversión de timezone
-        $date = new \DateTime($dateReceived);
-        $date->modify('+1 day');
-        $dateFinal = $date->format('Y-m-d');
-        
-        log_message('info', 'Fecha después de +1 día: ' . $dateFinal);
+        if (!$garden) {
+            return $this->fail('Jardín no encontrado', 404);
+        }
         
         $data = [
             'garden_id' => $this->request->getPost('garden_id'),
-            'date' => $dateFinal, // Fecha con +1 día
-            'estado_general' => $this->request->getPost('estado_general'),
-            'cesped_parejo' => $this->request->getPost('cesped_parejo') ? 1 : 0,
-            'color_ok' => $this->request->getPost('color_ok') ? 1 : 0,
-            'manchas' => $this->request->getPost('manchas') ? 1 : 0,
-            'zonas_desgastadas' => $this->request->getPost('zonas_desgastadas') ? 1 : 0,
-            'malezas_visibles' => $this->request->getPost('malezas_visibles') ? 1 : 0,
-            'crecimiento_cm' => $this->request->getPost('crecimiento_cm') ?? null,
-            'compactacion' => $this->request->getPost('compactacion') ?? null,
-            'humedad' => $this->request->getPost('humedad') ?? null,
-            'plagas' => $this->request->getPost('plagas') ? 1 : 0,
-            'observaciones' => $this->request->getPost('observaciones') ?? '',
-            'jardinero' => $this->request->getPost('jardinero')
+            'user_id' => $garden['user_id'],
+            'visit_date' => $this->request->getPost('visit_date'),
+            'status' => 'completado',
+            'grass_height_cm' => $this->request->getPost('grass_height_cm') ?? null,
+            'grass_health' => $this->request->getPost('grass_health') ?? 'bueno',
+            'watering_status' => $this->request->getPost('watering_status') ?? 'optimo',
+            'pest_detected' => $this->request->getPost('pest_detected') ? 1 : 0,
+            'pest_description' => $this->request->getPost('pest_description') ?? null,
+            'work_done' => $this->request->getPost('work_done') ?? '',
+            'recommendations' => $this->request->getPost('recommendations') ?? '',
+            'next_visit' => $this->request->getPost('next_visit') ?? null,
+            'growth_cm' => $this->request->getPost('growth_cm') ?? null,
+            'fertilizer_applied' => $this->request->getPost('fertilizer_applied') ? 1 : 0,
+            'fertilizer_type' => $this->request->getPost('fertilizer_type') ?? null,
+            'weather_conditions' => $this->request->getPost('weather_conditions') ?? null,
+            'technician_notes' => $this->request->getPost('technician_notes') ?? ''
         ];
         
         // Insertar reporte
@@ -175,8 +157,8 @@ class ReportesController extends ResourceController
             'data' => [
                 'id' => $report['id'],
                 'garden_id' => $report['garden_id'],
-                'date' => $report['date'],
-                'estado_general' => $report['estado_general']
+                'visit_date' => $report['visit_date'],
+                'grass_health' => $report['grass_health']
             ]
         ]);
     }

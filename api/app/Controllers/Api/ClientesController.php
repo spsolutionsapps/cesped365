@@ -51,7 +51,7 @@ class ClientesController extends ResourceController
             if ($garden) {
                 $ultimoReporte = $this->reportModel
                     ->where('garden_id', $garden['id'])
-                    ->orderBy('date', 'DESC')
+                    ->orderBy('visit_date', 'DESC')
                     ->first();
             }
             
@@ -63,7 +63,7 @@ class ClientesController extends ResourceController
                 'direccion' => $cliente['address'] ?? 'Sin dirección',
                 'plan' => $cliente['plan'] ?? 'Urbano',
                 'estado' => $cliente['estado'] ?? 'Pendiente',
-                'ultimaVisita' => $ultimoReporte ? $ultimoReporte['date'] : null,
+                'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
                 'proximaVisita' => null // Por implementar
             ];
         }
@@ -91,7 +91,7 @@ class ClientesController extends ResourceController
         if ($garden) {
             $ultimoReporte = $this->reportModel
                 ->where('garden_id', $garden['id'])
-                ->orderBy('date', 'DESC')
+                ->orderBy('visit_date', 'DESC')
                 ->first();
         }
         
@@ -103,7 +103,7 @@ class ClientesController extends ResourceController
             'direccion' => $cliente['address'] ?? 'Sin dirección',
             'plan' => $cliente['plan'] ?? 'Urbano',
             'estado' => $cliente['estado'] ?? 'Pendiente',
-            'ultimaVisita' => $ultimoReporte ? $ultimoReporte['date'] : null,
+            'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
             'proximaVisita' => null
         ];
         
@@ -318,27 +318,24 @@ class ClientesController extends ResourceController
         // Obtener todos los reportes del jardín
         $reports = $this->reportModel
             ->where('garden_id', $garden['id'])
-            ->orderBy('date', 'DESC')
+            ->orderBy('visit_date', 'DESC')
             ->findAll();
         
         // Formatear para el frontend
         $formatted = [];
         foreach ($reports as $report) {
             $tipo = 'Mantenimiento Regular';
-            if ($report['malezas_visibles'] || $report['manchas']) {
+            if (isset($report['pest_detected']) && $report['pest_detected']) {
                 $tipo = 'Mantenimiento + Tratamiento';
-            }
-            if ($report['zonas_desgastadas']) {
-                $tipo = 'Mantenimiento + Resembrado';
             }
             
             $formatted[] = [
                 'id' => $report['id'],
-                'fecha' => $report['date'],
+                'fecha' => $report['visit_date'],
                 'tipo' => $tipo,
-                'estadoGeneral' => $report['estado_general'],
-                'jardinero' => $report['jardinero'],
-                'observaciones' => $report['observaciones']
+                'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
+                'jardinero' => $report['technician_notes'] ?? 'Sin datos',
+                'observaciones' => $report['recommendations'] ?? ''
             ];
         }
         

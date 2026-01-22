@@ -19,8 +19,12 @@ async function request(endpoint, options = {}) {
       const formData = new URLSearchParams();
       Object.keys(options.body).forEach(key => {
         const value = options.body[key];
-        // Solo agregar si el valor no es null, undefined o cadena vacía
-        if (value !== null && value !== undefined && value !== '') {
+        // Enviar todos los valores, incluso null (como cadena vacía)
+        if (value === null || value === undefined) {
+          formData.append(key, '');
+        } else if (typeof value === 'boolean') {
+          formData.append(key, value ? '1' : '0');
+        } else {
           formData.append(key, value);
         }
       });

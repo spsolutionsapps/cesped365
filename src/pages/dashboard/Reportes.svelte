@@ -551,13 +551,55 @@
               </div>
             </div>
 
-            <!-- Observaciones -->
-            <div>
-              <h4 class="font-semibold text-gray-900 mb-2">Observaciones del Jardinero</h4>
-              <p class="text-gray-700 bg-gray-50 rounded-lg p-4">
-                {selectedReporte.notaJardinero}
-              </p>
-            </div>
+            <!-- Plagas Detectadas -->
+            {#if selectedReporte.plagas}
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 class="font-semibold text-red-900 mb-2">⚠️ Plagas Detectadas</h4>
+                <p class="text-red-700">
+                  {selectedReporte.pest_description || 'Sin descripción'}
+                </p>
+              </div>
+            {/if}
+
+            <!-- Fertilizante Aplicado -->
+            {#if selectedReporte.fertilizer_applied}
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 class="font-semibold text-green-900 mb-2">✅ Fertilizante Aplicado</h4>
+                <p class="text-green-700">
+                  {selectedReporte.fertilizer_type || 'Tipo no especificado'}
+                </p>
+              </div>
+            {/if}
+
+            <!-- Trabajo Realizado -->
+            {#if selectedReporte.work_done}
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-2">🔧 Trabajo Realizado</h4>
+                <p class="text-gray-700 bg-gray-50 rounded-lg p-4">
+                  {selectedReporte.work_done}
+                </p>
+              </div>
+            {/if}
+
+            <!-- Recomendaciones -->
+            {#if selectedReporte.observaciones}
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-2">💡 Recomendaciones</h4>
+                <p class="text-gray-700 bg-blue-50 rounded-lg p-4">
+                  {selectedReporte.observaciones}
+                </p>
+              </div>
+            {/if}
+
+            <!-- Observaciones del Jardinero -->
+            {#if selectedReporte.notaJardinero}
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-2">📝 Observaciones del Jardinero</h4>
+                <p class="text-gray-700 bg-gray-50 rounded-lg p-4">
+                  {selectedReporte.notaJardinero}
+                </p>
+              </div>
+            {/if}
 
             <!-- Imágenes -->
             {#if selectedReporte.imagenes && selectedReporte.imagenes.length > 0}

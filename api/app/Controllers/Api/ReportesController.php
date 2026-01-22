@@ -167,10 +167,18 @@ class ReportesController extends ResourceController
         $pestDesc = $this->request->getVar('pest_description');
         $fertType = $this->request->getVar('fertilizer_type');
         
+        // CORREGIR FECHA: Sumar 1 día para compensar timezone
+        $fechaRecibida = $this->request->getVar('visit_date');
+        $fecha = new \DateTime($fechaRecibida);
+        $fecha->modify('+1 day');
+        $fechaFinal = $fecha->format('Y-m-d');
+        
+        log_message('info', 'Fecha recibida: ' . $fechaRecibida . ' -> Fecha final: ' . $fechaFinal);
+        
         $data = [
             'garden_id' => $this->request->getVar('garden_id'),
             'user_id' => $garden['user_id'],
-            'visit_date' => $this->request->getVar('visit_date'),
+            'visit_date' => $fechaFinal,
             'status' => 'completado',
             'grass_health' => $this->request->getVar('grass_health') ?: 'bueno',
             'watering_status' => $this->request->getVar('watering_status') ?: 'optimo',

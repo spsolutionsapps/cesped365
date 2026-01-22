@@ -218,8 +218,22 @@
       </div>
     </div>
 
-    <!-- Estado del Césped y Técnico -->
+    <!-- Jardinero y Estado del Césped -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="jardinero" class="block text-sm font-medium text-gray-700 mb-2">
+          Nombre del Jardinero *
+        </label>
+        <input
+          id="jardinero"
+          type="text"
+          bind:value={formData.technician_notes}
+          required
+          placeholder="Ej: Juan Pérez"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        />
+      </div>
+
       <div>
         <label for="grass_health" class="block text-sm font-medium text-gray-700 mb-2">
           Estado del Césped *
@@ -236,21 +250,22 @@
           <option value="malo">Malo</option>
         </select>
       </div>
-
-      <div>
-        <label for="watering_status" class="block text-sm font-medium text-gray-700 mb-2">
-          Estado de Riego
-        </label>
-        <select
-          id="watering_status"
-          bind:value={formData.watering_status}
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        >
-          <option value="optimo">Óptimo</option>
-          <option value="insuficiente">Insuficiente</option>
-          <option value="excesivo">Excesivo</option>
-        </select>
-      </div>
+    </div>
+    
+    <!-- Estado de Riego -->
+    <div>
+      <label for="watering_status" class="block text-sm font-medium text-gray-700 mb-2">
+        Estado de Riego
+      </label>
+      <select
+        id="watering_status"
+        bind:value={formData.watering_status}
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+      >
+        <option value="optimo">Óptimo</option>
+        <option value="insuficiente">Insuficiente</option>
+        <option value="excesivo">Excesivo</option>
+      </select>
     </div>
 
     <!-- Mediciones -->
@@ -317,22 +332,21 @@
       </div>
     </div>
 
-    <!-- Trabajo Realizado -->
-    <div>
-      <label for="work_done" class="block text-sm font-medium text-gray-700 mb-2">
-        Trabajo Realizado
-      </label>
-      <textarea
-        id="work_done"
-        bind:value={formData.work_done}
-        rows="2"
-        placeholder="Corte, fertilización, control de plagas, etc."
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-      ></textarea>
-    </div>
-
-    <!-- Recomendaciones y Notas del Técnico -->
+    <!-- Trabajo Realizado y Recomendaciones -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="work_done" class="block text-sm font-medium text-gray-700 mb-2">
+          Trabajo Realizado
+        </label>
+        <textarea
+          id="work_done"
+          bind:value={formData.work_done}
+          rows="3"
+          placeholder="Corte, fertilización, control de plagas, etc."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+        ></textarea>
+      </div>
+
       <div>
         <label for="recommendations" class="block text-sm font-medium text-gray-700 mb-2">
           Recomendaciones
@@ -342,19 +356,6 @@
           bind:value={formData.recommendations}
           rows="3"
           placeholder="Recomendaciones para el próximo mantenimiento..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-        ></textarea>
-      </div>
-
-      <div>
-        <label for="technician_notes" class="block text-sm font-medium text-gray-700 mb-2">
-          Notas del Técnico
-        </label>
-        <textarea
-          id="technician_notes"
-          bind:value={formData.technician_notes}
-          rows="3"
-          placeholder="Observaciones adicionales..."
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
         ></textarea>
       </div>

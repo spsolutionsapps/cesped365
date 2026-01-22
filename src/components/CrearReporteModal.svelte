@@ -102,27 +102,43 @@
       console.log('📦 Datos a enviar:', dataToSend);
 
       // 1. Crear el reporte
+      console.log('🔄 Creando reporte...');
       const reporteResponse = await reportesAPI.create(dataToSend);
+      console.log('✅ Respuesta del servidor:', reporteResponse);
       
       if (!reporteResponse.success) {
         throw new Error(reporteResponse.message || 'Error al crear el reporte');
       }
 
       const reporteId = reporteResponse.data.id;
+      console.log('✅ Reporte creado con ID:', reporteId);
 
       // 2. Subir imágenes
       if (selectedImages.length > 0) {
+        console.log(`📸 Subiendo ${selectedImages.length} imágenes...`);
+        let imagenesSubidas = 0;
+        
         for (const image of selectedImages) {
-          await reportesAPI.uploadImage(reporteId, image);
+          try {
+            await reportesAPI.uploadImage(reporteId, image);
+            imagenesSubidas++;
+            console.log(`✅ Imagen ${imagenesSubidas}/${selectedImages.length} subida`);
+          } catch (imgErr) {
+            console.error('Error subiendo imagen:', imgErr);
+            // Continuar con las demás imágenes aunque una falle
+          }
         }
+        
+        console.log(`✅ Total imágenes subidas: ${imagenesSubidas}/${selectedImages.length}`);
       }
 
       // Éxito
+      console.log('🎉 Reporte creado exitosamente');
       onSuccess();
       resetForm();
       onClose();
     } catch (err) {
-      console.error('Error creando reporte:', err);
+      console.error('❌ Error creando reporte:', err);
       error = err.message || 'Error al crear el reporte. Por favor, intenta de nuevo.';
     } finally {
       loading = false;

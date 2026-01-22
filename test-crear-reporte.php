@@ -12,13 +12,19 @@ pre { white-space: pre-wrap; word-wrap: break-word; }
 </style>";
 
 // Cargar CodeIgniter
+// El script está en public_html/, la API está en public_html/api/
 define('FCPATH', __DIR__ . '/api/public/');
-chdir(FCPATH);
 
-require FCPATH . '../app/Config/Paths.php';
+// No cambiar de directorio, solo definir rutas
+require __DIR__ . '/api/app/Config/Paths.php';
 $paths = new \Config\Paths();
 
-require FCPATH . '../vendor/autoload.php';
+// Ajustar rutas para que apunten correctamente
+$paths->systemDirectory = __DIR__ . '/api/vendor/codeigniter4/framework/system';
+$paths->appDirectory = __DIR__ . '/api/app';
+$paths->writableDirectory = __DIR__ . '/api/writable';
+
+require __DIR__ . '/api/vendor/autoload.php';
 require $paths->systemDirectory . '/Boot.php';
 
 // Boot CodeIgniter

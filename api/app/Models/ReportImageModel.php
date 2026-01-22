@@ -23,11 +23,11 @@ class ReportImageModel extends Model
     protected array $casts = [];
     protected array $castHandlers = [];
 
-    // Dates
-    protected $useTimestamps = true;
+    // Dates - Desactivar timestamps porque la tabla no tiene created_at/updated_at
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
-    protected $updatedField  = '';
+    protected $updatedField  = 'updated_at';
     protected $deletedField  = '';
 
     // Validation

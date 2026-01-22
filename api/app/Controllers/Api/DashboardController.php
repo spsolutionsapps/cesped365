@@ -34,19 +34,19 @@ class DashboardController extends ResourceController
         $totalReportes = $this->reportModel->countAllResults();
         
         // Último reporte
-        $ultimoReporte = $this->reportModel->orderBy('date', 'DESC')->first();
+        $ultimoReporte = $this->reportModel->orderBy('visit_date', 'DESC')->first();
         
         // Reportes de este mes
         $reportesEsteMes = $this->reportModel
-            ->where('MONTH(date)', date('m'))
-            ->where('YEAR(date)', date('Y'))
+            ->where('MONTH(visit_date)', date('m'))
+            ->where('YEAR(visit_date)', date('Y'))
             ->countAllResults();
         
         $data = [
             'success' => true,
             'data' => [
-                'estadoGeneral' => $ultimoReporte ? $ultimoReporte['estado_general'] : 'Sin datos',
-                'ultimaVisita' => $ultimoReporte ? $ultimoReporte['date'] : null,
+                'estadoGeneral' => $ultimoReporte ? $ultimoReporte['grass_health'] : 'Sin datos',
+                'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
                 'totalReportes' => $totalReportes,
                 'estadisticas' => [
                     'totalClientes' => $totalClientes,

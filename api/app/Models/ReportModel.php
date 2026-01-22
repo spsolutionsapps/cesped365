@@ -36,10 +36,10 @@ class ReportModel extends Model
     protected bool $updateOnlyChanged = true;
 
     protected array $casts = [
-        'pest_detected'       => 'boolean',
-        'fertilizer_applied'  => 'boolean',
-        'grass_height_cm'     => 'float',
-        'growth_cm'           => 'float',
+        'pest_detected'       => '?boolean',
+        'fertilizer_applied'  => '?boolean',
+        'grass_height_cm'     => '?float',
+        'growth_cm'           => '?float',
     ];
     protected array $castHandlers = [];
 

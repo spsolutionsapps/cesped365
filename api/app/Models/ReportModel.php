@@ -43,13 +43,12 @@ class ReportModel extends Model
     ];
     protected array $castHandlers = [];
 
-    // Dates
-    protected $useTimestamps = true;
+    // Dates - Desactivar timestamps automáticos porque la tabla los maneja con DEFAULT CURRENT_TIMESTAMP
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     
-    // NO convertir el campo 'date' automáticamente
     protected $dates = [];
 
     // Validation

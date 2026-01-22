@@ -130,22 +130,29 @@ class ReportesController extends ResourceController
         log_message('info', 'Jardín encontrado: ' . json_encode($garden));
         
         // Usar getVar() en lugar de getPost() para form-urlencoded
+        // Convertir valores vacíos a null para campos opcionales
+        $grassHeight = $this->request->getVar('grass_height_cm');
+        $growthCm = $this->request->getVar('growth_cm');
+        $nextVisit = $this->request->getVar('next_visit');
+        $pestDesc = $this->request->getVar('pest_description');
+        $fertType = $this->request->getVar('fertilizer_type');
+        
         $data = [
             'garden_id' => $this->request->getVar('garden_id'),
             'user_id' => $garden['user_id'],
             'visit_date' => $this->request->getVar('visit_date'),
             'status' => 'completado',
-            'grass_height_cm' => $this->request->getVar('grass_height_cm') ?: null,
+            'grass_height_cm' => ($grassHeight !== '' && $grassHeight !== null) ? $grassHeight : null,
             'grass_health' => $this->request->getVar('grass_health') ?: 'bueno',
             'watering_status' => $this->request->getVar('watering_status') ?: 'optimo',
             'pest_detected' => $this->request->getVar('pest_detected') ? 1 : 0,
-            'pest_description' => $this->request->getVar('pest_description') ?: null,
+            'pest_description' => ($pestDesc !== '' && $pestDesc !== null) ? $pestDesc : null,
             'work_done' => $this->request->getVar('work_done') ?: '',
             'recommendations' => $this->request->getVar('recommendations') ?: '',
-            'next_visit' => $this->request->getVar('next_visit') ?: null,
-            'growth_cm' => $this->request->getVar('growth_cm') ?: null,
+            'next_visit' => ($nextVisit !== '' && $nextVisit !== null && $nextVisit !== '0000-00-00') ? $nextVisit : null,
+            'growth_cm' => ($growthCm !== '' && $growthCm !== null) ? $growthCm : null,
             'fertilizer_applied' => $this->request->getVar('fertilizer_applied') ? 1 : 0,
-            'fertilizer_type' => $this->request->getVar('fertilizer_type') ?: null,
+            'fertilizer_type' => ($fertType !== '' && $fertType !== null) ? $fertType : null,
             'weather_conditions' => $this->request->getVar('weather_conditions') ?: '',
             'technician_notes' => $this->request->getVar('technician_notes') ?: ''
         ];

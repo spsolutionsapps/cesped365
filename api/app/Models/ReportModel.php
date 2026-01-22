@@ -14,32 +14,32 @@ class ReportModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'garden_id',
-        'date',
-        'estado_general',
-        'cesped_parejo',
-        'color_ok',
-        'manchas',
-        'zonas_desgastadas',
-        'malezas_visibles',
-        'crecimiento_cm',
-        'compactacion',
-        'humedad',
-        'plagas',
-        'observaciones',
-        'jardinero'
+        'user_id',
+        'visit_date',
+        'status',
+        'grass_height_cm',
+        'grass_health',
+        'watering_status',
+        'pest_detected',
+        'pest_description',
+        'work_done',
+        'recommendations',
+        'next_visit',
+        'growth_cm',
+        'fertilizer_applied',
+        'fertilizer_type',
+        'weather_conditions',
+        'technician_notes'
     ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
 
     protected array $casts = [
-        'cesped_parejo'       => 'boolean',
-        'color_ok'            => 'boolean',
-        'manchas'             => 'boolean',
-        'zonas_desgastadas'   => 'boolean',
-        'malezas_visibles'    => 'boolean',
-        'plagas'              => 'boolean',
-        'crecimiento_cm'      => 'float',
+        'pest_detected'       => 'boolean',
+        'fertilizer_applied'  => 'boolean',
+        'grass_height_cm'     => 'float',
+        'growth_cm'           => 'float',
     ];
     protected array $castHandlers = [];
 
@@ -55,9 +55,9 @@ class ReportModel extends Model
     // Validation
     protected $validationRules      = [
         'garden_id'      => 'required|is_natural_no_zero',
-        'date'           => 'required|valid_date',
-        'estado_general' => 'required|in_list[Bueno,Regular,Malo]',
-        'jardinero'      => 'required|min_length[3]|max_length[100]',
+        'user_id'        => 'required|is_natural_no_zero',
+        'visit_date'     => 'required|valid_date',
+        'grass_health'   => 'permit_empty|in_list[excelente,bueno,regular,malo]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
@@ -92,7 +92,7 @@ class ReportModel extends Model
     public function getByGarden($gardenId)
     {
         return $this->where('garden_id', $gardenId)
-                    ->orderBy('date', 'DESC')
+                    ->orderBy('visit_date', 'DESC')
                     ->findAll();
     }
 
@@ -101,7 +101,7 @@ class ReportModel extends Model
      */
     public function getLatest($limit = 10)
     {
-        return $this->orderBy('date', 'DESC')
+        return $this->orderBy('visit_date', 'DESC')
                     ->limit($limit)
                     ->findAll();
     }

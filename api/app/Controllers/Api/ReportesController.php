@@ -99,8 +99,12 @@ class ReportesController extends ResourceController
     
     public function create()
     {
-        // Log de datos recibidos
+        // Log COMPLETO de datos recibidos
+        log_message('info', '=== CREAR REPORTE ===');
+        log_message('info', 'Content-Type: ' . $this->request->getHeaderLine('Content-Type'));
         log_message('info', 'POST data: ' . json_encode($this->request->getPost()));
+        log_message('info', 'JSON data: ' . $this->request->getBody());
+        log_message('info', 'All input: ' . json_encode($this->request->getVar()));
         
         // Validar datos de entrada
         $rules = [

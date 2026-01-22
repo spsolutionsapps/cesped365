@@ -117,33 +117,40 @@ class ReportesController extends ResourceController
             return $this->fail($this->validator->getErrors(), 400);
         }
         
-        // Obtener user_id del garden
+        // Obtener user_id del garden usando getVar() que funciona con POST form-urlencoded
         $db = \Config\Database::connect();
-        $garden = $db->table('gardens')->where('id', $this->request->getPost('garden_id'))->get()->getRowArray();
+        $gardenId = $this->request->getVar('garden_id');
+        $garden = $db->table('gardens')->where('id', $gardenId)->get()->getRowArray();
         
         if (!$garden) {
+            log_message('error', 'Jardín no encontrado con ID: ' . $gardenId);
             return $this->fail('Jardín no encontrado', 404);
         }
         
+        log_message('info', 'Jardín encontrado: ' . json_encode($garden));
+        
+        // Usar getVar() en lugar de getPost() para form-urlencoded
         $data = [
-            'garden_id' => $this->request->getPost('garden_id'),
+            'garden_id' => $this->request->getVar('garden_id'),
             'user_id' => $garden['user_id'],
-            'visit_date' => $this->request->getPost('visit_date'),
+            'visit_date' => $this->request->getVar('visit_date'),
             'status' => 'completado',
-            'grass_height_cm' => $this->request->getPost('grass_height_cm') ?? null,
-            'grass_health' => $this->request->getPost('grass_health') ?? 'bueno',
-            'watering_status' => $this->request->getPost('watering_status') ?? 'optimo',
-            'pest_detected' => $this->request->getPost('pest_detected') ? 1 : 0,
-            'pest_description' => $this->request->getPost('pest_description') ?? null,
-            'work_done' => $this->request->getPost('work_done') ?? '',
-            'recommendations' => $this->request->getPost('recommendations') ?? '',
-            'next_visit' => $this->request->getPost('next_visit') ?? null,
-            'growth_cm' => $this->request->getPost('growth_cm') ?? null,
-            'fertilizer_applied' => $this->request->getPost('fertilizer_applied') ? 1 : 0,
-            'fertilizer_type' => $this->request->getPost('fertilizer_type') ?? null,
-            'weather_conditions' => $this->request->getPost('weather_conditions') ?? null,
-            'technician_notes' => $this->request->getPost('technician_notes') ?? ''
+            'grass_height_cm' => $this->request->getVar('grass_height_cm') ?: null,
+            'grass_health' => $this->request->getVar('grass_health') ?: 'bueno',
+            'watering_status' => $this->request->getVar('watering_status') ?: 'optimo',
+            'pest_detected' => $this->request->getVar('pest_detected') ? 1 : 0,
+            'pest_description' => $this->request->getVar('pest_description') ?: null,
+            'work_done' => $this->request->getVar('work_done') ?: '',
+            'recommendations' => $this->request->getVar('recommendations') ?: '',
+            'next_visit' => $this->request->getVar('next_visit') ?: null,
+            'growth_cm' => $this->request->getVar('growth_cm') ?: null,
+            'fertilizer_applied' => $this->request->getVar('fertilizer_applied') ? 1 : 0,
+            'fertilizer_type' => $this->request->getVar('fertilizer_type') ?: null,
+            'weather_conditions' => $this->request->getVar('weather_conditions') ?: '',
+            'technician_notes' => $this->request->getVar('technician_notes') ?: ''
         ];
+        
+        log_message('info', 'Datos preparados para insertar: ' . json_encode($data));
         
         // Insertar reporte
         $reportId = $this->reportModel->insert($data);

@@ -1,4 +1,4 @@
-CI_ENVIRONMENT=production
+CI_ENVIRONMENT=development
 
 app.baseURL=https://cesped365.com/api/
 app.indexPage=
@@ -28,7 +28,7 @@ session.cookieSameSite=Lax
 session.cookieDomain=.cesped365.com
 session.cookiePath=/
 
-logger.threshold=4
+logger.threshold=9
 
 cors.allowedOrigins=https://cesped365.com
 cors.allowedMethods=GET,POST,PUT,DELETE,OPTIONS

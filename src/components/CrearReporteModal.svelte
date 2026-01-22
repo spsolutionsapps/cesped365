@@ -23,19 +23,20 @@
   // Datos del formulario
   let formData = {
     garden_id: '',
-    date: getFechaActual(),
-    estado_general: 'Bueno',
-    jardinero: '',
-    cesped_parejo: true,
-    color_ok: true,
-    manchas: false,
-    zonas_desgastadas: false,
-    malezas_visibles: false,
-    crecimiento_cm: '',
-    compactacion: 'Normal',
-    humedad: 'Adecuada',
-    plagas: false,
-    observaciones: ''
+    visit_date: getFechaActual(),
+    grass_health: 'bueno',
+    technician_notes: '',
+    growth_cm: '',
+    pest_detected: false,
+    pest_description: '',
+    work_done: '',
+    recommendations: '',
+    grass_height_cm: '',
+    watering_status: 'optimo',
+    fertilizer_applied: false,
+    fertilizer_type: '',
+    weather_conditions: '',
+    next_visit: ''
   };
 
   // Imágenes
@@ -90,10 +91,15 @@
       // Preparar datos para enviar (convertir strings vacíos a null)
       const dataToSend = {
         ...formData,
-        crecimiento_cm: formData.crecimiento_cm === '' ? null : formData.crecimiento_cm
+        growth_cm: formData.growth_cm === '' ? null : formData.growth_cm,
+        grass_height_cm: formData.grass_height_cm === '' ? null : formData.grass_height_cm,
+        pest_description: formData.pest_description === '' ? null : formData.pest_description,
+        fertilizer_type: formData.fertilizer_type === '' ? null : formData.fertilizer_type,
+        next_visit: formData.next_visit === '' ? null : formData.next_visit
       };
       
-      console.log('📅 Fecha que se enviará:', dataToSend.date);
+      console.log('📅 Fecha que se enviará:', dataToSend.visit_date);
+      console.log('📦 Datos a enviar:', dataToSend);
 
       // 1. Crear el reporte
       const reporteResponse = await reportesAPI.create(dataToSend);
@@ -126,19 +132,20 @@
   function resetForm() {
     formData = {
       garden_id: jardines[0]?.id || '',
-      date: getFechaActual(),
-      estado_general: 'Bueno',
-      jardinero: '',
-      cesped_parejo: true,
-      color_ok: true,
-      manchas: false,
-      zonas_desgastadas: false,
-      malezas_visibles: false,
-      crecimiento_cm: '',
-      compactacion: 'Normal',
-      humedad: 'Adecuada',
-      plagas: false,
-      observaciones: ''
+      visit_date: getFechaActual(),
+      grass_health: 'bueno',
+      technician_notes: '',
+      growth_cm: '',
+      pest_detected: false,
+      pest_description: '',
+      work_done: '',
+      recommendations: '',
+      grass_height_cm: '',
+      watering_status: 'optimo',
+      fertilizer_applied: false,
+      fertilizer_type: '',
+      weather_conditions: '',
+      next_visit: ''
     };
     selectedImages = [];
     imagePreviews = [];
@@ -188,139 +195,153 @@
         <input
           id="date"
           type="date"
-          bind:value={formData.date}
+          bind:value={formData.visit_date}
           required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
       </div>
     </div>
 
-    <!-- Estado General y Jardinero -->
+    <!-- Estado del Césped y Técnico -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
-          Estado General *
+        <label for="grass_health" class="block text-sm font-medium text-gray-700 mb-2">
+          Estado del Césped *
         </label>
         <select
-          id="estado"
-          bind:value={formData.estado_general}
+          id="grass_health"
+          bind:value={formData.grass_health}
           required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         >
-          <option value="Bueno">Bueno</option>
-          <option value="Regular">Regular</option>
-          <option value="Malo">Malo</option>
+          <option value="excelente">Excelente</option>
+          <option value="bueno">Bueno</option>
+          <option value="regular">Regular</option>
+          <option value="malo">Malo</option>
         </select>
       </div>
 
       <div>
-        <label for="jardinero" class="block text-sm font-medium text-gray-700 mb-2">
-          Jardinero *
+        <label for="watering_status" class="block text-sm font-medium text-gray-700 mb-2">
+          Estado de Riego
         </label>
-        <input
-          id="jardinero"
-          type="text"
-          bind:value={formData.jardinero}
-          required
-          placeholder="Nombre del jardinero"
+        <select
+          id="watering_status"
+          bind:value={formData.watering_status}
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        />
-      </div>
-    </div>
-
-    <!-- Checkboxes de Estado del Césped -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-3">
-        Estado del Césped
-      </label>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" bind:checked={formData.cesped_parejo} class="rounded text-primary-600 focus:ring-primary-500" />
-          <span class="text-sm text-gray-700">Césped Parejo</span>
-        </label>
-        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" bind:checked={formData.color_ok} class="rounded text-primary-600 focus:ring-primary-500" />
-          <span class="text-sm text-gray-700">Color OK</span>
-        </label>
-        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" bind:checked={formData.manchas} class="rounded text-primary-600 focus:ring-primary-500" />
-          <span class="text-sm text-gray-700">Manchas</span>
-        </label>
-        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" bind:checked={formData.zonas_desgastadas} class="rounded text-primary-600 focus:ring-primary-500" />
-          <span class="text-sm text-gray-700">Zonas Desgastadas</span>
-        </label>
-        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" bind:checked={formData.malezas_visibles} class="rounded text-primary-600 focus:ring-primary-500" />
-          <span class="text-sm text-gray-700">Malezas Visibles</span>
-        </label>
-        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" bind:checked={formData.plagas} class="rounded text-primary-600 focus:ring-primary-500" />
-          <span class="text-sm text-gray-700">Plagas</span>
-        </label>
+        >
+          <option value="optimo">Óptimo</option>
+          <option value="insuficiente">Insuficiente</option>
+          <option value="excesivo">Excesivo</option>
+        </select>
       </div>
     </div>
 
     <!-- Mediciones -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label for="crecimiento" class="block text-sm font-medium text-gray-700 mb-2">
-          Crecimiento (cm)
+        <label for="grass_height_cm" class="block text-sm font-medium text-gray-700 mb-2">
+          Altura del Césped (cm)
         </label>
         <input
-          id="crecimiento"
+          id="grass_height_cm"
           type="number"
           step="0.1"
-          bind:value={formData.crecimiento_cm}
-          placeholder="ej: 2.5"
+          bind:value={formData.grass_height_cm}
+          placeholder="ej: 5.5"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
       </div>
 
       <div>
-        <label for="compactacion" class="block text-sm font-medium text-gray-700 mb-2">
-          Compactación
+        <label for="growth_cm" class="block text-sm font-medium text-gray-700 mb-2">
+          Crecimiento desde última visita (cm)
         </label>
-        <select
-          id="compactacion"
-          bind:value={formData.compactacion}
+        <input
+          id="growth_cm"
+          type="number"
+          step="0.1"
+          bind:value={formData.growth_cm}
+          placeholder="ej: 2.5"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        >
-          <option value="Baja">Baja</option>
-          <option value="Normal">Normal</option>
-          <option value="Alta">Alta</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="humedad" class="block text-sm font-medium text-gray-700 mb-2">
-          Humedad
-        </label>
-        <select
-          id="humedad"
-          bind:value={formData.humedad}
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        >
-          <option value="Seca">Seca</option>
-          <option value="Adecuada">Adecuada</option>
-          <option value="Húmeda">Húmeda</option>
-          <option value="Encharcada">Encharcada</option>
-        </select>
+        />
       </div>
     </div>
 
-    <!-- Observaciones -->
+    <!-- Plagas y Fertilizante -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="flex items-center space-x-2 cursor-pointer">
+          <input type="checkbox" bind:checked={formData.pest_detected} class="rounded text-primary-600 focus:ring-primary-500" />
+          <span class="text-sm font-medium text-gray-700">Plagas Detectadas</span>
+        </label>
+        {#if formData.pest_detected}
+          <input
+            type="text"
+            bind:value={formData.pest_description}
+            placeholder="Descripción de la plaga"
+            class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        {/if}
+      </div>
+
+      <div>
+        <label class="flex items-center space-x-2 cursor-pointer">
+          <input type="checkbox" bind:checked={formData.fertilizer_applied} class="rounded text-primary-600 focus:ring-primary-500" />
+          <span class="text-sm font-medium text-gray-700">Fertilizante Aplicado</span>
+        </label>
+        {#if formData.fertilizer_applied}
+          <input
+            type="text"
+            bind:value={formData.fertilizer_type}
+            placeholder="Tipo de fertilizante"
+            class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        {/if}
+      </div>
+    </div>
+
+    <!-- Trabajo Realizado -->
     <div>
-      <label for="observaciones" class="block text-sm font-medium text-gray-700 mb-2">
-        Observaciones
+      <label for="work_done" class="block text-sm font-medium text-gray-700 mb-2">
+        Trabajo Realizado
       </label>
       <textarea
-        id="observaciones"
-        bind:value={formData.observaciones}
-        rows="3"
-        placeholder="Notas adicionales sobre el estado del jardín..."
+        id="work_done"
+        bind:value={formData.work_done}
+        rows="2"
+        placeholder="Corte, fertilización, control de plagas, etc."
         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
       ></textarea>
+    </div>
+
+    <!-- Recomendaciones y Notas del Técnico -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="recommendations" class="block text-sm font-medium text-gray-700 mb-2">
+          Recomendaciones
+        </label>
+        <textarea
+          id="recommendations"
+          bind:value={formData.recommendations}
+          rows="3"
+          placeholder="Recomendaciones para el próximo mantenimiento..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+        ></textarea>
+      </div>
+
+      <div>
+        <label for="technician_notes" class="block text-sm font-medium text-gray-700 mb-2">
+          Notas del Técnico
+        </label>
+        <textarea
+          id="technician_notes"
+          bind:value={formData.technician_notes}
+          rows="3"
+          placeholder="Observaciones adicionales..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+        ></textarea>
+      </div>
     </div>
 
     <!-- Upload de Imágenes -->

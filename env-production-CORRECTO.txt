@@ -1,0 +1,32 @@
+CI_ENVIRONMENT = 'production'
+
+app.baseURL = 'https://cesped365.com/api/'
+app.indexPage = ''
+app.defaultTimezone = 'America/Argentina/Buenos_Aires'
+app.forceGlobalSecureRequests = 'true'
+
+database.default.hostname = 'localhost'
+database.default.database = 'cespvcyi_cesped365_db'
+database.default.username = 'cespvcyi_cesped365_user'
+database.default.password = 'Sebaspado123'
+database.default.DBDriver = 'MySQLi'
+database.default.port = '3306'
+database.default.charset = 'utf8mb4'
+database.default.DBCollat = 'utf8mb4_general_ci'
+
+encryption.key = 'hex2bin:c28bc69227541672817df949c70fd2e06123f86051c4cf104fef94c9de001556'
+
+session.driver = 'CodeIgniter\Session\Handlers\FileHandler'
+session.cookieName = 'ci_session'
+session.expiration = '7200'
+session.savePath = 'writable/session'
+session.matchIP = 'false'
+session.timeToUpdate = '300'
+session.regenerateDestroy = 'false'
+
+logger.threshold = '4'
+
+cors.allowedOrigins = 'https://cesped365.com'
+cors.allowedMethods = 'GET,POST,PUT,DELETE,OPTIONS'
+cors.allowedHeaders = 'Content-Type,Authorization,X-Requested-With'
+cors.allowCredentials = 'true'

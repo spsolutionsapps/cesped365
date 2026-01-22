@@ -50,12 +50,20 @@ class ReportesController extends ResourceController
                 'observaciones' => $report['recommendations'] ?? '',
                 'garden_id' => $report['garden_id'],
                 'imagenes' => $imageUrls,
-                // Campos adicionales para compatibilidad
-                'cespedParejo' => true,
-                'colorOk' => true,
+                // Campos de evaluación técnica con datos reales
+                'grass_height_cm' => (float)($report['grass_height_cm'] ?? 0),
+                'watering_status' => $report['watering_status'] ?? 'optimo',
+                'pest_description' => $report['pest_description'] ?? '',
+                'work_done' => $report['work_done'] ?? '',
+                'fertilizer_applied' => (bool)($report['fertilizer_applied'] ?? false),
+                'fertilizer_type' => $report['fertilizer_type'] ?? '',
+                'weather_conditions' => $report['weather_conditions'] ?? '',
+                // Campos para compatibilidad con UI vieja (basados en datos reales)
+                'cespedParejo' => ($report['grass_health'] === 'excelente' || $report['grass_health'] === 'bueno'),
+                'colorOk' => ($report['grass_health'] === 'excelente' || $report['grass_health'] === 'bueno'),
                 'manchas' => false,
                 'zonasDesgastadas' => false,
-                'malezasVisibles' => false
+                'malezasVisibles' => (bool)($report['pest_detected'] ?? false)
             ];
         }
         
@@ -97,12 +105,20 @@ class ReportesController extends ResourceController
             'observaciones' => $report['recommendations'] ?? '',
             'garden_id' => $report['garden_id'],
             'imagenes' => $imageUrls,
-            // Campos adicionales para compatibilidad
-            'cespedParejo' => true,
-            'colorOk' => true,
+            // Campos de evaluación técnica con datos reales
+            'grass_height_cm' => (float)($report['grass_height_cm'] ?? 0),
+            'watering_status' => $report['watering_status'] ?? 'optimo',
+            'pest_description' => $report['pest_description'] ?? '',
+            'work_done' => $report['work_done'] ?? '',
+            'fertilizer_applied' => (bool)($report['fertilizer_applied'] ?? false),
+            'fertilizer_type' => $report['fertilizer_type'] ?? '',
+            'weather_conditions' => $report['weather_conditions'] ?? '',
+            // Campos para compatibilidad con UI vieja (basados en datos reales)
+            'cespedParejo' => ($report['grass_health'] === 'excelente' || $report['grass_health'] === 'bueno'),
+            'colorOk' => ($report['grass_health'] === 'excelente' || $report['grass_health'] === 'bueno'),
             'manchas' => false,
             'zonasDesgastadas' => false,
-            'malezasVisibles' => false
+            'malezasVisibles' => (bool)($report['pest_detected'] ?? false)
         ];
         
         return $this->respond([

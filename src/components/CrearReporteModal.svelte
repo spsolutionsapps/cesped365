@@ -11,12 +11,18 @@
   let error = null;
   let jardines = [];
   
-  // Obtener fecha actual SIN conversión UTC
+  // Obtener fecha actual en timezone de Argentina
   function getFechaActual() {
+    // Crear fecha en timezone de Buenos Aires
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    const offset = -3; // UTC-3 (Argentina)
+    const localTime = now.getTime();
+    const localOffset = now.getTimezoneOffset() * 60000;
+    const argTime = new Date(localTime + localOffset + (offset * 3600000));
+    
+    const year = argTime.getFullYear();
+    const month = String(argTime.getMonth() + 1).padStart(2, '0');
+    const day = String(argTime.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 

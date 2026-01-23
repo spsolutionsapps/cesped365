@@ -224,8 +224,8 @@
       </div>
     </div>
 
-    <!-- Jardinero y Estado del Césped -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Jardinero, Estado del Césped y Estado de Riego -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
         <label for="jardinero" class="block text-sm font-medium text-gray-700 mb-2">
           Nombre del Jardinero *
@@ -256,22 +256,21 @@
           <option value="malo">Malo</option>
         </select>
       </div>
-    </div>
-    
-    <!-- Estado de Riego -->
-    <div>
-      <label for="watering_status" class="block text-sm font-medium text-gray-700 mb-2">
-        Estado de Riego
-      </label>
-      <select
-        id="watering_status"
-        bind:value={formData.watering_status}
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      >
-        <option value="optimo">Óptimo</option>
-        <option value="insuficiente">Insuficiente</option>
-        <option value="excesivo">Excesivo</option>
-      </select>
+      
+      <div>
+        <label for="watering_status" class="block text-sm font-medium text-gray-700 mb-2">
+          Estado de Riego
+        </label>
+        <select
+          id="watering_status"
+          bind:value={formData.watering_status}
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="optimo">Óptimo</option>
+          <option value="insuficiente">Insuficiente</option>
+          <option value="excesivo">Excesivo</option>
+        </select>
+      </div>
     </div>
 
     <!-- Mediciones -->

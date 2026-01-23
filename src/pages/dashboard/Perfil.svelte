@@ -51,29 +51,29 @@
     <Card title="Información Personal">
       <div class="space-y-4">
         <div>
-          <label class="text-sm font-medium text-gray-600">Nombre completo</label>
+          <span class="text-sm font-medium text-gray-600">Nombre completo</span>
           <p class="mt-1 text-gray-900">{currentUser?.name || 'N/A'}</p>
         </div>
-        
+
         <div>
-          <label class="text-sm font-medium text-gray-600">Correo electrónico</label>
+          <span class="text-sm font-medium text-gray-600">Correo electrónico</span>
           <p class="mt-1 text-gray-900">{currentUser?.email || 'N/A'}</p>
         </div>
         
         {#if userRole === 'cliente'}
           <div>
-            <label class="text-sm font-medium text-gray-600">Teléfono</label>
+            <span class="text-sm font-medium text-gray-600">Teléfono</span>
             <p class="mt-1 text-gray-900">{currentUser?.phone || 'N/A'}</p>
           </div>
-          
+
           <div>
-            <label class="text-sm font-medium text-gray-600">Dirección</label>
+            <span class="text-sm font-medium text-gray-600">Dirección</span>
             <p class="mt-1 text-gray-900">{currentUser?.address || 'N/A'}</p>
           </div>
         {/if}
         
         <div>
-          <label class="text-sm font-medium text-gray-600">Rol</label>
+          <span class="text-sm font-medium text-gray-600">Rol</span>
           <div class="mt-1">
             {#if userRole === 'admin'}
               <Badge type="info">Administrador</Badge>

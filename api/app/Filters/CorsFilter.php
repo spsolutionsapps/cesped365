@@ -10,41 +10,26 @@ class CorsFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Obtener orígenes permitidos desde .env (producción) o usar defaults (desarrollo)
-        $envOrigins = env('cors.allowedOrigins', '');
-        
-        if (!empty($envOrigins)) {
-            // En producción, usar los orígenes del .env
-            $allowedOrigins = array_map('trim', explode(',', $envOrigins));
-        } else {
-            // En desarrollo, permitir orígenes locales
-            $allowedOrigins = [
-                'http://localhost:3000',
-                'http://localhost:3001',
-                'http://localhost:5173', // Vite default
-                'http://localhost:5174',
-                'http://127.0.0.1:3000',
-                'http://127.0.0.1:5173'
-            ];
-        }
-        
         $origin = $request->getHeaderLine('Origin');
         
         // Manejar preflight OPTIONS request
         if (strtolower($request->getMethod()) === 'options') {
             $response = service('response');
             
-            // En desarrollo, si no hay origen configurado en .env, permitir cualquier origen localhost
-            if (empty($envOrigins) && !empty($origin)) {
-                // Permitir cualquier origen localhost en desarrollo
+            // En desarrollo, permitir cualquier origen localhost
+            if (ENVIRONMENT === 'development' && !empty($origin)) {
                 if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/', $origin)) {
                     $response->setHeader('Access-Control-Allow-Origin', $origin);
-                } elseif (in_array($origin, $allowedOrigins)) {
-                    $response->setHeader('Access-Control-Allow-Origin', $origin);
                 }
-            } elseif (in_array($origin, $allowedOrigins)) {
-                // En producción, solo permitir orígenes de la lista
-                $response->setHeader('Access-Control-Allow-Origin', $origin);
+            } else {
+                // En producción, usar orígenes del .env
+                $envOrigins = env('cors.allowedOrigins', '');
+                if (!empty($envOrigins)) {
+                    $allowedOrigins = array_map('trim', explode(',', $envOrigins));
+                    if (in_array($origin, $allowedOrigins)) {
+                        $response->setHeader('Access-Control-Allow-Origin', $origin);
+                    }
+                }
             }
             
             $response->setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -62,37 +47,22 @@ class CorsFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Obtener orígenes permitidos desde .env (producción) o usar defaults (desarrollo)
-        $envOrigins = env('cors.allowedOrigins', '');
-        
-        if (!empty($envOrigins)) {
-            // En producción, usar los orígenes del .env
-            $allowedOrigins = array_map('trim', explode(',', $envOrigins));
-        } else {
-            // En desarrollo, permitir orígenes locales
-            $allowedOrigins = [
-                'http://localhost:3000',
-                'http://localhost:3001',
-                'http://localhost:5173',
-                'http://localhost:5174',
-                'http://127.0.0.1:3000',
-                'http://127.0.0.1:5173'
-            ];
-        }
-        
         $origin = $request->getHeaderLine('Origin');
         
-        // En desarrollo, si no hay origen configurado en .env, permitir cualquier origen localhost
-        if (empty($envOrigins) && !empty($origin)) {
-            // Permitir cualquier origen localhost en desarrollo
+        // En desarrollo, permitir cualquier origen localhost
+        if (ENVIRONMENT === 'development' && !empty($origin)) {
             if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/', $origin)) {
                 $response->setHeader('Access-Control-Allow-Origin', $origin);
-            } elseif (in_array($origin, $allowedOrigins)) {
-                $response->setHeader('Access-Control-Allow-Origin', $origin);
             }
-        } elseif (in_array($origin, $allowedOrigins)) {
-            // En producción, solo permitir orígenes de la lista
-            $response->setHeader('Access-Control-Allow-Origin', $origin);
+        } else {
+            // En producción, usar orígenes del .env
+            $envOrigins = env('cors.allowedOrigins', '');
+            if (!empty($envOrigins)) {
+                $allowedOrigins = array_map('trim', explode(',', $envOrigins));
+                if (in_array($origin, $allowedOrigins)) {
+                    $response->setHeader('Access-Control-Allow-Origin', $origin);
+                }
+            }
         }
         
         $response->setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

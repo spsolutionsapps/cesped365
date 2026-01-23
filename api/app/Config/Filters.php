@@ -75,11 +75,13 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+            'corscustom',
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
         ],
         'after' => [
+            'corscustom',
             // 'honeypot',
             // 'secureheaders',
         ],
@@ -109,10 +111,5 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [
-        'corscustom' => [
-            'before' => ['*'],
-            'after' => ['*']
-        ]
-    ];
+    public array $filters = [];
 }

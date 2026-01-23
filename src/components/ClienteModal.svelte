@@ -117,48 +117,51 @@
       </div>
     {/if}
 
-    <!-- Nombre -->
-    <div>
-      <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-        Nombre Completo *
-      </label>
-      <input
-        id="name"
-        type="text"
-        bind:value={formData.name}
-        required
-        placeholder="Juan Pérez"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      />
-    </div>
+    <!-- Nombre, Email y Teléfono en la misma línea en desktop -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Nombre -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+          Nombre Completo *
+        </label>
+        <input
+          id="name"
+          type="text"
+          bind:value={formData.name}
+          required
+          placeholder="Juan Pérez"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        />
+      </div>
 
-    <!-- Email -->
-    <div>
-      <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-        Email *
-      </label>
-      <input
-        id="email"
-        type="email"
-        bind:value={formData.email}
-        required
-        placeholder="juan@ejemplo.com"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      />
-    </div>
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+          Email *
+        </label>
+        <input
+          id="email"
+          type="email"
+          bind:value={formData.email}
+          required
+          placeholder="juan@ejemplo.com"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        />
+      </div>
 
-    <!-- Teléfono -->
-    <div>
-      <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-        Teléfono
-      </label>
-      <input
-        id="phone"
-        type="tel"
-        bind:value={formData.phone}
-        placeholder="+54 11 1234-5678"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      />
+      <!-- Teléfono -->
+      <div>
+        <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+          Teléfono
+        </label>
+        <input
+          id="phone"
+          type="tel"
+          bind:value={formData.phone}
+          placeholder="+54 11 1234-5678"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        />
+      </div>
     </div>
 
     <!-- Dirección -->

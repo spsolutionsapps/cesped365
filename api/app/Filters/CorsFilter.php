@@ -34,7 +34,16 @@ class CorsFilter implements FilterInterface
         if (strtolower($request->getMethod()) === 'options') {
             $response = service('response');
             
-            if (in_array($origin, $allowedOrigins)) {
+            // En desarrollo, si no hay origen configurado en .env, permitir cualquier origen localhost
+            if (empty($envOrigins) && !empty($origin)) {
+                // Permitir cualquier origen localhost en desarrollo
+                if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/', $origin)) {
+                    $response->setHeader('Access-Control-Allow-Origin', $origin);
+                } elseif (in_array($origin, $allowedOrigins)) {
+                    $response->setHeader('Access-Control-Allow-Origin', $origin);
+                }
+            } elseif (in_array($origin, $allowedOrigins)) {
+                // En producción, solo permitir orígenes de la lista
                 $response->setHeader('Access-Control-Allow-Origin', $origin);
             }
             
@@ -73,7 +82,16 @@ class CorsFilter implements FilterInterface
         
         $origin = $request->getHeaderLine('Origin');
         
-        if (in_array($origin, $allowedOrigins)) {
+        // En desarrollo, si no hay origen configurado en .env, permitir cualquier origen localhost
+        if (empty($envOrigins) && !empty($origin)) {
+            // Permitir cualquier origen localhost en desarrollo
+            if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/', $origin)) {
+                $response->setHeader('Access-Control-Allow-Origin', $origin);
+            } elseif (in_array($origin, $allowedOrigins)) {
+                $response->setHeader('Access-Control-Allow-Origin', $origin);
+            }
+        } elseif (in_array($origin, $allowedOrigins)) {
+            // En producción, solo permitir orígenes de la lista
             $response->setHeader('Access-Control-Allow-Origin', $origin);
         }
         

@@ -279,7 +279,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
     <!-- Background Image with Overlay -->
     <div class="absolute inset-0 z-0">
       <img 
-        src="/hero.webp" 
+        src="/hero.jpg" 
         alt="Beautiful garden" 
         class="w-full h-full object-cover"
       />

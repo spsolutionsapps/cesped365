@@ -8,6 +8,11 @@ class CreateUserSubscriptionsTable extends Migration
 {
     public function up()
     {
+        // Verificar si la tabla ya existe
+        if ($this->db->tableExists('user_subscriptions')) {
+            return; // La tabla ya existe, no hacer nada
+        }
+        
         $this->forge->addField([
             'id' => [
                 'type' => 'INT',

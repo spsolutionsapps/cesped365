@@ -81,6 +81,68 @@ export const authAPI = {
   // GET /api/me
   getCurrentUser: async () => {
     return await request('/me');
+  },
+  
+  // PUT /api/me
+  updateProfile: async (profileData) => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+    const response = await fetch(`${API_BASE_URL}/me`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(profileData)
+    });
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      throw new Error(`El servidor no devolvió JSON. Status: ${response.status}. Response: ${text.substring(0, 100)}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!response.ok || !data.success) {
+      const error = new Error(data.message || `Error en la petición (${response.status})`);
+      if (data.errors) {
+        error.errors = data.errors;
+      }
+      throw error;
+    }
+    
+    return data;
+  },
+  
+  // PUT /api/me/password
+  updatePassword: async (passwordData) => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+    const response = await fetch(`${API_BASE_URL}/me/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(passwordData)
+    });
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      throw new Error(`El servidor no devolvió JSON. Status: ${response.status}. Response: ${text.substring(0, 100)}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!response.ok || !data.success) {
+      const error = new Error(data.message || `Error en la petición (${response.status})`);
+      if (data.errors) {
+        error.errors = data.errors;
+      }
+      throw error;
+    }
+    
+    return data;
   }
 };
 
@@ -193,5 +255,83 @@ export const jardinesAPI = {
   // GET /api/jardines
   getAll: async () => {
     return await request('/jardines');
+  }
+};
+
+// Visitas programadas endpoints
+export const scheduledVisitsAPI = {
+  // GET /api/scheduled-visits
+  getAll: async () => {
+    return await request('/scheduled-visits');
+  },
+  
+  // GET /api/scheduled-visits/:id
+  getById: async (id) => {
+    return await request(`/scheduled-visits/${id}`);
+  },
+  
+  // POST /api/scheduled-visits
+  create: async (visitData) => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+    const response = await fetch(`${API_BASE_URL}/scheduled-visits`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(visitData)
+    });
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      throw new Error(`El servidor no devolvió JSON. Status: ${response.status}. Response: ${text.substring(0, 100)}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!response.ok || !data.success) {
+      const error = new Error(data.message || `Error en la petición (${response.status})`);
+      if (data.errors) {
+        error.errors = data.errors;
+      }
+      throw error;
+    }
+    
+    return data;
+  },
+  
+  // PUT /api/scheduled-visits/:id
+  update: async (id, visitData) => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+    const response = await fetch(`${API_BASE_URL}/scheduled-visits/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(visitData)
+    });
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      throw new Error(`El servidor no devolvió JSON. Status: ${response.status}. Response: ${text.substring(0, 100)}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || `Error en la petición (${response.status})`);
+    }
+    
+    return data;
+  },
+  
+  // DELETE /api/scheduled-visits/:id
+  delete: async (id) => {
+    return await request(`/scheduled-visits/${id}`, {
+      method: 'DELETE'
+    });
   }
 };

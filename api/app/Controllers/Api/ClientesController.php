@@ -63,6 +63,7 @@ class ClientesController extends ResourceController
                 'direccion' => $cliente['address'] ?? 'Sin dirección',
                 'plan' => $cliente['plan'] ?? 'Urbano',
                 'estado' => $cliente['estado'] ?? 'Pendiente',
+                'referidoPor' => $cliente['referido_por'] ?? null,
                 'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
                 'proximaVisita' => null // Por implementar
             ];
@@ -103,6 +104,7 @@ class ClientesController extends ResourceController
             'direccion' => $cliente['address'] ?? 'Sin dirección',
             'plan' => $cliente['plan'] ?? 'Urbano',
             'estado' => $cliente['estado'] ?? 'Pendiente',
+            'referidoPor' => $cliente['referido_por'] ?? null,
             'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
             'proximaVisita' => null
         ];
@@ -115,29 +117,72 @@ class ClientesController extends ResourceController
     
     public function create()
     {
-        // Validar datos
+        // Obtener datos del request (soporta JSON y form-data)
+        $contentType = $this->request->getHeaderLine('Content-Type');
+        $isJson = strpos($contentType, 'application/json') !== false;
+        
+        if ($isJson) {
+            $input = $this->request->getJSON(true);
+            // Convertir null a string vacío para campos opcionales
+            if ($input === null) {
+                $input = [];
+            }
+        } else {
+            $input = $this->request->getVar();
+        }
+        
+        // Log para debugging
+        log_message('info', 'Registro - Content-Type: ' . $contentType);
+        log_message('info', 'Registro - Input recibido: ' . json_encode($input));
+        
+        // Validar datos directamente
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]',
             'email' => 'required|valid_email|is_unique[users.email]',
             'password' => 'required|min_length[6]',
             'phone' => 'permit_empty|max_length[20]',
-            'address' => 'permit_empty|max_length[255]'
+            'address' => 'permit_empty|max_length[255]',
+            'referidoPor' => 'permit_empty|max_length[255]'
         ];
         
-        if (!$this->validate($rules)) {
-            return $this->fail($this->validator->getErrors(), 400);
+        // Para JSON, necesitamos validar manualmente
+        if ($isJson) {
+            $validator = \Config\Services::validation();
+            $validator->setRules($rules);
+            
+            if (!$validator->run($input)) {
+                $errors = $validator->getErrors();
+                log_message('error', 'Errores de validación: ' . json_encode($errors));
+                return $this->respond([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $errors
+                ], 400);
+            }
+        } else {
+            // Para form-data, usar el método normal
+            if (!$this->validate($rules)) {
+                $errors = $this->validator->getErrors();
+                log_message('error', 'Errores de validación: ' . json_encode($errors));
+                return $this->respond([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $errors
+                ], 400);
+            }
         }
         
         // Crear usuario (cliente)
         $userData = [
-            'name' => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
-            'password' => $this->request->getPost('password'), // El modelo lo hasheará automáticamente
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'password' => $input['password'], // El modelo lo hasheará automáticamente
             'role' => 'cliente',
-            'phone' => $this->request->getPost('phone'),
-            'address' => $this->request->getPost('address'),
-            'plan' => $this->request->getPost('plan') ?? 'Urbano',
-            'estado' => 'Pendiente' // Siempre pendiente hasta que se active con MercadoPago
+            'phone' => !empty($input['phone']) ? $input['phone'] : null,
+            'address' => !empty($input['address']) ? $input['address'] : null,
+            'plan' => $input['plan'] ?? 'Urbano',
+            'estado' => 'Pendiente', // Siempre pendiente hasta que se active con MercadoPago
+            'referido_por' => !empty($input['referidoPor']) ? $input['referidoPor'] : null
         ];
         
         $userId = $this->userModel->insert($userData);
@@ -147,11 +192,12 @@ class ClientesController extends ResourceController
         }
         
         // Si se proporciona dirección, crear jardín
-        if ($this->request->getPost('address')) {
+        $address = !empty($input['address']) ? $input['address'] : null;
+        if ($address) {
             $gardenData = [
                 'user_id' => $userId,
-                'address' => $this->request->getPost('address'),
-                'notes' => $this->request->getPost('garden_notes') ?? ''
+                'address' => $address,
+                'notes' => $input['garden_notes'] ?? ''
             ];
             
             $this->gardenModel->insert($gardenData);

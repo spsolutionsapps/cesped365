@@ -16,11 +16,14 @@ $routes->group('api', ['filter' => 'corscustom'], function($routes) {
     
     // Rutas públicas (sin autenticación)
     $routes->post('login', 'Api\AuthController::login');
+    $routes->post('registro', 'Api\ClientesController::create'); // Registro público
     
     // Rutas protegidas (requieren autenticación)
     $routes->group('', ['filter' => 'auth'], function($routes) {
         // Auth
         $routes->get('me', 'Api\AuthController::me');
+        $routes->put('me', 'Api\AuthController::updateProfile');
+        $routes->put('me/password', 'Api\AuthController::updatePassword');
         $routes->post('logout', 'Api\AuthController::logout');
         
         // Dashboard (accesible para admin y cliente)
@@ -35,6 +38,10 @@ $routes->group('api', ['filter' => 'corscustom'], function($routes) {
         
         // Jardines (accesible para admin y cliente)
         $routes->get('jardines', 'Api\JardinesController::index');
+        
+        // Visitas programadas (accesible para admin y cliente)
+        $routes->get('scheduled-visits', 'Api\ScheduledVisitsController::index');
+        $routes->get('scheduled-visits/(:num)', 'Api\ScheduledVisitsController::show/$1');
         
         // Planes de suscripción (público para clientes)
         $routes->get('subscriptions/plans', 'Api\SubscriptionsController::plans');
@@ -55,6 +62,11 @@ $routes->group('api', ['filter' => 'corscustom'], function($routes) {
             $routes->post('reportes', 'Api\ReportesController::create');
             $routes->post('reportes/(:num)/imagen', 'Api\ReportesController::uploadImage/$1');
             $routes->delete('reportes/(:num)', 'Api\ReportesController::delete/$1');
+            
+            // Visitas programadas - CRUD completo (solo admin)
+            $routes->post('scheduled-visits', 'Api\ScheduledVisitsController::create');
+            $routes->put('scheduled-visits/(:num)', 'Api\ScheduledVisitsController::update/$1');
+            $routes->delete('scheduled-visits/(:num)', 'Api\ScheduledVisitsController::delete/$1');
             
             // Suscripciones - Gestión completa
             $routes->get('subscriptions', 'Api\SubscriptionsController::index');

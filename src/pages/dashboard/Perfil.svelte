@@ -1,14 +1,29 @@
 <script>
   import { onMount } from 'svelte';
   import { auth } from '../../stores/auth';
-  import { suscripcionesAPI } from '../../services/api';
+  import { suscripcionesAPI, authAPI } from '../../services/api';
   import Card from '../../components/Card.svelte';
   import Badge from '../../components/Badge.svelte';
+  import EditarPerfilModal from '../../components/EditarPerfilModal.svelte';
   
   let currentUser;
   let userRole;
   let suscripcion = null;
   let loading = true;
+  
+  // Modales
+  let showEditModal = false;
+  let showPasswordModal = false;
+  
+  // Formulario de contraseña
+  let passwordData = {
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
+  };
+  let passwordLoading = false;
+  let passwordError = null;
+  let passwordSuccess = null;
   
   auth.subscribe(value => {
     currentUser = value.user;
@@ -39,6 +54,60 @@
       loading = false;
     }
   });
+  
+  function openEditModal() {
+    showEditModal = true;
+  }
+  
+  function closeEditModal() {
+    showEditModal = false;
+  }
+  
+  function handleProfileUpdated() {
+    // Recargar datos del usuario
+    authAPI.getCurrentUser().then(response => {
+      if (response.success && response.user) {
+        auth.updateUser({
+          name: response.user.name,
+          address: response.user.address
+        });
+      }
+    });
+  }
+  
+  async function handlePasswordSubmit(e) {
+    e.preventDefault();
+    passwordLoading = true;
+    passwordError = null;
+    passwordSuccess = null;
+
+    try {
+      const response = await authAPI.updatePassword(passwordData);
+      
+      if (response.success) {
+        passwordSuccess = 'Contraseña actualizada exitosamente';
+        passwordData = {
+          current_password: '',
+          new_password: '',
+          confirm_password: ''
+        };
+        // Limpiar mensaje después de 3 segundos
+        setTimeout(() => {
+          passwordSuccess = null;
+        }, 3000);
+      }
+    } catch (err) {
+      console.error('Error actualizando contraseña:', err);
+      if (err.errors) {
+        const errorMessages = Object.values(err.errors).flat();
+        passwordError = errorMessages.join(', ') || err.message || 'Error al actualizar la contraseña';
+      } else {
+        passwordError = err.message || 'Error al actualizar la contraseña. Por favor, intenta de nuevo.';
+      }
+    } finally {
+      passwordLoading = false;
+    }
+  }
 </script>
 
 <div class="py-6">
@@ -84,47 +153,111 @@
         </div>
         
         <div class="pt-4">
-          <button class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 font-medium">
+          <button 
+            on:click={openEditModal}
+            class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 font-medium"
+          >
             Editar información
           </button>
         </div>
       </div>
     </Card>
 
-    <!-- Suscripción (solo clientes) -->
-    {#if userRole === 'cliente'}
-      <Card title="Mi Suscripción">
+    <!-- Cambiar contraseña (Seguridad) -->
+    <Card title="Seguridad">
+    <form on:submit={handlePasswordSubmit} class="space-y-4">
+      {#if passwordError}
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          {passwordError}
+        </div>
+      {/if}
+      
+      {#if passwordSuccess}
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+          {passwordSuccess}
+        </div>
+      {/if}
+      
+      <div>
+        <label for="current-password" class="block text-sm font-medium text-gray-700 mb-2">
+          Contraseña actual *
+        </label>
+        <input
+          id="current-password"
+          type="password"
+          bind:value={passwordData.current_password}
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          placeholder="••••••••"
+        />
+      </div>
+      
+      <div>
+        <label for="new-password" class="block text-sm font-medium text-gray-700 mb-2">
+          Nueva contraseña *
+        </label>
+        <input
+          id="new-password"
+          type="password"
+          bind:value={passwordData.new_password}
+          required
+          minlength="6"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          placeholder="••••••••"
+        />
+        <p class="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
+      </div>
+      
+      <div>
+        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
+          Confirmar nueva contraseña *
+        </label>
+        <input
+          id="confirm-password"
+          type="password"
+          bind:value={passwordData.confirm_password}
+          required
+          minlength="6"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          placeholder="••••••••"
+        />
+      </div>
+      
+      <button 
+        type="submit"
+        disabled={passwordLoading}
+        class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {passwordLoading ? 'Cambiando...' : 'Cambiar contraseña'}
+      </button>
+    </form>
+  </Card>
+    
+    {#if userRole === 'cliente' && !loading}
+      <Card title="Suscripción">
         <div class="space-y-4">
-          <div class="flex justify-between items-center">
+          <div>
             <span class="text-sm font-medium text-gray-600">Plan actual</span>
-            <span class="text-lg font-bold text-primary-600">{suscripcion.plan}</span>
+            <p class="mt-1 text-gray-900">{suscripcion?.plan || 'N/A'}</p>
           </div>
           
-          <div class="flex justify-between items-center">
+          <div>
             <span class="text-sm font-medium text-gray-600">Estado</span>
-            <Badge type="success">{suscripcion.estado}</Badge>
-          </div>
-          
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-gray-600">Fecha de inicio</span>
-            <span class="text-sm text-gray-900">
-              {new Date(suscripcion.fechaInicio).toLocaleDateString('es-AR')}
-            </span>
-          </div>
-          
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-gray-600">Próximo pago</span>
-            <span class="text-sm text-gray-900">
-              {new Date(suscripcion.proximoPago).toLocaleDateString('es-AR')}
-            </span>
-          </div>
-          
-          <div class="pt-4 border-t border-gray-200">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-medium text-gray-600">Monto</span>
-              <span class="text-2xl font-bold text-gray-900">{suscripcion.monto}</span>
+            <div class="mt-1">
+              <Badge type={suscripcion?.estado === 'Activo' ? 'success' : 'danger'}>
+                {suscripcion?.estado || 'N/A'}
+              </Badge>
             </div>
-            <p class="text-xs text-gray-500">{suscripcion.frecuencia}</p>
+          </div>
+          
+          <div>
+            <span class="text-sm font-medium text-gray-600">Próximo pago</span>
+            <p class="mt-1 text-gray-900">{suscripcion?.proximoPago || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <span class="text-sm font-medium text-gray-600">Monto</span>
+            <p class="mt-1 text-gray-900">{suscripcion?.monto || 'N/A'} / {suscripcion?.frecuencia || 'N/A'}</p>
           </div>
           
           <div class="pt-4 space-y-2">
@@ -137,72 +270,13 @@
           </div>
         </div>
       </Card>
-    {:else}
-      <!-- Panel de admin -->
-      <Card title="Configuración de Administrador">
-        <div class="space-y-4">
-          <p class="text-sm text-gray-600">
-            Como administrador, tienes acceso completo al sistema.
-          </p>
-          
-          <div class="space-y-2">
-            <button class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 font-medium">
-              Gestionar usuarios
-            </button>
-            <button class="w-full bg-white text-gray-700 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 font-medium">
-              Configuración del sistema
-            </button>
-            <button class="w-full bg-white text-gray-700 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 font-medium">
-              Reportes del sistema
-            </button>
-          </div>
-        </div>
-      </Card>
     {/if}
   </div>
-
-  <!-- Cambiar contraseña -->
-  <Card title="Seguridad">
-    <div class="space-y-4">
-      <div>
-        <label for="current-password" class="block text-sm font-medium text-gray-700 mb-2">
-          Contraseña actual
-        </label>
-        <input
-          id="current-password"
-          type="password"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="••••••••"
-        />
-      </div>
-      
-      <div>
-        <label for="new-password" class="block text-sm font-medium text-gray-700 mb-2">
-          Nueva contraseña
-        </label>
-        <input
-          id="new-password"
-          type="password"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="••••••••"
-        />
-      </div>
-      
-      <div>
-        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
-          Confirmar nueva contraseña
-        </label>
-        <input
-          id="confirm-password"
-          type="password"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="••••••••"
-        />
-      </div>
-      
-      <button class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 font-medium">
-        Cambiar contraseña
-      </button>
-    </div>
-  </Card>
 </div>
+
+<!-- Modal de editar perfil -->
+<EditarPerfilModal
+  isOpen={showEditModal}
+  onClose={closeEditModal}
+  onSuccess={handleProfileUpdated}
+/>

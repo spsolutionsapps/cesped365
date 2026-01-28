@@ -617,7 +617,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Residencial</h3>
           <div class="mb-6">
-            <span class="text-3xl font-bold text-green-600">$60.000</span>
+            <span class="text-3xl font-bold text-green-600">$90.000</span>
             <span class="text-gray-600">/mes</span>
           </div>
           <p class="text-gray-600 mb-6 text-xl">500 a 2.500 m² de tu jardín</p>
@@ -649,7 +649,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Parque / Quintas</h3>
           <div class="mb-6">
-            <span class="text-3xl font-bold text-green-600">$90.000</span>
+            <span class="text-3xl font-bold text-green-600">$120.000</span>
             <span class="text-gray-600">/mes</span>
           </div>
           <p class="text-gray-600 mb-6 md:text-lg">2.500 a 4.000 m² de tu jardín</p>
@@ -1070,6 +1070,9 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div class="text-center">
           <p class="text-gray-400 text-sm">
             © 2025 CESPED 365. Todos los derechos reservados.
+          </p>
+          <p class="text-gray-400 text-sm mt-2">
+            Diseño web: <a href="https://www.spsolutions.app" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Sp solutions</a>
           </p>
         </div>
       </div>

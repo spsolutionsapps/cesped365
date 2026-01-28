@@ -84,6 +84,16 @@ function createAuthStore() {
         isChecking: false
       });
       return false;
+    },
+    // Actualizar usuario después de editar perfil
+    updateUser: (userData) => {
+      update(state => ({
+        ...state,
+        user: {
+          ...state.user,
+          ...userData
+        }
+      }));
     }
   };
 }

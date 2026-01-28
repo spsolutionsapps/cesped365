@@ -20,6 +20,14 @@ api/writable/uploads/*
 !api/writable/logs/index.html
 !api/writable/session/index.html
 !api/writable/uploads/index.html
+
+# Archivos en api/public/ (sesiones y uploads)
+api/public/writable/session/*
+!api/public/writable/session/index.html
+api/public/uploads/*
+!api/public/uploads/index.html
+!api/public/uploads/reportes/index.html
+
 api/.env
 api/phpunit*.xml
 api/.phpunit.*.cache

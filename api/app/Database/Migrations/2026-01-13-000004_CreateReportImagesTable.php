@@ -8,6 +8,11 @@ class CreateReportImagesTable extends Migration
 {
     public function up()
     {
+        // Verificar si la tabla ya existe
+        if ($this->db->tableExists('report_images')) {
+            return; // La tabla ya existe, no hacer nada
+        }
+        
         $this->forge->addField([
             'id' => [
                 'type'           => 'INT',

@@ -20,7 +20,8 @@ class UserModel extends Model
         'phone',
         'address',
         'plan',
-        'estado'
+        'estado',
+        'referido_por'
     ];
 
     protected bool $allowEmptyInserts = false;

@@ -6,6 +6,7 @@
   import Card from '../../components/Card.svelte';
   import Badge from '../../components/Badge.svelte';
   import CrearReporteModal from '../../components/CrearReporteModal.svelte';
+
   import ImageGalleryModal from '../../components/ImageGalleryModal.svelte';
   
   let reportes = [];
@@ -14,6 +15,7 @@
   let loading = true;
   let error = null;
   let showCrearModal = false;
+
   let reporteParaEditar = null;
   let userRole;
   let jardines = [];
@@ -907,6 +909,8 @@
   onSuccess={handleReporteCreado}
   reporte={reporteParaEditar}
 />
+
+
 
 <!-- Modal Galería de Imágenes -->
 <ImageGalleryModal

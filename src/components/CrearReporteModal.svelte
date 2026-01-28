@@ -6,6 +6,7 @@
   export let isOpen = false;
   export let onClose = () => {};
   export let onSuccess = () => {};
+  export let reporte = null; // Reporte para editar (opcional)
 
   let loading = false;
   let error = null;

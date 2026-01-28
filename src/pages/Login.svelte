@@ -18,7 +18,12 @@
       
       if (result.success) {
         // Redirigir al dashboard según el rol
-        navigate('/dashboard/resumen', { replace: true });
+        const userRole = result.data?.user?.role || result.data?.role;
+        if (userRole === 'admin') {
+          navigate('/dashboard/resumen', { replace: true });
+        } else {
+          navigate('/dashboard/mi-jardin', { replace: true });
+        }
       } else {
         error = result.error || 'Credenciales inválidas';
       }

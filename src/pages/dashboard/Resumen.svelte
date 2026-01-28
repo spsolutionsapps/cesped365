@@ -1,10 +1,11 @@
 <script>
   import { onMount } from 'svelte';
   import { auth } from '../../stores/auth';
-  import { dashboardAPI, reportesAPI, historialAPI } from '../../services/api';
+  import { dashboardAPI, reportesAPI, historialAPI, scheduledVisitsAPI } from '../../services/api';
   import StatCard from '../../components/StatCard.svelte';
   import Card from '../../components/Card.svelte';
   import Badge from '../../components/Badge.svelte';
+  import ReagendarVisitaModal from '../../components/ReagendarVisitaModal.svelte';
   
   let userRole;
   let userName;
@@ -15,14 +16,19 @@
   let estadisticas = {};
   let ultimoReporte = null;
   let proximasVisitas = [];
+  let visitasProgramadas = [];
+  
+  // Estado del modal de reagendar
+  let visitaSeleccionada = null;
+  let showReagendarModal = false;
   
   auth.subscribe(value => {
     userRole = value.role;
     userName = value.user?.name;
   });
   
-  // Cargar datos del backend
-  onMount(async () => {
+  // Función para cargar datos
+  async function cargarDatos() {
     try {
       loading = true;
       
@@ -44,12 +50,41 @@
         proximasVisitas = historialResponse.data.slice(0, 3);
       }
       
+      // Cargar visitas programadas (para clientes)
+      if (userRole === 'cliente') {
+        try {
+          const visitsResponse = await scheduledVisitsAPI.getAll();
+          if (visitsResponse.success) {
+            visitasProgramadas = visitsResponse.data.slice(0, 5); // Mostrar hasta 5 próximas visitas
+          }
+        } catch (err) {
+          console.error('Error cargando visitas programadas:', err);
+        }
+      }
+      
       loading = false;
     } catch (err) {
       console.error('Error cargando dashboard:', err);
       error = 'Error al cargar los datos. Verifica que el backend esté corriendo.';
       loading = false;
     }
+  }
+  
+  // Cargar datos del backend
+  onMount(async () => {
+    await cargarDatos();
+    
+    // Recargar estadísticas cada 30 segundos para mantenerlas actualizadas
+    const interval = setInterval(async () => {
+      if (userRole === 'admin') {
+        const dashboardResponse = await dashboardAPI.getDashboard();
+        if (dashboardResponse.success) {
+          estadisticas = dashboardResponse.data.estadisticas || {};
+        }
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
   });
   
   // Iconos SVG
@@ -62,6 +97,27 @@
     if (estado === 'Bueno') return 'success';
     if (estado === 'Regular') return 'warning';
     return 'danger';
+  }
+
+  function abrirReagendarModal(visita) {
+    visitaSeleccionada = visita;
+    showReagendarModal = true;
+  }
+
+  async function handleReagendarSuccess() {
+    showReagendarModal = false;
+    visitaSeleccionada = null;
+    // Recargar visitas programadas
+    if (userRole === 'cliente') {
+      try {
+        const visitsResponse = await scheduledVisitsAPI.getAll();
+        if (visitsResponse.success) {
+          visitasProgramadas = visitsResponse.data.slice(0, 5);
+        }
+      } catch (err) {
+        console.error('Error recargando visitas programadas:', err);
+      }
+    }
   }
 </script>
 
@@ -106,11 +162,58 @@
           color="blue"
         />
         <StatCard 
-        title="Reportes totales" 
-        value={(estadisticas.reportesTotales || 0).toString()} 
-        icon={iconReportes}
-        color="orange"
-      />
+          title="Reportes totales" 
+          value={(estadisticas.reportesTotales || 0).toString()} 
+          icon={iconReportes}
+          color="orange"
+        />
+      </div>
+      
+      <!-- Cards adicionales para admin -->
+      {#if estadisticas.visitasHoy > 0}
+        <div class="mb-8">
+          <Card title="Visitas del Día de Hoy">
+            <div class="text-center py-4">
+              <div class="text-4xl font-bold text-primary-600 mb-2">
+                {estadisticas.visitasHoy || 0}
+              </div>
+              <p class="text-gray-600">Visitas completadas hoy</p>
+            </div>
+          </Card>
+        </div>
+      {/if}
+      
+      <div class="grid gap-6 mb-8 md:grid-cols-2">
+        <!-- Últimos usuarios registrados -->
+        <Card title="Últimos 5 Usuarios Registrados">
+          <div class="space-y-3">
+            {#if estadisticas.ultimosUsuarios && estadisticas.ultimosUsuarios.length > 0}
+              {#each estadisticas.ultimosUsuarios as usuario}
+                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">{usuario.name}</p>
+                    <p class="text-xs text-gray-500">{usuario.email}</p>
+                  </div>
+                  <p class="text-xs text-gray-400">
+                    {new Date(usuario.created_at).toLocaleDateString('es-AR')}
+                  </p>
+                </div>
+              {/each}
+            {:else}
+              <p class="text-sm text-gray-500 text-center py-4">No hay usuarios registrados</p>
+            {/if}
+          </div>
+        </Card>
+        
+        <!-- Ganancias del mes -->
+        <Card title="Ganancias del Mes">
+          <div class="text-center py-4">
+            <div class="text-4xl font-bold text-green-600 mb-2">
+              ${(estadisticas.gananciasMes || 0).toLocaleString('es-AR')}
+            </div>
+            <p class="text-gray-600">Total de suscripciones activas</p>
+          </div>
+        </Card>
       </div>
     {:else}
       {#if ultimoReporte}
@@ -135,6 +238,72 @@
           />
         </div>
       {/if}
+    {/if}
+
+    <!-- Próximas visitas programadas para clientes (siempre visible) -->
+    {#if userRole === 'cliente'}
+      <div class="mb-8">
+        <Card title="Próximas Visitas Programadas">
+          <div class="space-y-4">
+            {#if visitasProgramadas.length > 0}
+              {#each visitasProgramadas as visita}
+                <div class="py-3 border-b border-gray-100 last:border-0">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center flex-1">
+                      <div class="flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-900">
+                          {new Date(visita.scheduled_date).toLocaleDateString('es-AR', { 
+                            weekday: 'long', 
+                            day: 'numeric', 
+                            month: 'long' 
+                          })}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          {#if visita.scheduled_time}
+                            Hora: {visita.scheduled_time}
+                          {/if}
+                          {#if visita.gardener_name}
+                            {visita.scheduled_time ? ' • ' : ''}Jardinero: {visita.gardener_name}
+                          {/if}
+                        </p>
+                        {#if visita.notes}
+                          <p class="text-xs text-gray-400 mt-1">{visita.notes}</p>
+                        {/if}
+                      </div>
+                      <Badge type="info" class="ml-2">
+                        Programada
+                      </Badge>
+                    </div>
+                  </div>
+                  <div class="flex justify-end mt-2">
+                    <button
+                      on:click={() => abrirReagendarModal(visita)}
+                      class="px-3 py-1.5 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors flex items-center gap-1"
+                      title="Postergar por lluvia"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                      </svg>
+                      Postergar por lluvia
+                    </button>
+                  </div>
+                </div>
+              {/each}
+            {:else}
+              <p class="text-sm text-gray-500 text-center py-4">
+                No hay visitas programadas por el momento
+              </p>
+            {/if}
+          </div>
+        </Card>
+      </div>
     {/if}
 
     {#if ultimoReporte}
@@ -225,36 +394,50 @@
     </Card>
 
     <!-- Próximas visitas / Historial reciente -->
-    <Card title={userRole === 'admin' ? 'Próximas Visitas' : 'Historial Reciente'}>
-      <div class="space-y-4">
-        {#each proximasVisitas as visita}
-          <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                  <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+    {#if userRole === 'admin'}
+      <Card title="Próximas Visitas">
+        <div class="space-y-4">
+          {#each proximasVisitas as visita}
+            <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-900">{visita.tipo}</p>
+                  <p class="text-xs text-gray-500">{new Date(visita.fecha).toLocaleDateString('es-AR')}</p>
                 </div>
               </div>
-              <div class="ml-4">
-                <p class="text-sm font-medium text-gray-900">{visita.tipo}</p>
-                <p class="text-xs text-gray-500">{new Date(visita.fecha).toLocaleDateString('es-AR')}</p>
-              </div>
+              <Badge type={getBadgeType(visita.estadoGeneral)}>
+                {visita.estadoGeneral}
+              </Badge>
             </div>
-            <Badge type={getBadgeType(visita.estadoGeneral)}>
-              {visita.estadoGeneral}
-            </Badge>
+          {/each}
+          
+          <div class="pt-4">
+            <a href="/dashboard/historial" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
+              Ver historial completo →
+            </a>
           </div>
-        {/each}
-        
-        <div class="pt-4">
-          <a href="/dashboard/historial" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
-            Ver historial completo →
-          </a>
         </div>
       </Card>
+    {/if}
       </div>
     {/if}
   {/if}
 </div>
+
+<!-- Modal de reagendar visita -->
+<ReagendarVisitaModal
+  isOpen={showReagendarModal}
+  visita={visitaSeleccionada}
+  onClose={() => {
+    showReagendarModal = false;
+    visitaSeleccionada = null;
+  }}
+  onSuccess={handleReagendarSuccess}
+/>

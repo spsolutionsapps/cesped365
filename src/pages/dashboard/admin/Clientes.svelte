@@ -7,6 +7,8 @@
   
   let clientes = [];
   let searchTerm = '';
+  let selectedPlan = 'Todos los planes';
+  let selectedEstado = 'Todos los estados';
   let loading = true;
   let error = null;
   let selectedCliente = null;
@@ -34,11 +36,21 @@
     }
   }
   
-  $: filteredClientes = clientes.filter(cliente => 
-    cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.direccion.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  $: filteredClientes = clientes.filter(cliente => {
+    // Filtro de búsqueda
+    const matchesSearch = searchTerm === '' || 
+      cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.direccion.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro de plan
+    const matchesPlan = selectedPlan === 'Todos los planes' || cliente.plan === selectedPlan;
+    
+    // Filtro de estado
+    const matchesEstado = selectedEstado === 'Todos los estados' || cliente.estado === selectedEstado;
+    
+    return matchesSearch && matchesPlan && matchesEstado;
+  });
   
   function getBadgeType(estado) {
     if (estado === 'Activo') return 'success';
@@ -90,13 +102,27 @@
     showDetailModal = false;
     clienteDetail = null;
   }
+
+  function handleBackdropClick(event) {
+    if (event.target === event.currentTarget) {
+      closeModal();
+    }
+  }
   
   async function handleClienteSaved() {
     showClienteModal = false;
     clienteToEdit = null;
     await loadClientes();
   }
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape' && showDetailModal) {
+      closeModal();
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <div class="py-6">
   <div class="flex justify-between items-center mb-6">
@@ -132,13 +158,13 @@
           />
         </div>
       </div>
-      <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+      <select bind:value={selectedPlan} class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
         <option>Todos los planes</option>
-        <option>Básico</option>
-        <option>Estándar</option>
-        <option>Premium</option>
+        <option>Urbano</option>
+        <option>Residencial</option>
+        <option>Parque</option>
       </select>
-      <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+      <select bind:value={selectedEstado} class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
         <option>Todos los estados</option>
         <option>Activo</option>
         <option>Pendiente</option>
@@ -158,6 +184,7 @@
             <th class="px-4 py-3">Dirección</th>
             <th class="px-4 py-3">Plan</th>
             <th class="px-4 py-3">Estado</th>
+            <th class="px-4 py-3">Referido por</th>
             <th class="px-4 py-3">Última Visita</th>
             <th class="px-4 py-3">Acciones</th>
           </tr>
@@ -198,12 +225,17 @@
                 </Badge>
               </td>
               <td class="px-4 py-3 text-sm">
+                <span class="text-gray-900">
+                  {cliente.referidoPor || '-'}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-sm">
                 <div>
                   <p class="text-gray-900">
-                    {new Date(cliente.ultimaVisita).toLocaleDateString('es-AR')}
+                    {cliente.ultimaVisita ? new Date(cliente.ultimaVisita).toLocaleDateString('es-AR') : '-'}
                   </p>
                   <p class="text-xs text-gray-600">
-                    Próxima: {new Date(cliente.proximaVisita).toLocaleDateString('es-AR')}
+                    Próxima: {cliente.proximaVisita ? new Date(cliente.proximaVisita).toLocaleDateString('es-AR') : '-'}
                   </p>
                 </div>
               </td>
@@ -264,7 +296,7 @@
   </Card>
 
   <!-- Estadísticas rápidas -->
-  <div class="grid gap-6 mt-8 md:grid-cols-4">
+  <div class="grid gap-6 mt-8 md:grid-cols-3 lg:grid-cols-6">
     <Card>
       <div class="flex items-center">
         <div class="p-3 rounded-full bg-primary-100 text-primary-600 mr-4">
@@ -297,22 +329,6 @@
 
     <Card>
       <div class="flex items-center">
-        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Premium</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {clientes.filter(c => c.plan === 'Premium').length}
-          </p>
-        </div>
-      </div>
-    </Card>
-
-    <Card>
-      <div class="flex items-center">
         <div class="p-3 rounded-full bg-orange-100 text-orange-600 mr-4">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -322,6 +338,54 @@
           <p class="text-sm text-gray-600">Pendientes</p>
           <p class="text-2xl font-bold text-gray-900">
             {clientes.filter(c => c.estado === 'Pendiente').length}
+          </p>
+        </div>
+      </div>
+    </Card>
+
+    <Card>
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Urbano</p>
+          <p class="text-2xl font-bold text-gray-900">
+            {clientes.filter(c => c.plan === 'Urbano').length}
+          </p>
+        </div>
+      </div>
+    </Card>
+
+    <Card>
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Residencial</p>
+          <p class="text-2xl font-bold text-gray-900">
+            {clientes.filter(c => c.plan === 'Residencial').length}
+          </p>
+        </div>
+      </div>
+    </Card>
+
+    <Card>
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-teal-100 text-teal-600 mr-4">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Parque</p>
+          <p class="text-2xl font-bold text-gray-900">
+            {clientes.filter(c => c.plan === 'Parque').length}
           </p>
         </div>
       </div>
@@ -342,19 +406,28 @@
 
 <!-- Modal de detalles del cliente -->
 {#if showDetailModal && clienteDetail}
-  <div class="fixed inset-0 z-50 overflow-y-auto" on:click={closeModal}>
+  <div 
+    class="fixed inset-0 z-50 overflow-y-auto" 
+    on:click={handleBackdropClick}
+    on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && closeModal()}
+    role="button"
+    tabindex="0"
+    aria-label="Cerrar modal"
+  >
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
 
       <div 
         class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full"
-        on:click|stopPropagation
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
       >
         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
           <!-- Header -->
           <div class="flex justify-between items-start mb-6">
             <div>
-              <h3 class="text-2xl font-bold text-gray-900">{clienteDetail.nombre}</h3>
+              <h3 id="modal-title" class="text-2xl font-bold text-gray-900">{clienteDetail.nombre}</h3>
               <p class="text-sm text-gray-500 mt-1">Cliente ID: {clienteDetail.id}</p>
             </div>
             <button
@@ -384,6 +457,10 @@
                 <div class="flex justify-between">
                   <span class="text-sm text-gray-600">Dirección:</span>
                   <span class="text-sm font-medium text-gray-900">{clienteDetail.direccion}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Referido por:</span>
+                  <span class="text-sm font-medium text-gray-900">{clienteDetail.referidoPor || '-'}</span>
                 </div>
               </div>
             </div>

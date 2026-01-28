@@ -35,8 +35,12 @@ class ReportesController extends ResourceController
         foreach ($reports as $report) {
             // Obtener imágenes del reporte
             $images = $this->imageModel->getByReport($report['id']);
-            $imageUrls = array_map(function($img) {
-                return 'https://cesped365.com/api/' . $img['image_path'];
+            $baseUrl = config('App')->baseURL;
+            // Remover trailing slash si existe
+            $baseUrl = rtrim($baseUrl, '/');
+            $imageUrls = array_map(function($img) use ($baseUrl) {
+                // image_path ya incluye 'uploads/reportes/...', solo agregamos la base URL
+                return $baseUrl . '/' . $img['image_path'];
             }, $images);
             
             $formatted[] = [
@@ -45,8 +49,8 @@ class ReportesController extends ResourceController
                 'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
                 'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
                 'plagas' => (bool)($report['pest_detected'] ?? false),
-                'notaJardinero' => $report['technician_notes'] ?? 'Sin notas',
-                'jardinero' => $report['technician_notes'] ?? 'Sin notas',
+                'notaJardinero' => $report['recommendations'] ?? 'Sin observaciones',
+                'jardinero' => $report['technician_notes'] ?? 'Sin jardinero',
                 'observaciones' => $report['recommendations'] ?? '',
                 'garden_id' => $report['garden_id'],
                 'imagenes' => $imageUrls,
@@ -89,8 +93,12 @@ class ReportesController extends ResourceController
         
         // Obtener imágenes
         $images = $this->imageModel->getByReport($id);
-        $imageUrls = array_map(function($img) {
-            return 'https://cesped365.com/api/' . $img['image_path'];
+        $baseUrl = config('App')->baseURL;
+        // Remover trailing slash si existe
+        $baseUrl = rtrim($baseUrl, '/');
+        $imageUrls = array_map(function($img) use ($baseUrl) {
+            // image_path ya incluye 'uploads/reportes/...', solo agregamos la base URL
+            return $baseUrl . '/' . $img['image_path'];
         }, $images);
         
         // Formatear respuesta
@@ -100,8 +108,8 @@ class ReportesController extends ResourceController
             'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
             'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
             'plagas' => (bool)($report['pest_detected'] ?? false),
-            'notaJardinero' => $report['technician_notes'] ?? 'Sin notas',
-            'jardinero' => $report['technician_notes'] ?? 'Sin notas',
+            'notaJardinero' => $report['recommendations'] ?? 'Sin observaciones',
+            'jardinero' => $report['technician_notes'] ?? 'Sin jardinero',
             'observaciones' => $report['recommendations'] ?? '',
             'garden_id' => $report['garden_id'],
             'imagenes' => $imageUrls,

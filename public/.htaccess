@@ -3,9 +3,15 @@
     RewriteEngine On
     RewriteBase /
     
+    # CRÍTICO: Excluir peticiones /api/* antes de redirigir a index.html
+    # Esto permite que las peticiones del backend pasen correctamente
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteRule ^ - [L]
+    
     # Si el archivo o directorio existe, servirlo directamente
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
     
     # Si no existe, redirigir todo al index.html (para SPA)
     RewriteRule ^ index.html [QSA,L]

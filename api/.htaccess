@@ -1,0 +1,18 @@
+# Redirigir todas las peticiones a api/public/
+# Este archivo es necesario para producción cuando CodeIgniter está en un subdirectorio
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirigir todas las peticiones a api/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Proteger archivos de configuración
+<FilesMatch "^\.env|composer\.(json|lock)|phpunit\.xml">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Proteger carpetas sensibles
+RedirectMatch 403 ^/api/(app|writable|vendor|\.git)(/|$)

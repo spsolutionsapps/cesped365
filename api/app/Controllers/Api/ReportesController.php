@@ -39,8 +39,8 @@ class ReportesController extends ResourceController
             // Remover trailing slash si existe
             $baseUrl = rtrim($baseUrl, '/');
             $imageUrls = array_map(function($img) use ($baseUrl) {
-                // image_path ya incluye 'uploads/reportes/...', solo agregamos la base URL
-                return $baseUrl . '/' . $img['image_path'];
+                // image_path ya incluye 'uploads/reportes/...', agregamos /api/public/ porque CodeIgniter está en subdirectorio
+                return $baseUrl . '/api/public/' . $img['image_path'];
             }, $images);
             
             $formatted[] = [
@@ -97,8 +97,8 @@ class ReportesController extends ResourceController
         // Remover trailing slash si existe
         $baseUrl = rtrim($baseUrl, '/');
         $imageUrls = array_map(function($img) use ($baseUrl) {
-            // image_path ya incluye 'uploads/reportes/...', solo agregamos la base URL
-            return $baseUrl . '/' . $img['image_path'];
+            // image_path ya incluye 'uploads/reportes/...', agregamos /api/public/ porque CodeIgniter está en subdirectorio
+            return $baseUrl . '/api/public/' . $img['image_path'];
         }, $images);
         
         // Formatear respuesta
@@ -320,12 +320,17 @@ class ReportesController extends ResourceController
             return $this->fail('Error al guardar la imagen', 500);
         }
         
+        // Construir URL completa de la imagen
+        $baseUrl = config('App')->baseURL;
+        $baseUrl = rtrim($baseUrl, '/');
+        $fullImageUrl = $baseUrl . '/api/public/' . $imagePath;
+        
         return $this->respondCreated([
             'success' => true,
             'message' => 'Imagen subida exitosamente',
             'data' => [
                 'id' => $imageId,
-                'image_url' => base_url($imagePath)
+                'image_url' => $fullImageUrl
             ]
         ]);
     }

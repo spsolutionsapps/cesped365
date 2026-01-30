@@ -16,6 +16,7 @@
   let clienteToEdit = null;
   let showDetailModal = false;
   let clienteDetail = null;
+  let expandedClients = new Set();
   
   onMount(async () => {
     await loadClientes();
@@ -52,10 +53,22 @@
     return matchesSearch && matchesPlan && matchesEstado;
   });
   
-  function getBadgeType(estado) {
-    if (estado === 'Activo') return 'success';
-    if (estado === 'Pendiente') return 'warning';
-    return 'danger';
+function getBadgeType(estado) {
+    switch(estado) {
+      case 'Activo': return 'success';
+      case 'Pendiente': return 'warning';
+      case 'Inactivo': return 'danger';
+      default: return 'default';
+    }
+  }
+
+  function toggleClientExpand(clienteId) {
+    if (expandedClients.has(clienteId)) {
+      expandedClients.delete(clienteId);
+    } else {
+      expandedClients.add(clienteId);
+    }
+    expandedClients = expandedClients; // Trigger reactivity
   }
   
   function openCreateModal() {
@@ -141,9 +154,9 @@
   </div>
 
   <!-- Búsqueda y filtros -->
-  <Card className="mb-6">
-    <div class="flex gap-4">
-      <div class="flex-1">
+  <Card class="mb-6">
+    <div class="flex flex-col lg:flex-row gap-4">
+      <div class="flex-1 w-full">
         <div class="relative">
           <div class="absolute inset-y-0 left-0 flex items-center pl-3">
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,13 +171,13 @@
           />
         </div>
       </div>
-      <select bind:value={selectedPlan} class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+      <select bind:value={selectedPlan} class="w-full lg:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
         <option>Todos los planes</option>
         <option>Urbano</option>
         <option>Residencial</option>
         <option>Parque</option>
       </select>
-      <select bind:value={selectedEstado} class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+      <select bind:value={selectedEstado} class="w-full lg:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
         <option>Todos los estados</option>
         <option>Activo</option>
         <option>Pendiente</option>
@@ -173,9 +186,10 @@
     </div>
   </Card>
 
-  <!-- Tabla de clientes -->
-  <Card>
-    <div class="overflow-x-auto">
+  <!-- Tabla de clientes (Desktop) -->
+  <div class="hidden md:block">
+    <Card>
+      <div class="overflow-x-auto">
       <table class="w-full whitespace-no-wrap">
         <thead>
           <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
@@ -275,10 +289,142 @@
           {/each}
         </tbody>
       </table>
-    </div>
+      </div>
+    </Card>
+  </div>
 
-    <!-- Pagination -->
-    <div class="px-4 py-3 border-t border-gray-200 bg-gray-50">
+  <!-- Lista de clientes mobile (collapsable) -->
+  <div class="block md:hidden">
+    <Card>
+      <div class="space-y-3">
+      {#each filteredClientes as cliente}
+        <div class="border border-gray-200 rounded-lg overflow-hidden">
+          <!-- Header del collapsable -->
+          <button
+            on:click={() => toggleClientExpand(cliente.id)}
+            class="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
+          >
+            <div class="flex items-center">
+              <div class="relative w-10 h-10 mr-3 rounded-full bg-primary-100 flex items-center justify-center">
+                <span class="font-semibold text-primary-600">
+                  {cliente.nombre.split(' ').map(n => n[0]).join('')}
+                </span>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">{cliente.nombre}</p>
+                <p class="text-xs text-gray-600">ID: {cliente.id}</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <Badge type={getBadgeType(cliente.estado)} class="text-xs">
+                {cliente.estado}
+              </Badge>
+              <svg 
+                class="w-4 h-4 text-gray-500 transition-transform duration-200 {expandedClients.has(cliente.id) ? 'rotate-180' : ''}" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </button>
+
+          <!-- Contenido collapsable -->
+          {#if expandedClients.has(cliente.id)}
+            <div class="px-4 py-4 bg-white border-t border-gray-200 space-y-3">
+              <!-- Contacto -->
+              <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Contacto</p>
+                <p class="text-sm text-gray-900">{cliente.email}</p>
+                <p class="text-sm text-gray-600">{cliente.telefono}</p>
+              </div>
+
+              <!-- Dirección -->
+              <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Dirección</p>
+                <p class="text-sm text-gray-900">{cliente.direccion}</p>
+              </div>
+
+              <!-- Plan y Referido -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Plan</p>
+                  <Badge type={cliente.plan === 'Premium' ? 'info' : 'default'}>
+                    {cliente.plan}
+                  </Badge>
+                </div>
+                <div>
+                  <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Referido por</p>
+                  <p class="text-sm text-gray-900">{cliente.referidoPor || '-'}</p>
+                </div>
+              </div>
+
+              <!-- Visitas -->
+              <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Visitas</p>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p class="text-gray-500 text-xs">Última:</p>
+                    <p class="text-gray-900">
+                      {cliente.ultimaVisita ? new Date(cliente.ultimaVisita).toLocaleDateString('es-AR') : '-'}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500 text-xs">Próxima:</p>
+                    <p class="text-gray-900">
+                      {cliente.proximaVisita ? new Date(cliente.proximaVisita).toLocaleDateString('es-AR') : '-'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Acciones -->
+              <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Acciones</p>
+                <div class="flex space-x-3">
+                  <button
+                    on:click={() => viewCliente(cliente)}
+                    class="flex items-center px-3 py-2 text-xs font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100"
+                  >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Ver
+                  </button>
+                  <button
+                    on:click={() => openEditModal(cliente)}
+                    class="flex items-center px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
+                  >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Editar
+                  </button>
+                  <button
+                    on:click={() => deleteCliente(cliente.id)}
+                    class="flex items-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100"
+                  >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/each}
+      </div>
+    </Card>
+  </div>
+
+  <!-- Pagination (mobile) -->
+  <div class="block md:hidden">
+    <Card>
+      <div class="px-4 py-3 border-t border-gray-200 bg-gray-50">
       <div class="flex items-center justify-between">
         <div class="text-sm text-gray-700">
           Mostrando <span class="font-semibold">{filteredClientes.length}</span> de <span class="font-semibold">{clientes.length}</span> clientes
@@ -292,8 +438,9 @@
           </button>
         </div>
       </div>
-    </div>
-  </Card>
+      </div>
+    </Card>
+  </div>
 
   <!-- Estadísticas rápidas -->
   <div class="grid gap-6 mt-8 md:grid-cols-3 lg:grid-cols-6">

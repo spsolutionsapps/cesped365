@@ -8,20 +8,19 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 // API Routes
-// NOTA: No usar grupo 'api' porque CodeIgniter ya está en /api/public/
 // El filtro CORS ya está aplicado globalmente en Filters.php
-
-// Manejar OPTIONS para todas las rutas (preflight CORS)
-$routes->options('(:any)', function() {
-    return service('response')->setStatusCode(200);
-});
-
-// Rutas públicas (sin autenticación)
-$routes->post('login', 'Api\AuthController::login');
-$routes->post('registro', 'Api\ClientesController::create'); // Registro público
-
-// Rutas protegidas (requieren autenticación)
-$routes->group('', ['filter' => 'auth'], function($routes) {
+$routes->group('api', ['filter' => 'corscustom'], function($routes) {
+    // Manejar OPTIONS para todas las rutas (preflight CORS)
+    $routes->options('(:any)', function() {
+        return service('response')->setStatusCode(200);
+    });
+    
+    // Rutas públicas (sin autenticación)
+    $routes->post('login', 'Api\AuthController::login');
+    $routes->post('registro', 'Api\ClientesController::create'); // Registro público
+    
+    // Rutas protegidas (requieren autenticación)
+    $routes->group('', ['filter' => 'auth'], function($routes) {
         // Auth
         $routes->get('me', 'Api\AuthController::me');
         $routes->put('me', 'Api\AuthController::updateProfile');
@@ -83,3 +82,4 @@ $routes->group('', ['filter' => 'auth'], function($routes) {
             $routes->post('subscriptions/plans', 'Api\SubscriptionsController::createPlan');
         });
     });
+});

@@ -37,6 +37,18 @@
   // Estado de filtros colapsables
   let filtrosAbiertos = false;
   
+  // Estado de reportes expandidos en mobile
+  let expandedReportes = new Set();
+  
+  function toggleReporteExpand(reporteId) {
+    if (expandedReportes.has(reporteId)) {
+      expandedReportes.delete(reporteId);
+    } else {
+      expandedReportes.add(reporteId);
+    }
+    expandedReportes = expandedReportes; // Trigger reactivity
+  }
+  
   auth.subscribe(value => {
     userRole = value.role;
   });
@@ -199,9 +211,9 @@
     </h2>
     
     <div class="flex items-center gap-4">
-      <!-- Selector de vista -->
+      <!-- Selector de vista (solo desktop) -->
       {#if !loading && reportesFiltrados.length > 0}
-        <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+        <div class="hidden md:flex items-center gap-2 bg-gray-100 rounded-lg p-1">
           <button
             on:click={() => vista = 'cards'}
             class="px-4 py-2 rounded-md text-sm font-medium transition-colors {vista === 'cards' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}"
@@ -278,7 +290,7 @@
     {#if filtrosAbiertos}
       <div transition:slide>
         <div class="pb-4 space-y-4 pt-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Búsqueda por texto -->
             <div>
               <label for="busqueda" class="block text-sm font-medium text-gray-700 mb-2">
@@ -362,8 +374,8 @@
     </div>
   {:else}
     {#if vista === 'cards'}
-      <!-- Vista de tarjetas -->
-      <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-3 mt-6">
+      <!-- Vista de tarjetas (Desktop) -->
+      <div class="hidden md:grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-3 mt-6">
         {#each reportesPaginados as reporte}
       <Card>
         <div class="space-y-4">
@@ -483,8 +495,8 @@
       {/each}
       </div>
     {:else}
-      <!-- Vista de tabla -->
-      <div class="mt-6">
+      <!-- Vista de tabla (Desktop) -->
+      <div class="hidden md:block mt-6">
         <Card>
           <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -637,14 +649,166 @@
         </Card>
       </div>
     {/if}
+    
+    <!-- Vista mobile (lista colapsable) -->
+    <div class="block md:hidden mt-6">
+      <Card>
+        <div class="space-y-3">
+          {#each reportesPaginados as reporte}
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <!-- Header del collapsable -->
+              <button
+                on:click={() => toggleReporteExpand(reporte.id)}
+                class="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
+              >
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-1">
+                    <p class="font-semibold text-gray-900 truncate">
+                      {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                    <Badge type={getBadgeType(reporte.estadoGeneral)} class="ml-2 flex-shrink-0">
+                      {reporte.estadoGeneral}
+                    </Badge>
+                  </div>
+                  <p class="text-xs text-gray-600">por {reporte.jardinero || 'N/A'}</p>
+                </div>
+                <svg 
+                  class="w-5 h-5 text-gray-500 transition-transform duration-200 ml-2 flex-shrink-0 {expandedReportes.has(reporte.id) ? 'rotate-180' : ''}" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Contenido collapsable -->
+              {#if expandedReportes.has(reporte.id)}
+                <div class="px-4 py-4 bg-white border-t border-gray-200 space-y-3">
+                  <!-- Evaluación técnica -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Evaluación</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                      <div class="flex items-center">
+                        {#if reporte.cespedParejo}
+                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                          </svg>
+                        {:else}
+                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                          </svg>
+                        {/if}
+                        <span class="text-gray-600">Parejo</span>
+                      </div>
+                      <div class="flex items-center">
+                        {#if reporte.colorOk}
+                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                          </svg>
+                        {:else}
+                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                          </svg>
+                        {/if}
+                        <span class="text-gray-600">Color</span>
+                      </div>
+                      <div class="flex items-center">
+                        {#if !reporte.manchas}
+                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                          </svg>
+                        {:else}
+                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                          </svg>
+                        {/if}
+                        <span class="text-gray-600">Manchas</span>
+                      </div>
+                      <div class="flex items-center">
+                        {#if !reporte.malezasVisibles}
+                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                          </svg>
+                        {:else}
+                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                          </svg>
+                        {/if}
+                        <span class="text-gray-600">Malezas</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Crecimiento -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Crecimiento</p>
+                    <p class="text-sm text-gray-900 font-medium">{reporte.crecimientoCm} cm</p>
+                  </div>
+
+                  <!-- Observaciones -->
+                  {#if reporte.notaJardinero || reporte.observaciones}
+                    <div>
+                      <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Observaciones</p>
+                      <p class="text-sm text-gray-600 line-clamp-2">
+                        {reporte.notaJardinero || reporte.observaciones}
+                      </p>
+                    </div>
+                  {/if}
+
+                  <!-- Acciones -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Acciones</p>
+                    <div class="flex space-x-2">
+                      <button
+                        on:click={() => selectReporte(reporte)}
+                        class="flex-1 flex items-center justify-center px-3 py-2 text-xs font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100"
+                      >
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Ver
+                      </button>
+                      {#if userRole === 'admin'}
+                        <button
+                          on:click={() => editarReporte(reporte)}
+                          class="flex items-center px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          on:click={() => eliminarReporte(reporte.id)}
+                          class="flex items-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      {/if}
+                    </div>
+                  </div>
+                </div>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      </Card>
+    </div>
 
     <!-- Paginación -->
     {#if totalPaginas > 1}
-      <div class="flex items-center justify-between mt-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
         <div class="text-sm text-gray-700">
           Página {paginaActual} de {totalPaginas}
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap justify-center">
           <button
             on:click={() => paginaActual = Math.max(1, paginaActual - 1)}
             disabled={paginaActual === 1}
@@ -653,19 +817,21 @@
             Anterior
           </button>
           
-          <!-- Números de página -->
-          {#each Array(totalPaginas) as _, i}
-            {#if i + 1 === 1 || i + 1 === totalPaginas || (i + 1 >= paginaActual - 1 && i + 1 <= paginaActual + 1)}
-              <button
-                on:click={() => paginaActual = i + 1}
-                class="px-4 py-2 text-sm font-medium rounded-lg {paginaActual === i + 1 ? 'bg-primary-600 text-white' : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'}"
-              >
-                {i + 1}
-              </button>
-            {:else if i + 1 === paginaActual - 2 || i + 1 === paginaActual + 2}
-              <span class="px-2 py-2 text-gray-500">...</span>
-            {/if}
-          {/each}
+          <!-- Números de página (ocultos en mobile muy pequeño) -->
+          <div class="hidden sm:flex gap-2">
+            {#each Array(totalPaginas) as _, i}
+              {#if i + 1 === 1 || i + 1 === totalPaginas || (i + 1 >= paginaActual - 1 && i + 1 <= paginaActual + 1)}
+                <button
+                  on:click={() => paginaActual = i + 1}
+                  class="px-4 py-2 text-sm font-medium rounded-lg {paginaActual === i + 1 ? 'bg-primary-600 text-white' : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'}"
+                >
+                  {i + 1}
+                </button>
+              {:else if i + 1 === paginaActual - 2 || i + 1 === paginaActual + 2}
+                <span class="px-2 py-2 text-gray-500">...</span>
+              {/if}
+            {/each}
+          </div>
 
           <button
             on:click={() => paginaActual = Math.min(totalPaginas, paginaActual + 1)}

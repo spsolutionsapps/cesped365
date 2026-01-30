@@ -13,7 +13,7 @@
   };
 </script>
 
-<div class="bg-white rounded-lg shadow-md p-6">
+<div class="bg-white rounded-lg p-6">
   <div class="flex items-center">
     <div class="flex-shrink-0">
       <div class="p-3 rounded-full {colorClasses[color]}">

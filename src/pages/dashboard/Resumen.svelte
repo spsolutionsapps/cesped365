@@ -184,26 +184,35 @@
       {/if}
       
       <div class="grid gap-6 mb-8 md:grid-cols-2">
-        <!-- Últimos usuarios registrados -->
-        <Card title="Últimos 5 Usuarios Registrados">
-          <div class="space-y-3">
-            {#if estadisticas.ultimosUsuarios && estadisticas.ultimosUsuarios.length > 0}
-              {#each estadisticas.ultimosUsuarios as usuario}
-                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                  <div>
-                    <p class="text-sm font-medium text-gray-900">{usuario.name}</p>
-                    <p class="text-xs text-gray-500">{usuario.email}</p>
+        <!-- Próximas visitas -->
+        {#if userRole === 'admin'}
+          <Card title="Próximas Visitas">
+            <div class="space-y-4">
+              {#each proximasVisitas as visita}
+                  <div class="flex items-center py-3 border-b border-gray-100 last:border-0">
+                    <div class="flex-shrink-0">
+                      <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm font-medium text-gray-900">{visita.cliente}</p>
+                      <p class="text-xs text-gray-600">{visita.jardin}</p>
+                      <p class="text-xs text-gray-500">{new Date(visita.fecha).toLocaleDateString('es-AR')}</p>
+                    </div>
                   </div>
-                  <p class="text-xs text-gray-400">
-                    {new Date(usuario.created_at).toLocaleDateString('es-AR')}
-                  </p>
-                </div>
               {/each}
-            {:else}
-              <p class="text-sm text-gray-500 text-center py-4">No hay usuarios registrados</p>
-            {/if}
-          </div>
-        </Card>
+              
+              <div class="pt-4">
+                <a href="/dashboard/agenda" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
+                  Ver toda la agenda →
+                </a>
+              </div>
+            </div>
+          </Card>
+        {/if}
         
         <!-- Ganancias del mes -->
         <Card title="Ganancias del Mes">
@@ -392,40 +401,28 @@
         </div>
       </div>
     </Card>
-
-    <!-- Próximas visitas / Historial reciente -->
-    {#if userRole === 'admin'}
-      <Card title="Próximas Visitas">
-        <div class="space-y-4">
-          {#each proximasVisitas as visita}
-            <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+        
+        <!-- Últimos usuarios registrados -->
+        <Card title="Últimos 5 Usuarios Registrados">
+          <div class="space-y-3">
+            {#if estadisticas.ultimosUsuarios && estadisticas.ultimosUsuarios.length > 0}
+              {#each estadisticas.ultimosUsuarios as usuario}
+                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">{usuario.name}</p>
+                    <p class="text-xs text-gray-500">{usuario.email}</p>
                   </div>
+                  <p class="text-xs text-gray-400">
+                    {new Date(usuario.created_at).toLocaleDateString('es-AR')}
+                  </p>
                 </div>
-                <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-900">{visita.tipo}</p>
-                  <p class="text-xs text-gray-500">{new Date(visita.fecha).toLocaleDateString('es-AR')}</p>
-                </div>
-              </div>
-              <Badge type={getBadgeType(visita.estadoGeneral)}>
-                {visita.estadoGeneral}
-              </Badge>
-            </div>
-          {/each}
-          
-          <div class="pt-4">
-            <a href="/dashboard/historial" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
-              Ver historial completo →
-            </a>
+              {/each}
+            {:else}
+              <p class="text-sm text-gray-500 text-center py-4">No hay usuarios registrados</p>
+            {/if}
           </div>
-        </div>
-      </Card>
-    {/if}
+        </Card>
+
       </div>
     {/if}
   {/if}

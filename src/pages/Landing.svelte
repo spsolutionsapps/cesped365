@@ -122,7 +122,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
 <div class="min-h-screen bg-white">
   <!-- Header/Navbar -->
-  <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {scrolled ? 'bg-gray-900 shadow-lg' : 'bg-transparent'}">
+  <nav data-aos="fade-down" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {scrolled ? 'bg-gray-900 shadow-lg' : 'bg-transparent'}">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-20">
         <!-- Logo -->
@@ -209,7 +209,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
       <!-- Menu Content -->
     <div class="px-6 py-4 space-y-6 overflow-y-auto h-full pb-20">
       <!-- Navigation Links -->
-      <nav class="space-y-4">
+      <nav  class="space-y-4">
         <a
           href="#home"
           on:click={(e) => {smoothScrollToSection(e, 'home'); mobileMenuOpen = false;}}
@@ -301,7 +301,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
       
           
           <!-- Main heading -->
-          <h1 class="text-[34px] md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-8">
+          <h1 data-aos="fade-up-right" data-aos-duration="1000" class="text-[34px] md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-8">
             Un problema menos <br> todos los meses <br>
             <span class="subheading"> Mantenimiento de jardines <br> durante todo el año.</span>
 
@@ -315,7 +315,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           </h1>
 
           <!-- CTA Button -->
-          <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 mt-[50px]">
+          <div data-aos-duration="1000" data-aos="fade-up-left" class="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 mt-[50px]">
             <a href="#categorias" on:click={(e) => smoothScrollToSection(e, 'categorias')} class="w-full sm:w-auto sm:mr-4 text-white px-8 py-4 rounded-full hover:bg-gray-800 font-semibold text-lg transition-all shadow-xl flex items-center justify-center gap-3 group bg-black">
               Elegir mi categoría
 
@@ -351,7 +351,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid lg:grid-cols-2 gap-16 items-center">
       <!-- Left side - Content -->
-      <div>
+      <div data-aos="fade-right" data-aos-duration="1000">
         <h2 class="text-2xl md:text-[48px] md:leading-[50px] font-bold text-gray-900 mb-6">
           Beneficios exclusivos del <span class="text-green-600">suscriptor</span>
         </h2>
@@ -443,7 +443,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
       </div>
 
       <!-- Right side - Images -->
-      <div class="relative">
+      <div class="relative" data-aos="fade-left" data-aos-duration="1000">
 
 
         <!-- Top small image -->
@@ -479,20 +479,20 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
       <!-- Features Grid -->
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         <!-- Feature 1 -->
-        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
+        <div data-aos-duration="1000" data-aos="fade-right" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">Corte programado mensual</h3>
+          <h3  class="text-xl font-bold text-gray-900 mb-3">Corte programado mensual</h3>
           <p class="text-gray-600 leading-relaxed">
             Un corte programado por mes + bordes + repaso de zonas de uso. Sin coordinar, sin llamadas.
           </p>
         </div>
 
         <!-- Feature 2 -->
-        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
+        <div data-aos-duration="1000" data-aos="fade-down" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -505,7 +505,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Feature 3 -->
-        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
+        <div data-aos-duration="1000" data-aos="fade-left" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -518,7 +518,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Feature 4 -->
-        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
+        <div data-aos-duration="1000" data-aos="fade-up-right" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -531,7 +531,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Feature 5 -->
-        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
+        <div data-aos-duration="1000" data-aos="fade-up" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -544,7 +544,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Feature 6 -->
-        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
+        <div data-aos-duration="1000" data-aos="fade-up-left" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -582,7 +582,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
       <!-- Pricing Cards -->
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Card 1: Urbano -->
-        <div class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+        <div data-aos-duration="1000" data-aos="fade-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Urbano</h3>
           <div class="mb-6">
             <span class="text-3xl font-bold text-green-600">$45.000</span>
@@ -614,7 +614,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Card 2: Residencial -->
-        <div class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+        <div data-aos-duration="1000" data-aos="fade-up-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Residencial</h3>
           <div class="mb-6">
             <span class="text-3xl font-bold text-green-600">$90.000</span>
@@ -646,7 +646,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Card 3: Parque / Quintas -->
-        <div class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+        <div data-aos-duration="1000" data-aos="fade-right" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Parque / Quintas</h3>
           <div class="mb-6">
             <span class="text-3xl font-bold text-green-600">$120.000</span>
@@ -678,7 +678,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Card 4: Campo de Deportes / Consultar -->
-        <div class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+        <div data-aos-duration="1000" data-aos="fade-up-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Especiales</h3>
    
           <p class="text-gray-600 mb-2">Campos de deportes</p>
@@ -717,8 +717,8 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
 
 <!-- Características principales -->
-<section class="py-20 bg-gray-100" id="como-funciona">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<section  class="py-20 bg-gray-100" id="como-funciona">
+  <div data-aos-duration="1000" data-aos="fade-up" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <h2 class="text-2xl md:text-4xl font-bold text-gray-900">¿Cómo funciona?</h2>
       <p class="mt-4 text-xl text-gray-600">Simple, profesional y confiable</p>
@@ -776,7 +776,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 <section id="beneficios" class="py-20 bg-gray-100">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid md:grid-cols-2 gap-12 items-center">
-      <div>
+      <div data-aos-duration="1000" data-aos="fade-right">
         <h2 class="text-3xl lg:text-[34px] font-bold text-gray-900 mb-6">Servicios complementarios  <span class="text-green-600">para tu jardín</span></h2>
      
 
@@ -784,7 +784,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           
       </div>
 
-      <div class="bg-primary-600 rounded-2xl p-8 text-white">
+      <div data-aos-duration="1000" data-aos="fade-left" class="bg-primary-600 rounded-2xl p-8 text-white">
         <ul class="space-y-4 mb-8">
             <li class="flex items-center lg:text-xl">
               <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -862,7 +862,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
     <div class="grid md:grid-cols-2 gap-4">
       {#each faqs as faq, index}
-        <div class="border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300">
+        <div data-aos-duration="1000" data-aos="fade-up" class="border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300">
           <button
             on:click={() => toggleFaq(index)}
             class="w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-300 {openFaq === index ? 'bg-[#0b3d2c] text-white' : 'bg-white text-gray-900 hover:bg-gray-50'}"
@@ -904,7 +904,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-16 items-center">
         <!-- Left side - Text Content -->
-        <div>
+        <div data-aos-duration="1000" data-aos="fade-right">
           <!-- Small heading with icon -->
           <div class="flex items-center gap-2 mb-4">
          
@@ -932,7 +932,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         </div>
 
         <!-- Right side - Image Grid -->
-        <div class="relative">
+        <div data-aos-duration="1000" data-aos="fade-left" class="relative">
           <div class="grid">
             <img src="varias.webp"   class="w-full h-full object-cover" alt="varias imagenes">
           </div>
@@ -946,7 +946,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
   
 
   <!-- Footer -->
-  <footer class="bg-white">
+  <footer data-aos-duration="1000" data-aos="fade-up" class="bg-white">
     <!-- SVG de pasto en la parte superior -->
     <div class="pasto">
       <img src="/pasto.svg" alt="Pasto decorativo" class="w-full h-auto" />

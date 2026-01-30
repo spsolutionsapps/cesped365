@@ -23,7 +23,7 @@
   }
 </script>
 
-<header class="z-10 py-4 bg-white shadow-md">
+<header class="z-10 py-4 bg-white">
   <div class="container flex items-center justify-between h-full px-6 mx-auto text-primary-600">
     <!-- Mobile hamburger -->
     <button

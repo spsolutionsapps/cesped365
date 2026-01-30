@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { slide } from 'svelte/transition';
   import { scheduledVisitsAPI } from '../../../services/api';
   import Card from '../../../components/Card.svelte';
   import Badge from '../../../components/Badge.svelte';
@@ -13,6 +14,7 @@
   let filtroFecha = '';
   let filtroEstado = 'programada';
   let visitasAbiertas = new Set(); // IDs de visitas expandidas
+  let filtrosAbiertos = false; // Estado de filtros colapsables
   
   // Estado del modal de reagendar
   let visitaSeleccionada = null;
@@ -150,6 +152,9 @@
   $: visitasHoy = visitasFiltradas.filter(v => esHoy(v.scheduled_date) && v.status === 'programada');
   $: visitasProximas = visitasFiltradas.filter(v => !esPasada(v.scheduled_date) && !esHoy(v.scheduled_date) && v.status === 'programada');
   $: visitasPasadas = visitasFiltradas.filter(v => esPasada(v.scheduled_date) || v.status !== 'programada');
+  
+  // Contar filtros activos
+  $: filtrosActivos = (filtroFecha ? 1 : 0) + (filtroEstado !== 'programada' ? 1 : 0);
 </script>
 
 <div class="py-6">
@@ -175,46 +180,121 @@
     </div>
   {/if}
 
-  <!-- Filtros -->
+  <!-- Filtros Colapsables -->
   <Card className="mb-6">
-    <div class="flex flex-col sm:flex-row gap-4">
-      <div class="flex-1">
-        <label for="filtroFecha" class="block text-sm font-medium text-gray-700 mb-2">
-          Filtrar por fecha
-        </label>
-        <input
-          id="filtroFecha"
-          type="date"
-          bind:value={filtroFecha}
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        />
+    <button
+      on:click={() => filtrosAbiertos = !filtrosAbiertos}
+      class="w-full flex items-center justify-between rounded-lg transition-colors md:hidden"
+    >
+      <div class="flex items-center gap-3">
+        <h3 class="text-lg font-semibold text-gray-900">Filtros</h3>
+        {#if filtrosActivos > 0}
+          <Badge type="info">{filtrosActivos} activo{filtrosActivos > 1 ? 's' : ''}</Badge>
+        {/if}
       </div>
-      <div>
-        <label for="filtroEstado" class="block text-sm font-medium text-gray-700 mb-2">
-          Estado
-        </label>
-        <select
-          id="filtroEstado"
-          bind:value={filtroEstado}
-          class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        >
-          <option value="todas">Todas</option>
-          <option value="programada">Programadas</option>
-          <option value="completada">Completadas</option>
-          <option value="cancelada">Canceladas</option>
-        </select>
-      </div>
-      {#if filtroFecha || filtroEstado !== 'programada'}
-        <div class="flex items-end">
-          <button
-            on:click={() => { filtroFecha = ''; filtroEstado = 'programada'; }}
-            class="w-full sm:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            Limpiar filtros
-          </button>
-        </div>
-      {/if}
+      <svg
+        class="w-5 h-5 text-gray-500 transition-transform {filtrosAbiertos ? 'rotate-180' : ''}"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    
+    <!-- Título en desktop (siempre visible) -->
+    <div class="hidden md:block mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Filtros</h3>
     </div>
+    
+    <!-- Contenido de filtros: colapsable en mobile, siempre visible en desktop -->
+    <div class="hidden md:block">
+      <div class="pb-4 space-y-4">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <label for="filtroFecha" class="block text-sm font-medium text-gray-700 mb-2">
+              Filtrar por fecha
+            </label>
+            <input
+              id="filtroFecha"
+              type="date"
+              bind:value={filtroFecha}
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label for="filtroEstado" class="block text-sm font-medium text-gray-700 mb-2">
+              Estado
+            </label>
+            <select
+              id="filtroEstado"
+              bind:value={filtroEstado}
+              class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="todas">Todas</option>
+              <option value="programada">Programadas</option>
+              <option value="completada">Completadas</option>
+              <option value="cancelada">Canceladas</option>
+            </select>
+          </div>
+          {#if filtroFecha || filtroEstado !== 'programada'}
+            <div class="flex items-end">
+              <button
+                on:click={() => { filtroFecha = ''; filtroEstado = 'programada'; }}
+                class="w-full md:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          {/if}
+        </div>
+      </div>
+    </div>
+    
+    {#if filtrosAbiertos}
+      <div transition:slide class="md:hidden">
+        <div class="pb-4 space-y-4 pt-4">
+          <div class="flex flex-col gap-4">
+            <div class="flex-1">
+              <label for="filtroFecha-mobile" class="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por fecha
+              </label>
+              <input
+                id="filtroFecha-mobile"
+                type="date"
+                bind:value={filtroFecha}
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label for="filtroEstado-mobile" class="block text-sm font-medium text-gray-700 mb-2">
+                Estado
+              </label>
+              <select
+                id="filtroEstado-mobile"
+                bind:value={filtroEstado}
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="todas">Todas</option>
+                <option value="programada">Programadas</option>
+                <option value="completada">Completadas</option>
+                <option value="cancelada">Canceladas</option>
+              </select>
+            </div>
+            {#if filtroFecha || filtroEstado !== 'programada'}
+              <div class="flex items-end">
+                <button
+                  on:click={() => { filtroFecha = ''; filtroEstado = 'programada'; }}
+                  class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            {/if}
+          </div>
+        </div>
+      </div>
+    {/if}
   </Card>
 
   {#if loading}

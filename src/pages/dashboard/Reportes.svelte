@@ -135,8 +135,8 @@
   $: totalPaginas = Math.ceil(reportesFiltrados.length / reportesPorPaginaAjustado);
   
   function getBadgeType(estado) {
-    if (estado === 'Bueno') return 'success';
-    if (estado === 'Regular') return 'warning';
+    if (estado === 'excelente' || estado === 'bueno') return 'success';
+    if (estado === 'regular') return 'warning';
     return 'danger';
   }
   

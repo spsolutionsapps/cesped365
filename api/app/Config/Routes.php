@@ -9,7 +9,8 @@ $routes->get('/', 'Home::index');
 
 // API Routes
 // El filtro CORS ya está aplicado globalmente en Filters.php
-$routes->group('api', ['filter' => 'corscustom'], function($routes) {
+// Nota: No usamos 'api' en el grupo porque CodeIgniter ya está en /api/public/
+$routes->group('', ['filter' => 'corscustom'], function($routes) {
     // Manejar OPTIONS para todas las rutas (preflight CORS)
     $routes->options('(:any)', function() {
         return service('response')->setStatusCode(200);

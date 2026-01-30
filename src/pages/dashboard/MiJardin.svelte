@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { auth } from '../../stores/auth';
-  import { reportesAPI } from '../../services/api';
+  import { reportesAPI, getApiBaseUrl } from '../../services/api';
   import Card from '../../components/Card.svelte';
   import Badge from '../../components/Badge.svelte';
   import ImageGalleryModal from '../../components/ImageGalleryModal.svelte';
@@ -49,7 +49,7 @@
   async function cargarSuscripcion() {
     try {
       loadingSuscripcion = true;
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_BASE_URL = getApiBaseUrl();
       const response = await fetch(`${API_BASE_URL}/subscriptions/my-subscription`, {
         credentials: 'include'
       });

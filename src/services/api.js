@@ -1,6 +1,27 @@
 // API Service - Conectado con CodeIgniter 4 Backend
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+// Obtener URL base de la API
+// En producción, usar la variable de entorno o detectar automáticamente
+export function getApiBaseUrl() {
+  // Si hay variable de entorno, usarla
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // En producción (cuando no hay localhost), usar el dominio actual
+  if (typeof window !== 'undefined') {
+    const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    if (isProduction) {
+      // En producción, usar el dominio actual + /api
+      return `${window.location.protocol}//${window.location.host}/api`;
+    }
+  }
+  
+  // Por defecto, desarrollo local
+  return 'http://localhost:8080/api';
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Helper para hacer requests
 async function request(endpoint, options = {}) {
@@ -34,10 +55,15 @@ async function request(endpoint, options = {}) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    // Asegurar que el endpoint comience con /
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const fullUrl = `${API_BASE_URL}${normalizedEndpoint}`;
     
     // Log para debugging
-    console.log(`API Request: ${config.method || 'GET'} ${API_BASE_URL}${endpoint}`);
+    console.log(`API Request: ${config.method || 'GET'} ${fullUrl}`);
+    
+    const response = await fetch(fullUrl, config);
+    
     console.log('Response status:', response.status);
     
     // Verificar si la respuesta tiene contenido
@@ -85,7 +111,6 @@ export const authAPI = {
   
   // PUT /api/me
   updateProfile: async (profileData) => {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
     const response = await fetch(`${API_BASE_URL}/me`, {
       method: 'PUT',
       headers: {
@@ -116,7 +141,6 @@ export const authAPI = {
   
   // PUT /api/me/password
   updatePassword: async (passwordData) => {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
     const response = await fetch(`${API_BASE_URL}/me/password`, {
       method: 'PUT',
       headers: {
@@ -272,7 +296,6 @@ export const scheduledVisitsAPI = {
   
   // POST /api/scheduled-visits
   create: async (visitData) => {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
     const response = await fetch(`${API_BASE_URL}/scheduled-visits`, {
       method: 'POST',
       headers: {
@@ -303,7 +326,6 @@ export const scheduledVisitsAPI = {
   
   // PUT /api/scheduled-visits/:id
   update: async (id, visitData) => {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
     const response = await fetch(`${API_BASE_URL}/scheduled-visits/${id}`, {
       method: 'PUT',
       headers: {

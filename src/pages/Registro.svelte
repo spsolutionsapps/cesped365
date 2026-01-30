@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { navigate } from 'svelte-routing';
-  import { clientesAPI } from '../services/api';
+  import { clientesAPI, getApiBaseUrl } from '../services/api';
 
   let formData = {
     name: '',
@@ -75,7 +75,7 @@
       }
 
       // Usar endpoint público de registro con JSON
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_BASE_URL = getApiBaseUrl();
       const response = await fetch(`${API_BASE_URL}/registro`, {
         method: 'POST',
         headers: {

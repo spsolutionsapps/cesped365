@@ -18,7 +18,8 @@
       
       if (result.success) {
         // Redirigir al dashboard según el rol
-        const userRole = result.data?.user?.role || result.data?.role;
+        // El rol viene en result.role después del login
+        const userRole = result.role;
         if (userRole === 'admin') {
           navigate('/dashboard/resumen', { replace: true });
         } else {

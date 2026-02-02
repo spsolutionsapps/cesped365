@@ -85,6 +85,24 @@ class SubscriptionSeeder extends Seeder
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ],
+            [
+                'name' => 'Urbano',
+                'description' => 'Plan ideal para espacios urbanos con mantenimiento regular',
+                'price' => 22000.00,
+                'frequency' => 'mensual',
+                'visits_per_month' => 3,
+                'features' => json_encode([
+                    'Corte de césped profesional',
+                    'Control de malezas',
+                    'Fertilización',
+                    '3 visitas al mes',
+                    'Informe mensual con fotos',
+                    'Soporte por WhatsApp'
+                ]),
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ],
         ];
 
         // Insertar planes

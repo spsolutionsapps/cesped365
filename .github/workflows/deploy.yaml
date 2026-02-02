@@ -108,29 +108,32 @@ jobs:
       # ========================================
       # 4. PREPARAR BACKEND (CodeIgniter)
       # ========================================
+      - name: 🔧 Setup PHP for Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: 📦 Install backend dependencies (Composer)
+        working-directory: ./api
+        run: |
+          echo "=== Instalando dependencias del backend con Composer ==="
+          composer install --no-dev --optimize-autoloader --no-interaction
+          echo "✅ vendor/ generado correctamente"
+          du -sh vendor/
+
       - name: 📦 Verificar backend dependencies
         working-directory: ./api
         run: |
           echo "=== Verificando dependencias del backend ==="
-          
-          # Verificar si vendor/ existe
-          if [ -d "vendor" ]; then
-            VENDOR_SIZE=$(du -sh vendor/ 2>/dev/null | cut -f1 || echo "unknown")
-            echo "✅ Carpeta vendor/ encontrada ($VENDOR_SIZE)"
-            echo "✅ Se usará el vendor/ del repositorio"
-          else
-            echo "⚠️  Carpeta vendor/ NO encontrada"
-            echo "⚠️  El backend necesita dependencias de Composer"
-            echo "⚠️  Ejecuta localmente: cd api && composer install"
-            exit 1
-          fi
-          
-          # Verificar archivos importantes
           if [ ! -f "app/Config/App.php" ]; then
             echo "❌ ERROR: Estructura de CodeIgniter incorrecta"
             exit 1
           fi
-          
+          if [ ! -f "vendor/autoload.php" ]; then
+            echo "❌ ERROR: vendor/autoload.php no existe"
+            exit 1
+          fi
           echo "✅ Backend verificado correctamente"
 
       - name: 🔒 Create backend .htaccess files

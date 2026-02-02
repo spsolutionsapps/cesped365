@@ -25,8 +25,7 @@
     if (plan) {
       planSeleccionado = plan;
       formData.plan = plan;
-      // Limpiar sessionStorage después de leerlo
-      sessionStorage.removeItem('planSeleccionado');
+      // No limpiamos sessionStorage aquí para que persista hasta el login y pago
     }
   });
 
@@ -47,8 +46,8 @@
   function getPlanPrice(plan) {
     const precios = {
       'Urbano': '$45.000',
-      'Residencial': '$60.000',
-      'Parque': '$90.000'
+      'Residencial': '$90.000',
+      'Parque': '$120.000'
     };
     return precios[plan] || '';
   }

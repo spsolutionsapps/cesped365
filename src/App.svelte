@@ -20,6 +20,13 @@
   import AdminClientes from './pages/dashboard/admin/Clientes.svelte';
   import AdminAgenda from './pages/dashboard/admin/Agenda.svelte';
   
+  // Pagos views
+  import DashboardPlanes from './pages/dashboard/Suscripciones.svelte';
+  import PagoExito from './pages/dashboard/pagos/Exito.svelte';
+  import PagoFallo from './pages/dashboard/pagos/Fallo.svelte';
+  import PagoPendiente from './pages/dashboard/pagos/Pendiente.svelte';
+  import ToastContainer from './components/ToastContainer.svelte';
+
   export let url = "";
   
   // Verificar sesión al cargar la app
@@ -27,6 +34,8 @@
     await auth.checkAuth();
   });
 </script>
+
+<ToastContainer />
 
 <Router {url}>
   <Route path="/" component={Landing} />
@@ -67,6 +76,34 @@
       <AdminAgenda />
     </Dashboard>
   </Route>
+  
+  <!-- Rutas de Pagos -->
+  <Route path="/dashboard/planes">
+    <Dashboard>
+      <DashboardPlanes />
+    </Dashboard>
+  </Route>
+  <Route path="/dashboard/suscripciones">
+    <Dashboard>
+      <DashboardPlanes />
+    </Dashboard>
+  </Route>
+  <Route path="/dashboard/pagos/exito">
+    <Dashboard>
+      <PagoExito />
+    </Dashboard>
+  </Route>
+  <Route path="/dashboard/pagos/fallo">
+    <Dashboard>
+      <PagoFallo />
+    </Dashboard>
+  </Route>
+  <Route path="/dashboard/pagos/pendiente">
+    <Dashboard>
+      <PagoPendiente />
+    </Dashboard>
+  </Route>
+
   <Route path="/dashboard">
     <Dashboard>
       <DashboardResumen />

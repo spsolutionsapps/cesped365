@@ -3,6 +3,7 @@
   import { slide } from 'svelte/transition';
   import { reportesAPI, jardinesAPI } from '../../services/api';
   import { auth } from '../../stores/auth';
+  import { reportesRefresh } from '../../stores/reportesRefresh';
   import Card from '../../components/Card.svelte';
   import Badge from '../../components/Badge.svelte';
   import CrearReporteModal from '../../components/CrearReporteModal.svelte';
@@ -84,6 +85,48 @@
     }
   }
 
+  function siNo(value) {
+    return value ? 'Sí' : 'No';
+  }
+
+  function capitalizar(value) {
+    if (!value || typeof value !== 'string') return '';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function getColorLabel(reporte) {
+    // Preferimos el valor real guardado (grass_color). Fallback para reportes viejos.
+    const val = reporte?.grass_color;
+    if (val) return capitalizar(val);
+    if (reporte?.colorOk === true) return 'Bueno';
+    if (reporte?.colorOk === false) return 'Regular';
+    return '-';
+  }
+
+  function getJardinInfoById(gardenId) {
+    const jardin = jardines.find(j => String(j.id) === String(gardenId));
+    if (!jardin) {
+      return { cliente: '', direccion: '' };
+    }
+    return {
+      cliente: jardin.user_name || '',
+      direccion: jardin.address || ''
+    };
+  }
+
+  function getReporteTitulo(reporte) {
+    // Preferir datos que vienen directamente del reporte (backend ya los entrega)
+    if (reporte?.cliente && reporte?.direccion) return `${reporte.cliente} — ${reporte.direccion}`;
+    if (reporte?.direccion) return reporte.direccion;
+    if (reporte?.cliente) return reporte.cliente;
+
+    const { cliente, direccion } = getJardinInfoById(reporte.garden_id);
+    if (cliente && direccion) return `${cliente} — ${direccion}`;
+    if (direccion) return direccion;
+    if (cliente) return cliente;
+    return `Jardín #${reporte.garden_id}`;
+  }
+
   function aplicarFiltros() {
     let filtrados = [...reportes];
 
@@ -108,7 +151,8 @@
       filtrados = filtrados.filter(r => 
         (r.jardinero && r.jardinero.toLowerCase().includes(termino)) ||
         (r.observaciones && r.observaciones.toLowerCase().includes(termino)) ||
-        (r.direccion && r.direccion.toLowerCase().includes(termino))
+        (getJardinInfoById(r.garden_id).direccion && getJardinInfoById(r.garden_id).direccion.toLowerCase().includes(termino)) ||
+        (getJardinInfoById(r.garden_id).cliente && getJardinInfoById(r.garden_id).cliente.toLowerCase().includes(termino))
       );
     }
 
@@ -162,6 +206,7 @@
 
   async function handleReporteCreado() {
     await cargarReportes();
+    reportesRefresh.trigger();
   }
   
   function editarReporte(reporte) {
@@ -375,13 +420,16 @@
   {:else}
     {#if vista === 'cards'}
       <!-- Vista de tarjetas (Desktop) -->
-      <div class="hidden md:grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-3 mt-6">
+      <div class="hidden md:grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4 mt-6">
         {#each reportesPaginados as reporte}
       <Card>
         <div class="space-y-4">
           <!-- Header del reporte -->
           <div class="flex justify-between items-start">
             <div>
+              <p class="text-sm font-semibold text-gray-900 leading-snug">
+                {getReporteTitulo(reporte)}
+              </p>
               <p class="text-sm text-gray-500">
                 {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
                   year: 'numeric', 
@@ -396,55 +444,23 @@
             </Badge>
           </div>
 
-          <!-- Indicadores visuales -->
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <div class="flex items-center">
-              {#if reporte.cespedParejo}
-                <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-600">Parejo</span>
+          <!-- Indicadores (texto) -->
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+            <div class="flex items-center gap-1">
+              <span class="text-gray-600">Parejo:</span>
+              <span class="font-semibold text-gray-900">{siNo(reporte.cespedParejo)}</span>
             </div>
-            <div class="flex items-center">
-              {#if reporte.colorOk}
-                <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-600">Color</span>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-600">Color:</span>
+              <span class="font-semibold text-gray-900">{getColorLabel(reporte)}</span>
             </div>
-            <div class="flex items-center">
-              {#if !reporte.manchas}
-                <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-600">Manchas</span>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-600">Manchas:</span>
+              <span class="font-semibold text-gray-900">{siNo(reporte.manchas)}</span>
             </div>
-            <div class="flex items-center">
-              {#if !reporte.malezasVisibles}
-                <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-600">Malezas</span>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-600">Malezas:</span>
+              <span class="font-semibold text-gray-900">{siNo(reporte.malezasVisibles)}</span>
             </div>
           </div>
 
@@ -529,6 +545,9 @@
               {#each reportesPaginados as reporte}
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-semibold text-gray-900 max-w-xs truncate">
+                      {getReporteTitulo(reporte)}
+                    </div>
                     <div class="text-sm font-medium text-gray-900">
                       {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
                         year: 'numeric', 
@@ -552,51 +571,11 @@
                     </Badge>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="flex flex-wrap gap-2">
-                      <div class="flex items-center" title="Césped parejo">
-                        {#if reporte.cespedParejo}
-                          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                      </div>
-                      <div class="flex items-center" title="Color saludable">
-                        {#if reporte.colorOk}
-                          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                      </div>
-                      <div class="flex items-center" title="Sin manchas">
-                        {#if !reporte.manchas}
-                          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                      </div>
-                      <div class="flex items-center" title="Sin malezas">
-                        {#if !reporte.malezasVisibles}
-                          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                      </div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                      <div><span class="text-gray-600">Parejo:</span> <span class="font-semibold text-gray-900">{siNo(reporte.cespedParejo)}</span></div>
+                      <div><span class="text-gray-600">Color:</span> <span class="font-semibold text-gray-900">{getColorLabel(reporte)}</span></div>
+                      <div><span class="text-gray-600">Manchas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.manchas)}</span></div>
+                      <div><span class="text-gray-600">Malezas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.malezasVisibles)}</span></div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -664,16 +643,19 @@
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between mb-1">
                     <p class="font-semibold text-gray-900 truncate">
-                      {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
+                      {getReporteTitulo(reporte)}
                     </p>
                     <Badge type={getBadgeType(reporte.estadoGeneral)} class="ml-2 flex-shrink-0">
                       {reporte.estadoGeneral}
                     </Badge>
                   </div>
+                  <p class="text-xs text-gray-500">
+                    {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </p>
                   <p class="text-xs text-gray-600">por {reporte.jardinero || 'N/A'}</p>
                 </div>
                 <svg 
@@ -692,54 +674,22 @@
                   <!-- Evaluación técnica -->
                   <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Evaluación</p>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                      <div class="flex items-center">
-                        {#if reporte.cespedParejo}
-                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                        <span class="text-gray-600">Parejo</span>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                      <div class="flex items-center gap-1">
+                        <span class="text-gray-600">Parejo:</span>
+                        <span class="font-semibold text-gray-900">{siNo(reporte.cespedParejo)}</span>
                       </div>
-                      <div class="flex items-center">
-                        {#if reporte.colorOk}
-                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                        <span class="text-gray-600">Color</span>
+                      <div class="flex items-center gap-1">
+                        <span class="text-gray-600">Color:</span>
+                        <span class="font-semibold text-gray-900">{getColorLabel(reporte)}</span>
                       </div>
-                      <div class="flex items-center">
-                        {#if !reporte.manchas}
-                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                        <span class="text-gray-600">Manchas</span>
+                      <div class="flex items-center gap-1">
+                        <span class="text-gray-600">Manchas:</span>
+                        <span class="font-semibold text-gray-900">{siNo(reporte.manchas)}</span>
                       </div>
-                      <div class="flex items-center">
-                        {#if !reporte.malezasVisibles}
-                          <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        {:else}
-                          <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                        <span class="text-gray-600">Malezas</span>
+                      <div class="flex items-center gap-1">
+                        <span class="text-gray-600">Malezas:</span>
+                        <span class="font-semibold text-gray-900">{siNo(reporte.malezasVisibles)}</span>
                       </div>
                     </div>
                   </div>
@@ -802,22 +752,22 @@
       </Card>
     </div>
 
-    <!-- Paginación -->
-    {#if totalPaginas > 1}
-      <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-        <div class="text-sm text-gray-700">
-          Página {paginaActual} de {totalPaginas}
-        </div>
-        <div class="flex gap-2 flex-wrap justify-center">
-          <button
-            on:click={() => paginaActual = Math.max(1, paginaActual - 1)}
-            disabled={paginaActual === 1}
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Anterior
-          </button>
-          
-          <!-- Números de página (ocultos en mobile muy pequeño) -->
+    <!-- Paginación (siempre visible) -->
+    <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+      <div class="text-sm text-gray-700">
+        Página {paginaActual} de {totalPaginas || 1}
+      </div>
+      <div class="flex gap-2 flex-wrap justify-center">
+        <button
+          on:click={() => paginaActual = Math.max(1, paginaActual - 1)}
+          disabled={paginaActual === 1 || totalPaginas <= 1}
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Anterior
+        </button>
+        
+        <!-- Números de página (solo si hay más de 1 página) -->
+        {#if totalPaginas > 1}
           <div class="hidden sm:flex gap-2">
             {#each Array(totalPaginas) as _, i}
               {#if i + 1 === 1 || i + 1 === totalPaginas || (i + 1 >= paginaActual - 1 && i + 1 <= paginaActual + 1)}
@@ -832,17 +782,17 @@
               {/if}
             {/each}
           </div>
+        {/if}
 
-          <button
-            on:click={() => paginaActual = Math.min(totalPaginas, paginaActual + 1)}
-            disabled={paginaActual === totalPaginas}
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Siguiente
-          </button>
-        </div>
+        <button
+          on:click={() => paginaActual = Math.min(totalPaginas, paginaActual + 1)}
+          disabled={totalPaginas <= 1 || paginaActual === totalPaginas}
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Siguiente
+        </button>
       </div>
-    {/if}
+    </div>
   {/if}
 </div>
 
@@ -903,43 +853,10 @@
             <!-- Detalles técnicos -->
             <div class="bg-gray-50 rounded-lg p-4">
               <h4 class="font-semibold text-gray-900 mb-3">Evaluación Técnica</h4>
-              <div class="grid grid-cols-2 gap-4">
-                <div class="flex items-center">
-                  {#if selectedReporte.cespedParejo}
-                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                  {:else}
-                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                  {/if}
-                  <span class="text-gray-700">Césped parejo</span>
-                </div>
-                <div class="flex items-center">
-                  {#if selectedReporte.colorOk}
-                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                  {:else}
-                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                  {/if}
-                  <span class="text-gray-700">Color saludable</span>
-                </div>
-                <div class="flex items-center">
-                  {#if !selectedReporte.manchas}
-                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                  {:else}
-                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                  {/if}
-                  <span class="text-gray-700">Sin manchas</span>
-                </div>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div><span class="text-gray-600">Parejo:</span> <span class="font-semibold text-gray-900">{siNo(selectedReporte.cespedParejo)}</span></div>
+                <div><span class="text-gray-600">Color:</span> <span class="font-semibold text-gray-900">{getColorLabel(selectedReporte)}</span></div>
+                <div><span class="text-gray-600">Manchas:</span> <span class="font-semibold text-gray-900">{siNo(selectedReporte.manchas)}</span></div>
                 <div class="flex items-center">
                   {#if !selectedReporte.zonasDesgastadas}
                     <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -952,18 +869,7 @@
                   {/if}
                   <span class="text-gray-700">Sin zonas desgastadas</span>
                 </div>
-                <div class="flex items-center">
-                  {#if !selectedReporte.malezasVisibles}
-                    <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                  {:else}
-                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                  {/if}
-                  <span class="text-gray-700">Sin malezas visibles</span>
-                </div>
+                <div><span class="text-gray-600">Malezas:</span> <span class="font-semibold text-gray-900">{siNo(selectedReporte.malezasVisibles)}</span></div>
                 <div class="flex items-center">
                   <svg class="w-5 h-5 text-primary-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />

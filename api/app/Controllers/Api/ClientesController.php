@@ -6,6 +6,7 @@ use CodeIgniter\RESTful\ResourceController;
 use App\Models\UserModel;
 use App\Models\GardenModel;
 use App\Models\ReportModel;
+use App\Models\UserSubscriptionModel;
 
 class ClientesController extends ResourceController
 {
@@ -13,12 +14,14 @@ class ClientesController extends ResourceController
     protected $userModel;
     protected $gardenModel;
     protected $reportModel;
+    protected $userSubscriptionModel;
     
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->gardenModel = new GardenModel();
         $this->reportModel = new ReportModel();
+        $this->userSubscriptionModel = new UserSubscriptionModel();
     }
     
     public function index()
@@ -43,6 +46,15 @@ class ClientesController extends ResourceController
         // Formatear para el frontend
         $formatted = [];
         foreach ($clientes as $cliente) {
+            // Derivar estado real desde suscripción activa (fuente de verdad)
+            $activeSub = $this->userSubscriptionModel
+                ->where('user_id', $cliente['id'])
+                ->where('status', 'activa')
+                ->orderBy('id', 'DESC')
+                ->first();
+
+            $estado = $activeSub ? 'Activo' : ($cliente['estado'] ?? 'Pendiente');
+
             // Obtener jardín del cliente
             $garden = $this->gardenModel->where('user_id', $cliente['id'])->first();
             
@@ -62,7 +74,7 @@ class ClientesController extends ResourceController
                 'telefono' => $cliente['phone'] ?? 'Sin teléfono',
                 'direccion' => $cliente['address'] ?? 'Sin dirección',
                 'plan' => $cliente['plan'] ?? 'Urbano',
-                'estado' => $cliente['estado'] ?? 'Pendiente',
+                'estado' => $estado,
                 'referidoPor' => $cliente['referido_por'] ?? null,
                 'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
                 'proximaVisita' => null // Por implementar
@@ -83,6 +95,13 @@ class ClientesController extends ResourceController
         if (!$cliente) {
             return $this->fail('Cliente no encontrado', 404);
         }
+
+        $activeSub = $this->userSubscriptionModel
+            ->where('user_id', $cliente['id'])
+            ->where('status', 'activa')
+            ->orderBy('id', 'DESC')
+            ->first();
+        $estado = $activeSub ? 'Activo' : ($cliente['estado'] ?? 'Pendiente');
         
         // Obtener jardín
         $garden = $this->gardenModel->where('user_id', $id)->first();
@@ -103,7 +122,7 @@ class ClientesController extends ResourceController
             'telefono' => $cliente['phone'] ?? 'Sin teléfono',
             'direccion' => $cliente['address'] ?? 'Sin dirección',
             'plan' => $cliente['plan'] ?? 'Urbano',
-            'estado' => $cliente['estado'] ?? 'Pendiente',
+            'estado' => $estado,
             'referidoPor' => $cliente['referido_por'] ?? null,
             'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
             'proximaVisita' => null

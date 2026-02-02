@@ -379,6 +379,7 @@ class SubscriptionsController extends ResourceController
         
         $formatted = [
             'id' => $subscription['id'],
+            'subscriptionId' => (int) $subscription['subscription_id'],
             'planName' => $subscription['plan_name'],
             'price' => (float)$subscription['price'],
             'frequency' => $subscription['frequency'],
@@ -386,7 +387,9 @@ class SubscriptionsController extends ResourceController
             'status' => $subscription['status'],
             'startDate' => $subscription['start_date'],
             'nextBillingDate' => $subscription['next_billing_date'],
-            'autoRenew' => (bool)$subscription['auto_renew']
+            'autoRenew' => (bool)$subscription['auto_renew'],
+            'paymentMethod' => $subscription['payment_method'] ?? null,
+            'externalPaymentId' => $subscription['external_payment_id'] ?? null,
         ];
         
         return $this->respond([

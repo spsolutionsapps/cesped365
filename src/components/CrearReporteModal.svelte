@@ -12,6 +12,10 @@
   let error = null;
   let jardines = [];
   
+  // Estados de progreso
+  let uploadProgress = 0; // 0-100
+  let progressMessage = '';
+  
   // Obtener fecha actual en timezone de Argentina
   function getFechaActual() {
     // Crear fecha en timezone de Buenos Aires
@@ -32,6 +36,10 @@
     garden_id: '',
     visit_date: getFechaActual(),
     grass_health: 'bueno',
+    grass_color: 'bueno',
+    grass_even: '1',
+    spots: '0',
+    weeds_visible: '0',
     technician_notes: '',
     growth_cm: '',
     pest_detected: false,
@@ -49,23 +57,75 @@
   // Imágenes
   let selectedImages = [];
   let imagePreviews = [];
+  let existingImages = []; // Imágenes existentes del reporte
 
   onMount(async () => {
     await cargarJardines();
   });
+
+  // Cargar datos del reporte cuando se está editando
+  $: if (reporte && isOpen) {
+    // Usar un pequeño delay para asegurar que el modal esté completamente abierto
+    setTimeout(() => {
+      cargarDatosReporte();
+    }, 100);
+  }
+  
+  // Resetear cuando se cierra el modal sin reporte
+  $: if (!isOpen && !reporte) {
+    resetForm();
+  }
 
   async function cargarJardines() {
     try {
       const response = await jardinesAPI.getAll();
       if (response.success) {
         jardines = response.data;
-        if (jardines.length > 0) {
+        if (jardines.length > 0 && !reporte) {
           formData.garden_id = jardines[0].id;
         }
       }
     } catch (err) {
       console.error('Error cargando jardines:', err);
     }
+  }
+
+  function cargarDatosReporte() {
+    if (!reporte) return;
+    
+    // Cargar datos del reporte en el formulario
+    formData = {
+      garden_id: reporte.garden_id || '',
+      visit_date: reporte.fecha || getFechaActual(),
+      grass_health: reporte.estadoGeneral || 'bueno',
+      grass_color: reporte.grass_color || (reporte.colorOk ? 'bueno' : 'regular'),
+      grass_even: (reporte.grass_even ?? (reporte.cespedParejo ? 1 : 0)).toString(),
+      spots: (reporte.spots ?? (reporte.manchas ? 1 : 0)).toString(),
+      weeds_visible: (reporte.weeds_visible ?? (reporte.malezasVisibles ? 1 : 0)).toString(),
+      technician_notes: reporte.jardinero || '',
+      growth_cm: reporte.crecimientoCm ? String(reporte.crecimientoCm) : '',
+      pest_detected: reporte.plagas || false,
+      pest_description: reporte.pest_description || '',
+      work_done: reporte.work_done || '',
+      recommendations: reporte.recommendations || reporte.observaciones || '',
+      grass_height_cm: reporte.grass_height_cm ? String(reporte.grass_height_cm) : '',
+      watering_status: reporte.watering_status || 'optimo',
+      fertilizer_applied: reporte.fertilizer_applied || false,
+      fertilizer_type: reporte.fertilizer_type || '',
+      weather_conditions: reporte.weather_conditions || '',
+      next_visit: reporte.next_visit || ''
+    };
+    
+    // Cargar imágenes existentes
+    if (reporte.imagenes && reporte.imagenes.length > 0) {
+      existingImages = reporte.imagenes;
+      imagePreviews = [...reporte.imagenes];
+    } else {
+      existingImages = [];
+      imagePreviews = [];
+    }
+    
+    selectedImages = []; // Las nuevas imágenes seleccionadas
   }
 
   function handleImageSelect(e) {
@@ -93,6 +153,11 @@
     e.preventDefault();
     loading = true;
     error = null;
+    uploadProgress = 0;
+    progressMessage = '';
+
+    const isEditing = !!reporte;
+    let reporteId = reporte?.id;
 
     try {
       // Preparar datos para enviar (convertir strings vacíos a null)
@@ -108,45 +173,89 @@
       console.log('📅 Fecha que se enviará:', dataToSend.visit_date);
       console.log('📦 Datos a enviar:', dataToSend);
 
-      // 1. Crear el reporte
-      console.log('🔄 Creando reporte...');
-      const reporteResponse = await reportesAPI.create(dataToSend);
-      console.log('✅ Respuesta del servidor:', reporteResponse);
-      
-      if (!reporteResponse.success) {
-        throw new Error(reporteResponse.message || 'Error al crear el reporte');
+      // 1. Crear o actualizar el reporte (20% del progreso)
+      if (isEditing) {
+        progressMessage = 'Actualizando reporte...';
+        uploadProgress = 10;
+        console.log('🔄 Actualizando reporte...');
+        
+        const reporteResponse = await reportesAPI.update(reporteId, dataToSend);
+        console.log('✅ Respuesta del servidor:', reporteResponse);
+        
+        uploadProgress = 20;
+        
+        if (!reporteResponse.success) {
+          throw new Error(reporteResponse.message || 'Error al actualizar el reporte');
+        }
+        
+        console.log('✅ Reporte actualizado con ID:', reporteId);
+      } else {
+        progressMessage = 'Creando reporte...';
+        uploadProgress = 10;
+        console.log('🔄 Creando reporte...');
+        
+        const reporteResponse = await reportesAPI.create(dataToSend);
+        console.log('✅ Respuesta del servidor:', reporteResponse);
+        
+        uploadProgress = 20;
+        
+        if (!reporteResponse.success) {
+          throw new Error(reporteResponse.message || 'Error al crear el reporte');
+        }
+
+        const nuevoReporteId = reporteResponse.data.id;
+        console.log('✅ Reporte creado con ID:', nuevoReporteId);
+        
+        // Usar el nuevo ID para subir imágenes
+        if (!reporteId) {
+          reporteId = nuevoReporteId;
+        }
       }
 
-      const reporteId = reporteResponse.data.id;
-      console.log('✅ Reporte creado con ID:', reporteId);
-
-      // 2. Subir imágenes
+      // 2. Subir nuevas imágenes (80% del progreso)
       if (selectedImages.length > 0) {
-        console.log(`📸 Subiendo ${selectedImages.length} imágenes...`);
+        const progressPerImage = 80 / selectedImages.length;
+        console.log(`📸 Subiendo ${selectedImages.length} imágenes nuevas...`);
         let imagenesSubidas = 0;
         
-        for (const image of selectedImages) {
+        for (let i = 0; i < selectedImages.length; i++) {
+          const image = selectedImages[i];
+          progressMessage = `Subiendo imagen ${i + 1} de ${selectedImages.length}...`;
+          
           try {
             await reportesAPI.uploadImage(reporteId, image);
             imagenesSubidas++;
+            uploadProgress = 20 + (imagenesSubidas * progressPerImage);
             console.log(`✅ Imagen ${imagenesSubidas}/${selectedImages.length} subida`);
           } catch (imgErr) {
             console.error('Error subiendo imagen:', imgErr);
             // Continuar con las demás imágenes aunque una falle
+            uploadProgress = 20 + (imagenesSubidas * progressPerImage);
           }
         }
         
+        progressMessage = 'Finalizando...';
+        uploadProgress = 100;
         console.log(`✅ Total imágenes subidas: ${imagenesSubidas}/${selectedImages.length}`);
+      } else {
+        uploadProgress = 100;
+        progressMessage = 'Completado';
       }
 
       // Éxito
-      console.log('🎉 Reporte creado exitosamente');
+      console.log(`🎉 Reporte ${isEditing ? 'actualizado' : 'creado'} exitosamente`);
+      
+      // Pequeño delay para que se vea el 100%
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       onSuccess();
       resetForm();
       onClose();
     } catch (err) {
-      console.error('❌ Error creando reporte:', err);
-      error = err.message || 'Error al crear el reporte. Por favor, intenta de nuevo.';
+      console.error(`❌ Error ${isEditing ? 'actualizando' : 'creando'} reporte:`, err);
+      error = err.message || `Error al ${isEditing ? 'actualizar' : 'crear'} el reporte. Por favor, intenta de nuevo.`;
+      uploadProgress = 0;
+      progressMessage = '';
     } finally {
       loading = false;
     }
@@ -157,6 +266,10 @@
       garden_id: jardines[0]?.id || '',
       visit_date: getFechaActual(),
       grass_health: 'bueno',
+      grass_color: 'bueno',
+      grass_even: '1',
+      spots: '0',
+      weeds_visible: '0',
       technician_notes: '',
       growth_cm: '',
       pest_detected: false,
@@ -172,7 +285,10 @@
     };
     selectedImages = [];
     imagePreviews = [];
+    existingImages = [];
     error = null;
+    uploadProgress = 0;
+    progressMessage = '';
   }
 
   function handleClose() {
@@ -183,11 +299,27 @@
   }
 </script>
 
-<Modal {isOpen} title="Crear Nuevo Reporte" size="lg" onClose={handleClose}>
+<Modal {isOpen} title={reporte ? "Editar Reporte" : "Crear Nuevo Reporte"} size="lg" onClose={handleClose}>
   <form on:submit={handleSubmit} class="space-y-6">
     {#if error}
       <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
         {error}
+      </div>
+    {/if}
+
+    <!-- Barra de progreso -->
+    {#if loading && uploadProgress > 0}
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-blue-700">{progressMessage || 'Procesando...'}</span>
+          <span class="text-sm font-semibold text-blue-700">{Math.round(uploadProgress)}%</span>
+        </div>
+        <div class="w-full bg-blue-200 rounded-full h-2.5 overflow-hidden">
+          <div 
+            class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+            style="width: {uploadProgress}%"
+          ></div>
+        </div>
       </div>
     {/if}
 
@@ -225,8 +357,8 @@
       </div>
     </div>
 
-    <!-- Jardinero, Estado del Césped y Estado de Riego -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Jardinero, Estado del Césped, Color y Estado de Riego -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div>
         <label for="jardinero" class="block text-sm font-medium text-gray-700 mb-2">
           Nombre del Jardinero *
@@ -254,7 +386,21 @@
           <option value="excelente">Excelente</option>
           <option value="bueno">Bueno</option>
           <option value="regular">Regular</option>
-          <option value="malo">Malo</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="grass_color" class="block text-sm font-medium text-gray-700 mb-2">
+          Color del Césped
+        </label>
+        <select
+          id="grass_color"
+          bind:value={formData.grass_color}
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="excelente">Excelente</option>
+          <option value="bueno">Bueno</option>
+          <option value="regular">Regular</option>
         </select>
       </div>
       
@@ -275,6 +421,51 @@
     </div>
 
     <!-- Mediciones -->
+    <!-- Flags visuales -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label for="grass_even" class="block text-sm font-medium text-gray-700 mb-2">
+          Parejo
+        </label>
+        <select
+          id="grass_even"
+          bind:value={formData.grass_even}
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="spots" class="block text-sm font-medium text-gray-700 mb-2">
+          Manchas
+        </label>
+        <select
+          id="spots"
+          bind:value={formData.spots}
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="weeds_visible" class="block text-sm font-medium text-gray-700 mb-2">
+          Malezas
+        </label>
+        <select
+          id="weeds_visible"
+          bind:value={formData.weeds_visible}
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label for="grass_height_cm" class="block text-sm font-medium text-gray-700 mb-2">
@@ -436,9 +627,9 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Creando...
+        {reporte ? 'Actualizando...' : 'Creando...'}
       {:else}
-        Crear Reporte
+        {reporte ? 'Actualizar Reporte' : 'Crear Reporte'}
       {/if}
     </button>
   </div>

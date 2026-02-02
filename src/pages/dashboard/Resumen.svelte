@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { auth } from '../../stores/auth';
+  import { reportesRefresh } from '../../stores/reportesRefresh';
   import { dashboardAPI, reportesAPI, historialAPI, scheduledVisitsAPI } from '../../services/api';
   import StatCard from '../../components/StatCard.svelte';
   import Card from '../../components/Card.svelte';
@@ -25,6 +26,11 @@
   auth.subscribe(value => {
     userRole = value.role;
     userName = value.user?.name;
+  });
+
+  // Refrescar último reporte cuando se crea/edita uno desde Reportes
+  reportesRefresh.subscribe((n) => {
+    if (n > 0) cargarDatos();
   });
   
   // Función para cargar datos
@@ -97,6 +103,35 @@
     if (estado === 'Bueno') return 'success';
     if (estado === 'Regular') return 'warning';
     return 'danger';
+  }
+
+  function siNo(reporte, campo) {
+    if (!reporte) return '-';
+    if (campo === 'parejo') {
+      const v = reporte.grass_even ?? reporte.cespedParejo;
+      if (v === undefined || v === null) return '-';
+      return v === 1 || v === true ? 'Sí' : 'No';
+    }
+    if (campo === 'manchas') {
+      const v = reporte.spots ?? reporte.manchas;
+      if (v === undefined || v === null) return '-';
+      return v === 1 || v === true ? 'Sí' : 'No';
+    }
+    if (campo === 'malezas') {
+      const v = reporte.weeds_visible ?? reporte.malezasVisibles;
+      if (v === undefined || v === null) return '-';
+      return v === 1 || v === true ? 'Sí' : 'No';
+    }
+    return '-';
+  }
+
+  function getColorLabel(reporte) {
+    if (!reporte) return '-';
+    const val = reporte.grass_color;
+    if (val) return val.charAt(0).toUpperCase() + val.slice(1);
+    if (reporte.colorOk === true) return 'Bueno';
+    if (reporte.colorOk === false) return 'Regular';
+    return '-';
   }
 
   function abrirReagendarModal(visita) {
@@ -338,55 +373,11 @@
         
         <div class="pt-4 border-t border-gray-200">
           <h4 class="text-sm font-semibold text-gray-700 mb-3">Detalles:</h4>
-          <div class="grid grid-cols-2 gap-3 text-sm">
-            <div class="flex items-center">
-              {#if ultimoReporte.cespedParejo}
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-700">Césped parejo</span>
-            </div>
-            <div class="flex items-center">
-              {#if ultimoReporte.colorOk}
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-700">Color saludable</span>
-            </div>
-            <div class="flex items-center">
-              {#if !ultimoReporte.manchas}
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-700">Sin manchas</span>
-            </div>
-            <div class="flex items-center">
-              {#if !ultimoReporte.malezasVisibles}
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              {:else}
-                <svg class="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              {/if}
-              <span class="text-gray-700">Sin malezas</span>
-            </div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div><span class="text-gray-600">Parejo:</span> <span class="font-semibold text-gray-900">{siNo(ultimoReporte, 'parejo')}</span></div>
+            <div><span class="text-gray-600">Color:</span> <span class="font-semibold text-gray-900">{getColorLabel(ultimoReporte)}</span></div>
+            <div><span class="text-gray-600">Manchas:</span> <span class="font-semibold text-gray-900">{siNo(ultimoReporte, 'manchas')}</span></div>
+            <div><span class="text-gray-600">Malezas:</span> <span class="font-semibold text-gray-900">{siNo(ultimoReporte, 'malezas')}</span></div>
           </div>
         </div>
 

@@ -19,6 +19,10 @@ class ReportModel extends Model
         'status',
         'grass_height_cm',
         'grass_health',
+        'grass_color',
+        'grass_even',
+        'spots',
+        'weeds_visible',
         'watering_status',
         'pest_detected',
         'pest_description',
@@ -56,7 +60,11 @@ class ReportModel extends Model
         'garden_id'      => 'required|is_natural_no_zero',
         'user_id'        => 'required|is_natural_no_zero',
         'visit_date'     => 'required|valid_date',
-        'grass_health'   => 'permit_empty|in_list[excelente,bueno,regular,malo]',
+        'grass_health'   => 'permit_empty|in_list[excelente,bueno,regular]',
+        'grass_color'    => 'permit_empty|in_list[excelente,bueno,regular]',
+        'grass_even'     => 'permit_empty|in_list[0,1]',
+        'spots'          => 'permit_empty|in_list[0,1]',
+        'weeds_visible'  => 'permit_empty|in_list[0,1]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;

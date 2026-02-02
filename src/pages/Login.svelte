@@ -17,13 +17,22 @@
       const result = await auth.login(email, password);
       
       if (result.success) {
+        // Verificar si hay un plan pendiente de pago
+        const planPendiente = sessionStorage.getItem('planSeleccionado');
+        
         // Redirigir al dashboard según el rol
         // El rol viene en result.role después del login
         const userRole = result.role;
+        
         if (userRole === 'admin') {
           navigate('/dashboard/resumen', { replace: true });
         } else {
-          navigate('/dashboard/mi-jardin', { replace: true });
+          // Si es cliente y tiene plan pendiente, ir a pagar
+          if (planPendiente) {
+            navigate('/dashboard/planes', { replace: true });
+          } else {
+            navigate('/dashboard/mi-jardin', { replace: true });
+          }
         }
       } else {
         error = result.error || 'Credenciales inválidas';

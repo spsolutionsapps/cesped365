@@ -9,8 +9,8 @@ $routes->get('/', 'Home::index');
 
 // API Routes
 // El filtro CORS ya está aplicado globalmente en Filters.php
-// Nota: No usamos 'api' en el grupo porque CodeIgniter ya está en /api/public/
-$routes->group('', ['filter' => 'corscustom'], function($routes) {
+// Nota: CodeIgniter ya está en /api/public/, pero el frontend llama a /api/..., así que añadimos el prefijo 'api' para compatibilidad
+$routes->group('api', ['filter' => 'corscustom'], function($routes) {
     // Manejar OPTIONS para todas las rutas (preflight CORS)
     $routes->options('(:any)', function() {
         return service('response')->setStatusCode(200);
@@ -19,6 +19,8 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
     // Rutas públicas (sin autenticación)
     $routes->post('login', 'Api\AuthController::login');
     $routes->post('registro', 'Api\ClientesController::create'); // Registro público
+    $routes->post('payment/webhook', 'Api\PaymentController::webhook'); // Webhook Mercado Pago
+    $routes->get('payment/preapproval-return', 'Api\PaymentController::preapprovalReturn'); // Retorno público Preapproval
     
     // Rutas protegidas (requieren autenticación)
     $routes->group('', ['filter' => 'auth'], function($routes) {
@@ -27,6 +29,11 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
         $routes->put('me', 'Api\AuthController::updateProfile');
         $routes->put('me/password', 'Api\AuthController::updatePassword');
         $routes->post('logout', 'Api\AuthController::logout');
+
+        // Pagos
+        $routes->post('payment/create-preference', 'Api\PaymentController::createPreference');
+        $routes->post('payment/create-subscription', 'Api\PaymentController::createSubscription');
+        $routes->post('payment/cancel-subscription', 'Api\PaymentController::cancelSubscription');
         
         // Dashboard (accesible para admin y cliente)
         $routes->get('dashboard', 'Api\DashboardController::index');
@@ -60,8 +67,9 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
             $routes->delete('clientes/(:num)', 'Api\ClientesController::delete/$1');
             $routes->get('clientes/(:num)/historial', 'Api\ClientesController::historial/$1');
             
-            // Reportes - Crear, subir imágenes y eliminar
+            // Reportes - Crear, actualizar, subir imágenes y eliminar
             $routes->post('reportes', 'Api\ReportesController::create');
+            $routes->put('reportes/(:num)', 'Api\ReportesController::update/$1');
             $routes->post('reportes/(:num)/imagen', 'Api\ReportesController::uploadImage/$1');
             $routes->delete('reportes/(:num)', 'Api\ReportesController::delete/$1');
             

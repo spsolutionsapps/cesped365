@@ -190,6 +190,14 @@ export const reportesAPI = {
     });
   },
 
+  // PUT /api/reportes/:id (admin only)
+  update: async (id, reporteData) => {
+    return await request(`/reportes/${id}`, {
+      method: 'PUT',
+      body: reporteData
+    });
+  },
+
   // POST /api/reportes/:id/imagen (admin only)
   uploadImage: async (reporteId, imageFile) => {
     const formData = new FormData();
@@ -272,6 +280,32 @@ export const suscripcionesAPI = {
   getPlanes: async () => {
     return await request('/subscriptions/plans');
   }
+};
+
+// Pagos endpoints
+export const paymentAPI = {
+  // POST /api/payment/create-preference
+  createPreference: async (planId) => {
+    return await request('/payment/create-preference', {
+      method: 'POST',
+      body: { plan_id: planId }
+    });
+  },
+
+  // POST /api/payment/create-subscription (Mercado Pago Preapproval)
+  createSubscription: async (planId) => {
+    return await request('/payment/create-subscription', {
+      method: 'POST',
+      body: { plan_id: planId }
+    });
+  },
+
+  // POST /api/payment/cancel-subscription (Mercado Pago Preapproval)
+  cancelSubscription: async () => {
+    return await request('/payment/cancel-subscription', {
+      method: 'POST'
+    });
+  },
 };
 
 // Jardines endpoints

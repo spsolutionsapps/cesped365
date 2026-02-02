@@ -8,9 +8,9 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 // API Routes
-// El filtro CORS ya está aplicado globalmente en Filters.php
-// Nota: CodeIgniter ya está en /api/public/, pero el frontend llama a /api/..., así que añadimos el prefijo 'api' para compatibilidad
-$routes->group('api', ['filter' => 'corscustom'], function($routes) {
+// CodeIgniter está montado en /api/public/, así que las URIs llegan SIN el prefijo /api/ (ej: /me, /login)
+// El frontend llama a /api/me, /api/login, etc.; Apache reescribe a index.php/me, index.php/login
+$routes->group('', ['filter' => 'corscustom'], function($routes) {
     // Manejar OPTIONS para todas las rutas (preflight CORS)
     $routes->options('(:any)', function() {
         return service('response')->setStatusCode(200);

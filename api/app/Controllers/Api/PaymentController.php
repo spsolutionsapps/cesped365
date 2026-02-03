@@ -522,9 +522,9 @@ class PaymentController extends BaseController
             // Reflejar estado en users (para panel admin)
             try {
                 $userModel = new UserModel();
-                $userModel->update($userId, ['estado' => 'Inactivo']);
+                $userModel->update($userId, ['estado' => 'Cancelada']);
             } catch (\Throwable $t) {
-                log_message('warning', 'No se pudo actualizar users.estado a Inactivo para user ' . $userId . ': ' . $t->getMessage());
+                log_message('warning', 'No se pudo actualizar users.estado a Cancelada para user ' . $userId . ': ' . $t->getMessage());
             }
 
             log_message('info', "Suscripción cancelada por usuario {$userId}. Preapproval={$preapprovalId}");
@@ -783,16 +783,16 @@ class PaymentController extends BaseController
         foreach ($subs as $sub) {
             $this->userSubscriptionModel->update($sub['id'], ['status' => $newStatus]);
         }
-        // También reflejar estado en users
+        // También reflejar estado en users (Cancelada si canceló, Pausada si pausó)
         try {
-            // Encontrar user_id por la suscripción
             if (!empty($subs[0]['user_id'])) {
                 $userId = $subs[0]['user_id'];
                 $userModel = new UserModel();
-                $userModel->update($userId, ['estado' => 'Inactivo']);
+                $userEstado = ($status === 'paused') ? 'Pausada' : 'Cancelada';
+                $userModel->update($userId, ['estado' => $userEstado]);
             }
         } catch (\Throwable $t) {
-            log_message('warning', 'No se pudo actualizar users.estado a Inactivo para preapproval ' . $preapprovalId . ': ' . $t->getMessage());
+            log_message('warning', 'No se pudo actualizar users.estado para preapproval ' . $preapprovalId . ': ' . $t->getMessage());
         }
         log_message('info', "Suscripción marcada {$newStatus} por webhook preapproval {$preapprovalId}");
     }

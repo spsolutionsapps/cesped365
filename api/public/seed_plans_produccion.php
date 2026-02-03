@@ -1,7 +1,8 @@
 <?php
 /**
  * Script para cargar planes en producción (ejecutar UNA vez).
- * Acceder: https://cesped365.com/api/seed_plans_produccion.php?ejecutar=1
+ * Normal: .../seed_plans_produccion.php?ejecutar=1
+ * Test ($15): .../seed_plans_produccion.php?ejecutar=1&test=1
  * BORRAR después de usar.
  */
 if (!isset($_GET['ejecutar']) || $_GET['ejecutar'] !== '1') {
@@ -47,10 +48,12 @@ try {
 }
 
 $now = date('Y-m-d H:i:s');
+$isTest = isset($_GET['test']) && $_GET['test'] === '1';
+$prices = $isTest ? [15, 15, 15] : [45000, 90000, 120000];
 $plans = [
-    ['Urbano', 'Hasta 500 m² de tu jardín', 45000, ['Corte, bordes y repaso', 'Monitoreo mensual con fotos', 'Recomendaciones estacionales']],
-    ['Residencial', '500 a 2.500 m² de tu jardín', 90000, ['Corte, bordes y repaso', 'Monitoreo mensual con fotos', 'Recomendaciones estacionales']],
-    ['Parque', '2.500 a 4.000 m² de tu jardín', 120000, ['Corte, bordes y repaso', 'Monitoreo mensual con fotos', 'Recomendaciones estacionales']],
+    ['Urbano', 'Hasta 500 m² de tu jardín', $prices[0], ['Corte, bordes y repaso', 'Monitoreo mensual con fotos', 'Recomendaciones estacionales']],
+    ['Residencial', '500 a 2.500 m² de tu jardín', $prices[1], ['Corte, bordes y repaso', 'Monitoreo mensual con fotos', 'Recomendaciones estacionales']],
+    ['Parque', '2.500 a 4.000 m² de tu jardín', $prices[2], ['Corte, bordes y repaso', 'Monitoreo mensual con fotos', 'Recomendaciones estacionales']],
 ];
 
 // Desactivar todos
@@ -72,4 +75,8 @@ foreach ($plans as $p) {
 }
 
 echo "OK - Planes cargados: Urbano, Residencial, Parque.\n";
-echo "BORRAR seed_plans_produccion.php ahora.\n";
+if ($isTest) {
+    echo "Modo TEST: precios en \$15 (para pruebas Mercado Pago).\n";
+    echo "Para precios reales, ejecutar sin &test=1\n";
+}
+echo "BORRAR seed_plans_produccion.php después de usar.\n";

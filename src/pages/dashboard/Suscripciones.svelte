@@ -310,10 +310,10 @@
       </div>
     {/if}
 
-    <!-- Planes Disponibles -->
-    {#if plans.length > 0}
+    <!-- Planes Disponibles (oculto cuando tiene plan pendiente de pago) -->
+    {#if !selectedPlan && plans.length > 0}
       <h4 class="text-xl font-semibold text-gray-600 mb-4">
-        {mySubscription ? 'Cambiar Plan' : selectedPlan ? 'Otros Planes Disponibles' : 'Elegir un Plan'}
+        {mySubscription ? 'Cambiar Plan' : 'Elegir un Plan'}
       </h4>
       
       <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-3">
@@ -370,7 +370,7 @@
         </div>
         {/each}
       </div>
-    {:else}
+    {:else if !selectedPlan}
       <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded relative" role="alert">
         <span class="block sm:inline">No hay planes disponibles en este momento.</span>
       </div>

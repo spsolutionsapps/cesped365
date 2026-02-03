@@ -36,7 +36,8 @@
       </svg>
     </button>
 
-    <!-- Search input (placeholder) -->
+    <!-- Search input (solo admin) -->
+    {#if userRole === 'admin'}
     <div class="flex justify-center flex-1 lg:mr-32">
       <div class="relative w-full max-w-xl mr-6 focus-within:text-primary-500">
         <div class="absolute inset-y-0 flex items-center pl-2">
@@ -52,6 +53,9 @@
         />
       </div>
     </div>
+    {:else}
+    <div class="flex-1"></div>
+    {/if}
 
     <ul class="flex items-center flex-shrink-0 space-x-6">
 

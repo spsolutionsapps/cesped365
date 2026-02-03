@@ -38,7 +38,7 @@
         if (response.success && response.data) {
           suscripcion = {
             plan: response.data.planName,
-            estado: response.data.status === 'activa' ? 'Activo' : 'Inactivo',
+            estado: { activa: 'Activo', cancelada: 'Cancelada', pausada: 'Pausada', vencida: 'Vencida' }[response.data.status] || 'Inactivo',
             fechaInicio: response.data.startDate,
             proximoPago: response.data.nextBillingDate,
             monto: `$${response.data.price.toLocaleString('es-AR')}`,

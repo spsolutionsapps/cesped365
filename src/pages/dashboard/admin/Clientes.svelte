@@ -57,6 +57,8 @@ function getBadgeType(estado) {
     switch(estado) {
       case 'Activo': return 'success';
       case 'Pendiente': return 'warning';
+      case 'Cancelada': return 'danger';
+      case 'Pausada': return 'warning';
       case 'Inactivo': return 'danger';
       default: return 'default';
     }
@@ -181,6 +183,8 @@ function getBadgeType(estado) {
         <option>Todos los estados</option>
         <option>Activo</option>
         <option>Pendiente</option>
+        <option>Cancelada</option>
+        <option>Pausada</option>
         <option>Inactivo</option>
       </select>
     </div>

@@ -617,96 +617,96 @@ class PaymentController extends BaseController
 
     /**
      * Webhook para recibir notificaciones de Mercado Pago
-     * POST /api/payment/webhook
+     * POST/GET /api/payment/webhook
+     * Siempre responde 200 (MP reintenta si recibe error).
      */
     public function webhook()
     {
-        // Mercado Pago puede enviar datos por querystring o JSON body
-        $payload = $this->request->getJSON(true) ?? [];
-
-        $type = $this->request->getVar('type') ?? ($payload['type'] ?? null);
-        $topic = $this->request->getVar('topic') ?? ($payload['topic'] ?? null);
-
-        $id =
-            $this->request->getVar('data.id')
-            ?? $this->request->getVar('id')
-            ?? ($payload['data']['id'] ?? null)
-            ?? ($payload['id'] ?? null);
-
-        // Log para depuración
-        log_message('info', "Webhook MP recibido: Topic: {$topic} Type: {$type} ID: {$id}");
-
-        // Si es un test del panel (ID dummy) o falta ID, responder OK para que MP lo considere válido
-        if (empty($id) || (string) $id === '123456') {
-            log_message('info', 'Webhook MP: evento de prueba o sin ID. Respondiendo 200 OK.');
-            return $this->respond(['status' => 'OK'], 200);
-        }
-
-        if ($topic == 'payment' || $type == 'payment') {
+        try {
+            $payload = [];
             try {
-                $client = new PaymentClient();
-                $payment = $client->get($id);
-                
-                if ($payment && $payment->status == 'approved') {
-                    $externalRef = $payment->external_reference;
-                    // Formato esperado: user_id|plan_id|timestamp
-                    $parts = explode('|', $externalRef);
-                    
-                    if (count($parts) >= 2) {
-                        $userId = $parts[0];
-                        $planId = $parts[1];
-                        
-                        $this->activateSubscription($userId, $planId, $payment);
-                    }
-                }
-            } catch (MPApiException $e) {
-                // Importante: responder 200 para evitar reintentos infinitos por eventos inválidos
-                $apiResponse = $e->getApiResponse();
-                $statusCode = $apiResponse ? $apiResponse->getStatusCode() : 'N/A';
-                $content = $apiResponse ? $apiResponse->getContent() : null;
-                log_message('error', 'Error procesando webhook MP payment: ' . $e->getMessage() . ' Status: ' . $statusCode . ' Content: ' . json_encode($content));
-                return $this->respond(['status' => 'OK'], 200);
-            } catch (\Exception $e) {
-                log_message('error', 'Error procesando webhook MP payment: ' . $e->getMessage());
+                $payload = $this->request->getJSON(true) ?? [];
+            } catch (\Throwable $e) {
+                log_message('warning', 'Webhook MP: error parseando JSON - ' . $e->getMessage());
+            }
+
+            $type = $this->request->getVar('type') ?? ($payload['type'] ?? null);
+            $topic = $this->request->getVar('topic') ?? ($payload['topic'] ?? null);
+            $entity = $this->request->getVar('entity') ?? ($payload['entity'] ?? null);
+
+            $id =
+                $this->request->getVar('data.id')
+                ?? $this->request->getVar('id')
+                ?? ($payload['data']['id'] ?? null)
+                ?? ($payload['id'] ?? null);
+
+            log_message('info', "Webhook MP recibido: Topic: {$topic} Type: {$type} Entity: {$entity} ID: {$id}");
+
+            // Test del panel MP o sin ID → 200 OK
+            if (empty($id) || (string) $id === '123456') {
                 return $this->respond(['status' => 'OK'], 200);
             }
-        }
 
-        // Webhook de suscripciones (Preapproval)
-        if ($topic == 'preapproval' || $type == 'preapproval') {
-            try {
-                $client = new PreApprovalClient();
-                $preapproval = $client->get((string) $id);
-
-                if ($preapproval && !empty($preapproval->external_reference)) {
-                    $parts = explode('|', (string) $preapproval->external_reference);
-                    if (count($parts) >= 2) {
-                        $userId = $parts[0];
-                        $planId = $parts[1];
-
-                        $status = strtolower((string) ($preapproval->status ?? ''));
-                        $nextPayment = $preapproval->next_payment_date ?? null;
-
-                        if (in_array($status, ['authorized', 'active'], true)) {
-                            $this->activateSubscriptionFromPreapproval($userId, $planId, $preapproval, $nextPayment);
-                        } elseif (in_array($status, ['cancelled', 'paused'], true)) {
-                            $this->markSubscriptionInactiveFromPreapproval($preapproval);
+            if ($topic == 'payment' || $type == 'payment') {
+                try {
+                    $client = new PaymentClient();
+                    $payment = $client->get($id);
+                    if ($payment && $payment->status == 'approved') {
+                        $externalRef = $payment->external_reference;
+                        $parts = explode('|', $externalRef ?? '');
+                        if (count($parts) >= 2) {
+                            $this->activateSubscription($parts[0], $parts[1], $payment);
                         }
                     }
+                } catch (MPApiException $e) {
+                    $apiResponse = $e->getApiResponse();
+                    $statusCode = $apiResponse ? $apiResponse->getStatusCode() : 'N/A';
+                    log_message('error', 'Webhook MP payment: ' . $e->getMessage() . ' Status: ' . $statusCode);
+                    return $this->respond(['status' => 'OK'], 200);
+                } catch (\Exception $e) {
+                    log_message('error', 'Webhook MP payment: ' . $e->getMessage());
+                    return $this->respond(['status' => 'OK'], 200);
                 }
-            } catch (MPApiException $e) {
-                $apiResponse = $e->getApiResponse();
-                $statusCode = $apiResponse ? $apiResponse->getStatusCode() : 'N/A';
-                $content = $apiResponse ? $apiResponse->getContent() : null;
-                log_message('error', 'Error procesando webhook MP preapproval: ' . $e->getMessage() . ' Status: ' . $statusCode . ' Content: ' . json_encode($content));
-                return $this->respond(['status' => 'OK'], 200);
-            } catch (\Exception $e) {
-                log_message('error', 'Error procesando webhook MP preapproval: ' . $e->getMessage());
-                return $this->respond(['status' => 'OK'], 200);
             }
-        }
 
-        return $this->respond(['status' => 'OK'], 200);
+            // Webhook de suscripciones (Preapproval) - MP envía type "subscription_preapproval" o entity "preapproval"
+            $isPreapproval = in_array($topic, ['preapproval'], true)
+                || in_array($type, ['preapproval', 'subscription_preapproval'], true)
+                || $entity === 'preapproval';
+            if ($isPreapproval) {
+                try {
+                    $client = new PreApprovalClient();
+                    $preapproval = $client->get((string) $id);
+                    if ($preapproval && !empty($preapproval->external_reference)) {
+                        $parts = explode('|', (string) $preapproval->external_reference);
+                        if (count($parts) >= 2) {
+                            $userId = $parts[0];
+                            $planId = $parts[1];
+                            $status = strtolower((string) ($preapproval->status ?? ''));
+                            $nextPayment = $preapproval->next_payment_date ?? null;
+                            if (in_array($status, ['authorized', 'active'], true)) {
+                                $this->activateSubscriptionFromPreapproval($userId, $planId, $preapproval, $nextPayment);
+                            } elseif (in_array($status, ['cancelled', 'paused'], true)) {
+                                $this->markSubscriptionInactiveFromPreapproval($preapproval);
+                            }
+                        }
+                    }
+                } catch (MPApiException $e) {
+                    $apiResponse = $e->getApiResponse();
+                    $statusCode = $apiResponse ? $apiResponse->getStatusCode() : 'N/A';
+                    log_message('error', 'Webhook MP preapproval: ' . $e->getMessage() . ' Status: ' . $statusCode);
+                    return $this->respond(['status' => 'OK'], 200);
+                } catch (\Exception $e) {
+                    log_message('error', 'Webhook MP preapproval: ' . $e->getMessage());
+                    return $this->respond(['status' => 'OK'], 200);
+                }
+            }
+
+            return $this->respond(['status' => 'OK'], 200);
+        } catch (\Throwable $e) {
+            log_message('error', 'Webhook MP error inesperado: ' . $e->getMessage() . ' ' . $e->getFile() . ':' . $e->getLine());
+            return $this->respond(['status' => 'OK'], 200);
+        }
     }
 
     private function activateSubscriptionFromPreapproval($userId, $planId, $preapproval, $nextPaymentDate = null)

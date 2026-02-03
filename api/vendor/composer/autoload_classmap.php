@@ -22,6 +22,7 @@ return array(
     'App\\Controllers\\Home' => $baseDir . '/app/Controllers/Home.php',
     'App\\Database\\Seeds\\DatabaseSeeder' => $baseDir . '/app/Database/Seeds/DatabaseSeeder.php',
     'App\\Database\\Seeds\\GardenSeeder' => $baseDir . '/app/Database/Seeds/GardenSeeder.php',
+    'App\\Database\\Seeds\\PublicPlansSeeder' => $baseDir . '/app/Database/Seeds/PublicPlansSeeder.php',
     'App\\Database\\Seeds\\ReportSeeder' => $baseDir . '/app/Database/Seeds/ReportSeeder.php',
     'App\\Database\\Seeds\\SubscriptionSeeder' => $baseDir . '/app/Database/Seeds/SubscriptionSeeder.php',
     'App\\Database\\Seeds\\UserSeeder' => $baseDir . '/app/Database/Seeds/UserSeeder.php',

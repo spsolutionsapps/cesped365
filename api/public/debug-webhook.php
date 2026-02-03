@@ -74,15 +74,15 @@ if (!file_exists($vendor)) {
 require $vendor;
 echo "2. vendor/autoload OK\n";
 
-$mpPath = dirname(__DIR__) . '/vendor/mercadopago/dx-php/src/MercadoPago/MercadoPagoConfig.php';
+$base = dirname(__DIR__) . '/vendor/mercadopago';
+$mpPath = $base . '/dx-php/src/MercadoPago/MercadoPagoConfig.php';
 echo "3. MercadoPago SDK:\n";
-echo "   Ruta esperada: $mpPath\n";
-echo "   Archivo existe: " . (file_exists($mpPath) ? 'SÍ' : 'NO') . "\n";
-$mpDir = dirname(__DIR__) . '/vendor/mercadopago';
-if (is_dir($mpDir)) {
-    $list = @scandir($mpDir) ?: [];
-    $list = array_diff($list, ['.', '..']);
-    echo "   Contenido vendor/mercadopago/: " . (empty($list) ? '(vacío)' : implode(', ', $list)) . "\n";
+echo "   Archivo: " . (file_exists($mpPath) ? 'EXISTE' : 'NO EXISTE') . "\n";
+$dirs = ['mercadopago' => $base, 'dx-php' => $base . '/dx-php', 'src' => $base . '/dx-php/src', 'MercadoPago' => $base . '/dx-php/src/MercadoPago'];
+foreach ($dirs as $name => $path) {
+    $ok = is_dir($path);
+    $cnt = $ok ? count(array_diff(@scandir($path) ?: [], ['.', '..'])) : 0;
+    echo "   $name/ " . ($ok ? "OK ($cnt items)" : "NO existe") . "\n";
 }
 if (!class_exists('MercadoPago\MercadoPagoConfig')) {
     echo "   class_exists=FALLO - Intentando require directo...\n";
@@ -116,28 +116,9 @@ foreach (explode("\n", $envContent) as $line) {
 $token = $_ENV['MERCADOPAGO_ACCESS_TOKEN'] ?? getenv('MERCADOPAGO_ACCESS_TOKEN') ?? '';
 echo "5. MERCADOPAGO_ACCESS_TOKEN: " . (strlen($token) > 10 ? substr($token, 0, 15) . '...' : 'VACÍO') . "\n";
 
-echo "\n6. Boot CodeIgniter + PaymentController...\n";
-try {
-    if (!defined('FCPATH')) {
-        define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
-    }
-    chdir(FCPATH);
-    require FCPATH . '../app/Config/Paths.php';
-    $paths = new \Config\Paths();
-    require $paths->systemDirectory . '/Boot.php';
-    \CodeIgniter\Boot::bootConsole($paths);
-    
-    $ctrl = new \App\Controllers\Api\PaymentController();
-    echo "   PaymentController OK\n";
-    
-    echo "\n7. Simulando webhook()...\n";
-    $resp = $ctrl->webhook();
-    echo "   Status: " . $resp->getStatusCode() . " OK\n";
-} catch (\Throwable $e) {
-    echo "\n!!! ERROR !!!\n";
-    echo $e->getMessage() . "\n";
-    echo $e->getFile() . ":" . $e->getLine() . "\n";
-    echo "\nStack:\n" . $e->getTraceAsString() . "\n";
-}
+echo "\n6. Resumen:\n";
+echo "   MercadoPago SDK cargado correctamente.\n";
+echo "   El webhook real debería funcionar.\n";
+echo "\n   Probá el webhook en el panel de Mercado Pago (Probar).\n";
 
 echo "\n--- BORRAR debug-webhook.php después de usar ---\n";

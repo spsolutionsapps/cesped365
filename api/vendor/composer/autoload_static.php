@@ -124,6 +124,7 @@ class ComposerStaticInit657ac079313fab046eb8c29fe1d6992b
         'App\\Controllers\\Home' => __DIR__ . '/../..' . '/app/Controllers/Home.php',
         'App\\Database\\Seeds\\DatabaseSeeder' => __DIR__ . '/../..' . '/app/Database/Seeds/DatabaseSeeder.php',
         'App\\Database\\Seeds\\GardenSeeder' => __DIR__ . '/../..' . '/app/Database/Seeds/GardenSeeder.php',
+        'App\\Database\\Seeds\\PublicPlansSeeder' => __DIR__ . '/../..' . '/app/Database/Seeds/PublicPlansSeeder.php',
         'App\\Database\\Seeds\\ReportSeeder' => __DIR__ . '/../..' . '/app/Database/Seeds/ReportSeeder.php',
         'App\\Database\\Seeds\\SubscriptionSeeder' => __DIR__ . '/../..' . '/app/Database/Seeds/SubscriptionSeeder.php',
         'App\\Database\\Seeds\\UserSeeder' => __DIR__ . '/../..' . '/app/Database/Seeds/UserSeeder.php',

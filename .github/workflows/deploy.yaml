@@ -118,7 +118,8 @@ jobs:
         working-directory: ./api
         run: |
           echo "=== Instalando dependencias del backend con Composer ==="
-          composer install --no-dev --optimize-autoloader --no-interaction
+          rm -rf vendor/mercadopago
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
           echo "✅ vendor/ generado correctamente"
           du -sh vendor/
 
@@ -134,7 +135,12 @@ jobs:
             echo "❌ ERROR: vendor/autoload.php no existe"
             exit 1
           fi
-          echo "✅ Backend verificado correctamente"
+          if [ ! -f "vendor/mercadopago/dx-php/src/MercadoPago/MercadoPagoConfig.php" ]; then
+            echo "❌ ERROR: Mercado Pago SDK no instalado (vendor/mercadopago/dx-php vacío o faltante)"
+            echo "   Ejecutar localmente: cd api && composer install --no-dev"
+            exit 1
+          fi
+          echo "✅ Backend verificado (incl. Mercado Pago)"
 
       - name: 🔒 Create backend .htaccess files
         run: |

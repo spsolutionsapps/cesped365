@@ -27,12 +27,8 @@
         if (userRole === 'admin') {
           navigate('/dashboard/resumen', { replace: true });
         } else {
-          // Si es cliente y tiene plan pendiente, ir a pagar
-          if (planPendiente) {
-            navigate('/dashboard/planes', { replace: true });
-          } else {
-            navigate('/dashboard/mi-jardin', { replace: true });
-          }
+          // Cliente: ir a suscripciones (pagar o ver estado)
+          navigate('/dashboard/suscripciones', { replace: true });
         }
       } else {
         error = result.error || 'Credenciales inválidas';

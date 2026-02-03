@@ -19,7 +19,7 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
     // Rutas públicas (sin autenticación)
     $routes->post('login', 'Api\AuthController::login');
     $routes->post('registro', 'Api\ClientesController::create'); // Registro público
-    $routes->post('payment/webhook', 'Api\PaymentController::webhook'); // Webhook Mercado Pago
+    $routes->match(['get', 'post'], 'payment/webhook', 'Api\PaymentController::webhook'); // Webhook Mercado Pago (GET para test del panel, POST para notificaciones reales)
     $routes->get('payment/preapproval-return', 'Api\PaymentController::preapprovalReturn'); // Retorno público Preapproval
     
     // Rutas protegidas (requieren autenticación)

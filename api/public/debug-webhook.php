@@ -74,10 +74,27 @@ if (!file_exists($vendor)) {
 require $vendor;
 echo "2. vendor/autoload OK\n";
 
-if (!class_exists('MercadoPago\MercadoPagoConfig')) {
-    die("3. ERROR: MercadoPago SDK no cargado. Revisar vendor/.\n");
+$mpPath = dirname(__DIR__) . '/vendor/mercadopago/dx-php/src/MercadoPago/MercadoPagoConfig.php';
+echo "3. MercadoPago SDK:\n";
+echo "   Ruta esperada: $mpPath\n";
+echo "   Archivo existe: " . (file_exists($mpPath) ? 'SÍ' : 'NO') . "\n";
+$mpDir = dirname(__DIR__) . '/vendor/mercadopago';
+if (is_dir($mpDir)) {
+    $list = @scandir($mpDir) ?: [];
+    $list = array_diff($list, ['.', '..']);
+    echo "   Contenido vendor/mercadopago/: " . (empty($list) ? '(vacío)' : implode(', ', $list)) . "\n";
 }
-echo "3. MercadoPago SDK OK\n";
+if (!class_exists('MercadoPago\MercadoPagoConfig')) {
+    echo "   class_exists=FALLO - Intentando require directo...\n";
+    if (file_exists($mpPath)) {
+        require_once $mpPath;
+        echo "   require OK. class_exists ahora: " . (class_exists('MercadoPago\MercadoPagoConfig') ? 'SÍ' : 'NO') . "\n";
+    }
+    if (!class_exists('MercadoPago\MercadoPagoConfig')) {
+        die("\n   ERROR: MercadoPago SDK no cargado. Verificar que exista:\n   vendor/mercadopago/dx-php/src/MercadoPago/MercadoPagoConfig.php\n");
+    }
+}
+echo "   MercadoPago SDK OK\n";
 
 $env = dirname(__DIR__) . '/.env';
 if (!file_exists($env)) {

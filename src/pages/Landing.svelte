@@ -144,16 +144,9 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
         <!-- Desktop CTA Buttons -->
         <div class="hidden md:flex items-center">
-          <!-- Botones de login ocultos temporalmente
-          <Link to="/login" class="mr-4 text-white px-6 py-3 rounded-full hover:opacity-90 font-medium transition-all shadow-lg flex items-center gap-3 group" style="background-image: linear-gradient(to right, #000000, #262c29);">
-            Registrarse
-          </Link>
-
-          <Link to="/login" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3
-          rounded-full hover:from-green-600 hover:to-green-700 font-medium transition-all shadow-lg flex items-center gap-3">
+          <Link to="/login" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full hover:from-green-600 hover:to-green-700 font-medium transition-all shadow-lg flex items-center gap-3">
             Iniciar sesión
           </Link>
-          -->
         </div>
 
         <!-- Mobile Menu Button -->
@@ -259,16 +252,6 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
       <!-- CTA Buttons -->
       <div class="space-y-3">
-        <!-- Botones de login ocultos temporalmente
-        <Link
-          to="/login"
-          on:click={() => mobileMenuOpen = false}
-          class="block w-full text-center text-white px-6 py-4 rounded-full hover:opacity-90 font-semibold text-lg transition-all shadow-lg"
-          style="background-image: linear-gradient(to right, #000000, #262c29);"
-        >
-          Registrarse
-        </Link>
-
         <Link
           to="/login"
           on:click={() => mobileMenuOpen = false}
@@ -276,7 +259,6 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         >
           Iniciar sesión
         </Link>
-        -->
       </div>
     </div>
   </div>

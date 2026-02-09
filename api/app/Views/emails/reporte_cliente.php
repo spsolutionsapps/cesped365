@@ -4,7 +4,8 @@
  * Variables: $report (con address, user_name, visit_date, grass_health, etc.), $viewReportUrl, $logoUrl
  */
 $report = $report ?? [];
-$viewReportUrl = $viewReportUrl ?? '#';
+// El controller garantiza URL absoluta; evitar # para que no abra about:blank
+$viewReportUrl = (!empty($viewReportUrl) && $viewReportUrl !== '#') ? $viewReportUrl : 'https://www.cesped365.com/dashboard/reportes';
 $logoUrl = $logoUrl ?? '';
 $clientName = $report['user_name'] ?? 'Cliente';
 $address = $report['address'] ?? '';
@@ -81,7 +82,7 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
               <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto;">
                 <tr>
                   <td align="center" style="background-color: #166534; border-radius: 8px;">
-                    <a href="<?= esc($viewReportUrl !== '' && $viewReportUrl !== '#' ? $viewReportUrl : '#') ?>" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 14px 28px; color: #ffffff !important; text-decoration: none; font-size: 14px; font-weight: 600;">Ver reporte online y valorar el servicio</a>
+                    <a href="<?= esc($viewReportUrl) ?>" rel="noopener noreferrer" style="display: inline-block; padding: 14px 28px; color: #ffffff !important; text-decoration: none; font-size: 14px; font-weight: 600;">Ver reporte online y valorar el servicio</a>
                   </td>
                 </tr>
               </table>

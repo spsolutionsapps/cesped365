@@ -730,7 +730,7 @@ class ReportesController extends ResourceController
         $publicBaseUrl = $publicBaseUrl !== '' && $publicBaseUrl !== false
             ? rtrim(preg_replace('#/$#', '', (string) $publicBaseUrl), '/')
             : '';
-        $viewReportUrl = $publicBaseUrl !== '' ? $publicBaseUrl . '/login' : '';
+        $viewReportUrl = $publicBaseUrl !== '' ? $publicBaseUrl . '/dashboard/reportes' : '';
         $logoUrl = $publicBaseUrl !== '' ? $publicBaseUrl . '/logo_email.png' : '';
 
         $data = [

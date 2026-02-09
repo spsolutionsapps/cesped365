@@ -75,15 +75,25 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
               </table>
             </td>
           </tr>
-          <!-- Botón / Link -->
+          <!-- Botón / Link (tabla para máxima compatibilidad en clientes de correo) -->
           <tr>
             <td style="padding: 0 32px 32px; text-align: center;">
-              <a href="<?= esc($viewReportUrl) ?>" style="display: inline-block; padding: 12px 24px; background-color: #166534; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 8px;">Ver reporte online y valorar el servicio</a>
+              <?php if ($viewReportUrl !== '' && $viewReportUrl !== '#'): ?>
+              <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto;">
+                <tr>
+                  <td align="center" style="background-color: #166534; border-radius: 8px;">
+                    <a href="<?= esc($viewReportUrl) ?>" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 14px 28px; color: #ffffff !important; text-decoration: none; font-size: 14px; font-weight: 600;">Ver reporte online y valorar el servicio</a>
+                  </td>
+                </tr>
+              </table>
+              <?php else: ?>
+              <p style="margin: 0; font-size: 13px; color: #6b7280;">Entrá a tu cuenta en la web para ver el reporte.</p>
+              <?php endif; ?>
             </td>
           </tr>
           <tr>
             <td style="padding: 0 32px 24px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #9ca3af;">Iniciá sesión en tu cuenta para ver el reporte completo, fotos y dejar valoración del servicio. ¡Gracias!</p>
+              <p style="margin: 0; font-size: 15px; color: #212121;">Iniciá sesión en tu cuenta para ver el reporte completo, <br> fotos y dejar valoración del servicio. <br> ¡Gracias!</p>
             </td>
           </tr>
         </table>

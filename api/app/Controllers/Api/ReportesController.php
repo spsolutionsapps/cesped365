@@ -731,8 +731,9 @@ class ReportesController extends ResourceController
             ? rtrim(preg_replace('#/$#', '', (string) $publicBaseUrl), '/')
             : '';
         // Fallback para que el botón "Ver reporte" siempre tenga URL válida (p. ej. si .env no carga)
+        // Usar raíz + ?go=login para que el servidor siempre sirva index.html (evita página en blanco si /login no reescribe)
         $baseForLinks = $publicBaseUrl !== '' ? $publicBaseUrl : 'https://www.cesped365.com';
-        $viewReportUrl = $baseForLinks . '/login';
+        $viewReportUrl = $baseForLinks . '/?go=login';
         $logoUrl = $baseForLinks !== '' ? $baseForLinks . '/logo_email.png' : '';
 
         $data = [

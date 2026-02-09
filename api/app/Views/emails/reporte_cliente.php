@@ -5,7 +5,7 @@
  */
 $report = $report ?? [];
 // El controller garantiza URL absoluta; evitar # para que no abra about:blank
-$viewReportUrl = (!empty($viewReportUrl) && $viewReportUrl !== '#') ? $viewReportUrl : 'https://www.cesped365.com/login';
+$viewReportUrl = (!empty($viewReportUrl) && $viewReportUrl !== '#') ? $viewReportUrl : 'https://www.cesped365.com/?go=login';
 $clientName = $report['user_name'] ?? 'Cliente';
 $address = $report['address'] ?? '';
 $visitDate = $report['visit_date'] ?? '';

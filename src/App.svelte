@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { Router, Route } from 'svelte-routing';
+  import { Router, Route, navigate } from 'svelte-routing';
   import { auth } from './stores/auth';
   
   // Pages
@@ -34,6 +34,13 @@
   // Verificar sesión al cargar la app
   onMount(async () => {
     await auth.checkAuth();
+    // Enlace desde email "Ver reporte": ?go=login evita 404 en /login en hostings que no reescriben
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('go') === 'login') {
+        navigate('/login', { replace: true });
+      }
+    }
   });
 </script>
 

@@ -53,7 +53,10 @@ class ClientesController extends ResourceController
                 ->orderBy('id', 'DESC')
                 ->first();
 
-            $estado = $activeSub ? 'Activo' : ($cliente['estado'] ?? 'Pendiente');
+            // Si el admin puso Cancelado, respetarlo; si no, derivar de suscripción
+            $estado = ($cliente['estado'] ?? '') === 'Cancelado'
+                ? 'Cancelado'
+                : ($activeSub ? 'Activo' : ($cliente['estado'] ?? 'Pendiente'));
 
             // Obtener jardín del cliente
             $garden = $this->gardenModel->where('user_id', $cliente['id'])->first();
@@ -103,7 +106,10 @@ class ClientesController extends ResourceController
             ->where('status', 'activa')
             ->orderBy('id', 'DESC')
             ->first();
-        $estado = $activeSub ? 'Activo' : ($cliente['estado'] ?? 'Pendiente');
+        // Si el admin puso Cancelado, respetarlo; si no, derivar de suscripción
+        $estado = ($cliente['estado'] ?? '') === 'Cancelado'
+            ? 'Cancelado'
+            : ($activeSub ? 'Activo' : ($cliente['estado'] ?? 'Pendiente'));
         
         // Obtener jardín
         $garden = $this->gardenModel->where('user_id', $id)->first();
@@ -166,7 +172,7 @@ class ClientesController extends ResourceController
             'phone' => 'permit_empty|max_length[20]',
             'address' => 'permit_empty|max_length[255]',
             'referidoPor' => 'permit_empty|max_length[255]',
-            'estado' => 'permit_empty|in_list[Activo,Pendiente]',
+            'estado' => 'permit_empty|in_list[Activo,Pendiente,Cancelado]',
             'lat' => 'permit_empty|decimal',
             'lng' => 'permit_empty|decimal'
         ];
@@ -207,7 +213,7 @@ class ClientesController extends ResourceController
             'phone' => !empty($input['phone']) ? $input['phone'] : null,
             'address' => !empty($input['address']) ? $input['address'] : null,
             'plan' => $input['plan'] ?? 'Urbano',
-            'estado' => in_array($input['estado'] ?? '', ['Activo', 'Pendiente']) ? $input['estado'] : 'Pendiente',
+            'estado' => in_array($input['estado'] ?? '', ['Activo', 'Pendiente', 'Cancelado']) ? $input['estado'] : 'Pendiente',
             'referido_por' => !empty($input['referidoPor']) ? $input['referidoPor'] : null
         ];
         // Coordenadas GPS opcionales
@@ -255,18 +261,35 @@ class ClientesController extends ResourceController
     
     public function update($id = null)
     {
-        // Obtener datos del request usando getVar() que funciona con PUT
-        $input = [
-            'name' => $this->request->getVar('name'),
-            'email' => $this->request->getVar('email'),
-            'password' => $this->request->getVar('password'),
-            'phone' => $this->request->getVar('phone'),
-            'address' => $this->request->getVar('address'),
-            'plan' => $this->request->getVar('plan'),
-            'estado' => $this->request->getVar('estado'),
-            'lat' => $this->request->getVar('lat'),
-            'lng' => $this->request->getVar('lng'),
-        ];
+        // PUT puede llegar como JSON (recomendado) o form-urlencoded.
+        $contentType = $this->request->getHeaderLine('Content-Type');
+        $json = (strpos($contentType, 'application/json') !== false) ? $this->request->getJSON(true) : null;
+        if (is_array($json)) {
+            $input = [
+                'name' => $json['name'] ?? null,
+                'email' => $json['email'] ?? null,
+                'password' => $json['password'] ?? null,
+                'phone' => $json['phone'] ?? null,
+                'address' => $json['address'] ?? null,
+                'plan' => $json['plan'] ?? null,
+                'estado' => $json['estado'] ?? null,
+                'lat' => $json['lat'] ?? null,
+                'lng' => $json['lng'] ?? null,
+            ];
+        } else {
+            $raw = $this->request->getRawInput();
+            $input = [
+                'name' => $raw['name'] ?? $this->request->getVar('name'),
+                'email' => $raw['email'] ?? $this->request->getVar('email'),
+                'password' => $raw['password'] ?? $this->request->getVar('password'),
+                'phone' => $raw['phone'] ?? $this->request->getVar('phone'),
+                'address' => $raw['address'] ?? $this->request->getVar('address'),
+                'plan' => $raw['plan'] ?? $this->request->getVar('plan'),
+                'estado' => $raw['estado'] ?? $this->request->getVar('estado'),
+                'lat' => $raw['lat'] ?? $this->request->getVar('lat'),
+                'lng' => $raw['lng'] ?? $this->request->getVar('lng'),
+            ];
+        }
         
         // Log de datos recibidos
         log_message('info', 'UPDATE Cliente - ID: ' . $id);
@@ -286,7 +309,7 @@ class ClientesController extends ResourceController
             'password' => 'permit_empty|min_length[6]',
             'phone' => 'permit_empty|max_length[20]',
             'address' => 'permit_empty|max_length[255]',
-            'estado' => 'permit_empty|in_list[Activo,Pendiente]',
+            'estado' => 'permit_empty|in_list[Activo,Pendiente,Cancelado]',
             'lat' => 'permit_empty|decimal',
             'lng' => 'permit_empty|decimal'
         ];
@@ -317,7 +340,7 @@ class ClientesController extends ResourceController
             $userData['plan'] = $input['plan'];
             log_message('info', 'Plan a actualizar: ' . $input['plan']);
         }
-        if (isset($input['estado']) && in_array($input['estado'], ['Activo', 'Pendiente'])) {
+        if (isset($input['estado']) && in_array($input['estado'], ['Activo', 'Pendiente', 'Cancelado'])) {
             $userData['estado'] = $input['estado'];
         }
         if (array_key_exists('lat', $input)) {
@@ -330,9 +353,9 @@ class ClientesController extends ResourceController
         // Log de datos a actualizar
         log_message('info', 'Datos a actualizar: ' . json_encode($userData));
         
-        // Actualizar usuario
+        // Actualizar usuario (skipValidation: el modelo exige password required y en edición no lo enviamos)
         if (!empty($userData)) {
-            $result = $this->userModel->update($id, $userData);
+            $result = $this->userModel->skipValidation(true)->update($id, $userData);
             log_message('info', 'Resultado actualización: ' . ($result ? 'éxito' : 'fallo'));
         }
         

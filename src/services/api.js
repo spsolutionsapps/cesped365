@@ -34,10 +34,13 @@ async function request(endpoint, options = {}) {
     ...options,
   };
 
-  // Para form data (usado por CodeIgniter)
+  // Para form data (usado por CodeIgniter) o JSON (ej. PUT clientes)
   if (options.body && !(options.body instanceof FormData)) {
-    // Si es JSON, convertir a URLSearchParams para CodeIgniter
-    if (typeof options.body === 'object') {
+    // Si ya es string (ej. JSON), no convertir
+    if (typeof options.body === 'string') {
+      config.body = options.body;
+      if (!config.headers['Content-Type']) config.headers['Content-Type'] = 'application/json';
+    } else if (typeof options.body === 'object') {
       const formData = new URLSearchParams();
       Object.keys(options.body).forEach(key => {
         const value = options.body[key];
@@ -255,11 +258,12 @@ export const clientesAPI = {
     return await request(`/clientes/${id}`);
   },
   
-  // PUT /api/clientes/:id
+  // PUT /api/clientes/:id (JSON para que el backend reciba el body correctamente en PUT)
   update: async (id, clienteData) => {
     return await request(`/clientes/${id}`, {
       method: 'PUT',
-      body: clienteData
+      body: JSON.stringify(clienteData),
+      headers: { 'Content-Type': 'application/json' }
     });
   },
   

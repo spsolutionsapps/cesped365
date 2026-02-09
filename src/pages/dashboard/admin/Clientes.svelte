@@ -57,6 +57,7 @@ function getBadgeType(estado) {
     switch(estado) {
       case 'Activo': return 'success';
       case 'Pendiente': return 'warning';
+      case 'Cancelado':
       case 'Cancelada': return 'danger';
       case 'Pausada': return 'warning';
       case 'Inactivo': return 'danger';
@@ -183,7 +184,7 @@ function getBadgeType(estado) {
         <option>Todos los estados</option>
         <option>Activo</option>
         <option>Pendiente</option>
-        <option>Cancelada</option>
+        <option>Cancelado</option>
         <option>Pausada</option>
         <option>Inactivo</option>
       </select>
@@ -677,15 +678,6 @@ function getBadgeType(estado) {
               </div>
             </div>
 
-            <!-- Acciones -->
-            <div class="flex gap-2">
-              <button class="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 font-medium">
-                Ver reportes
-              </button>
-              <button class="flex-1 bg-white text-gray-700 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 font-medium">
-                Editar cliente
-              </button>
-            </div>
           </div>
         </div>
       </div>

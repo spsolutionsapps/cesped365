@@ -246,7 +246,7 @@
       </p>
     </div>
 
-    <!-- Estado (Activo / Pendiente) -->
+    <!-- Estado (Activo / Pendiente / Cancelado) -->
     <div>
       <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
         Estado
@@ -258,9 +258,10 @@
       >
         <option value="Pendiente">Pendiente</option>
         <option value="Activo">Activo</option>
+        <option value="Cancelado">Cancelado</option>
       </select>
       <p class="mt-1 text-xs text-gray-500">
-        Marcar como Activo si el cliente ya pagó por otro medio
+        Marcar como Activo si el cliente ya pagó por otro medio. Cancelado si dio de baja el servicio.
       </p>
     </div>
 

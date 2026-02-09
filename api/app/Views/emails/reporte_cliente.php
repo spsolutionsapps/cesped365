@@ -5,8 +5,7 @@
  */
 $report = $report ?? [];
 // El controller garantiza URL absoluta; evitar # para que no abra about:blank
-$viewReportUrl = (!empty($viewReportUrl) && $viewReportUrl !== '#') ? $viewReportUrl : 'https://www.cesped365.com/dashboard/reportes';
-$logoUrl = $logoUrl ?? '';
+$viewReportUrl = (!empty($viewReportUrl) && $viewReportUrl !== '#') ? $viewReportUrl : 'https://www.cesped365.com/login';
 $clientName = $report['user_name'] ?? 'Cliente';
 $address = $report['address'] ?? '';
 $visitDate = $report['visit_date'] ?? '';
@@ -35,11 +34,9 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
           <!-- Logo -->
           <tr>
             <td style="padding: 28px 32px 16px; text-align: center; border-bottom: 1px solid #e5e7eb;">
-              <?php if ($logoUrl): ?>
-              <img src="<?= esc($logoUrl) ?>" alt="Cesped365" width="180" height="auto" style="display: inline-block; max-height: 60px; width: auto;">
-              <?php else: ?>
-              <span style="font-size: 24px; font-weight: 700; color: #166534;">Cesped365</span>
-              <?php endif; ?>
+
+              <span style="font-size: 26px; font-weight: 700; color: #166534;">Cesped365</span>
+
             </td>
           </tr>
           <!-- Título -->
@@ -82,7 +79,7 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
               <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto;">
                 <tr>
                   <td align="center" style="background-color: #166534; border-radius: 8px;">
-                    <a href="<?= esc($viewReportUrl) ?>" rel="noopener noreferrer" style="display: inline-block; padding: 14px 28px; color: #ffffff !important; text-decoration: none; font-size: 14px; font-weight: 600;">Ver reporte online y valorar el servicio</a>
+                    <a href="<?= esc($viewReportUrl) ?>" rel="noopener noreferrer" style="display: inline-block; padding: 14px 28px; color: #ffffff !important; text-decoration: none; font-size: 14px; font-weight: 600;">Iniciar sesión para ver tu reporte</a>
                   </td>
                 </tr>
               </table>

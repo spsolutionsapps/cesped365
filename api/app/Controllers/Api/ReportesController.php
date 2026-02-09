@@ -732,7 +732,7 @@ class ReportesController extends ResourceController
             : '';
         // Fallback para que el botón "Ver reporte" siempre tenga URL válida (p. ej. si .env no carga)
         $baseForLinks = $publicBaseUrl !== '' ? $publicBaseUrl : 'https://www.cesped365.com';
-        $viewReportUrl = $baseForLinks . '/dashboard/reportes';
+        $viewReportUrl = $baseForLinks . '/login';
         $logoUrl = $baseForLinks !== '' ? $baseForLinks . '/logo_email.png' : '';
 
         $data = [

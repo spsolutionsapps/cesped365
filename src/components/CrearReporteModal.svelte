@@ -153,8 +153,8 @@
     e.preventDefault();
     loading = true;
     error = null;
-    uploadProgress = 0;
-    progressMessage = '';
+    uploadProgress = 5;
+    progressMessage = 'Procesando...';
 
     const isEditing = !!reporte;
     let reporteId = reporte?.id;
@@ -300,26 +300,32 @@
 </script>
 
 <Modal {isOpen} title={reporte ? "Editar Reporte" : "Crear Nuevo Reporte"} size="lg" onClose={handleClose}>
+  <!-- Loading overlay centrado sobre el modal -->
+  {#if loading}
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+      <div class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+        <div class="flex justify-center mb-4">
+          <svg class="animate-spin h-12 w-12 text-primary-600" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        <p class="text-gray-700 font-medium mb-3">{progressMessage || 'Procesando...'}</p>
+        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div 
+            class="bg-primary-600 h-2 rounded-full transition-all duration-300 ease-out"
+            style="width: {uploadProgress}%"
+          ></div>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">{Math.round(uploadProgress)}%</p>
+      </div>
+    </div>
+  {/if}
+
   <form on:submit={handleSubmit} class="space-y-6">
     {#if error}
       <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
         {error}
-      </div>
-    {/if}
-
-    <!-- Barra de progreso -->
-    {#if loading && uploadProgress > 0}
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-blue-700">{progressMessage || 'Procesando...'}</span>
-          <span class="text-sm font-semibold text-blue-700">{Math.round(uploadProgress)}%</span>
-        </div>
-        <div class="w-full bg-blue-200 rounded-full h-2.5 overflow-hidden">
-          <div 
-            class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
-            style="width: {uploadProgress}%"
-          ></div>
-        </div>
       </div>
     {/if}
 

@@ -49,7 +49,7 @@ try {
 
 $now = date('Y-m-d H:i:s');
 $isTest = isset($_GET['test']) && $_GET['test'] === '1';
-$prices = $isTest ? [15, 15, 15] : [45000, 90000, 120000];
+$prices = $isTest ? [15, 15, 15] : [60000, 90000, 120000];
 $plans = [
     ['Urbano', 'Hasta 500 m² de tu jardín', $prices[0], []],
     ['Residencial', '500 a 2.500 m² de tu jardín', $prices[1], []],

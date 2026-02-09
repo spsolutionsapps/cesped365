@@ -2,12 +2,27 @@
 -- Script para phpMyAdmin: crear TODAS las tablas de Cesped365
 -- Generado a partir de las migraciones del proyecto.
 -- ============================================================
--- Cómo usar:
+--
+--  ⚠️  ADVERTENCIA - PRODUCCIÓN  ⚠️
+--  Este script BORRA todas las tablas (DROP TABLE) y las vuelve
+--  a crear VACÍAS. Se pierden TODOS los datos: usuarios, admin,
+--  reportes, planes, visitas, etc.
+--
+--  ► NO ejecutar en la base de datos de PRODUCCIÓN si ya tienes
+--    datos que quieres conservar.
+--  ► Usar SOLO para una base NUEVA / vacía (ej. instalación
+--    inicial o entorno de pruebas).
+--
+--  Si lo ejecutaste por error en producción, después debes:
+--  1. Crear de nuevo el admin: abrir en el navegador
+--     .../public/seed_admin.php?ejecutar=1
+--  2. Crear de nuevo los planes: .../public/seed_plans_produccion.php?ejecutar=1
+--
+-- ============================================================
+-- Cómo usar (solo en base nueva):
 -- 1. En phpMyAdmin, selecciona tu base de datos (ej. cesped365).
 -- 2. Ve a la pestaña "SQL".
 -- 3. Pega y ejecuta todo el script.
--- Si alguna tabla ya existe, verás error; en ese caso puedes
--- comentar o borrar el CREATE de esa tabla y ejecutar el resto.
 -- ============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;

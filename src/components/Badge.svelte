@@ -1,5 +1,6 @@
 <script>
   export let type = 'default'; // default, success, warning, danger, info
+  export let className = '';
   
   const typeClasses = {
     default: 'bg-gray-100 text-gray-800',
@@ -10,6 +11,6 @@
   };
 </script>
 
-<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {typeClasses[type]}">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {typeClasses[type]} {className}">
   <slot />
 </span>

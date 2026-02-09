@@ -14,6 +14,7 @@
   import DashboardMiJardin from './pages/dashboard/MiJardin.svelte';
   import DashboardReportes from './pages/dashboard/Reportes.svelte';
   import DashboardHistorial from './pages/dashboard/Historial.svelte';
+  import DashboardAgendarVisita from './pages/dashboard/AgendarVisita.svelte';
   import DashboardPerfil from './pages/dashboard/Perfil.svelte';
   
   // Admin views
@@ -59,6 +60,11 @@
   <Route path="/dashboard/historial">
     <Dashboard>
       <DashboardHistorial />
+    </Dashboard>
+  </Route>
+  <Route path="/dashboard/agendar-visita">
+    <Dashboard>
+      <DashboardAgendarVisita />
     </Dashboard>
   </Route>
   <Route path="/dashboard/perfil">

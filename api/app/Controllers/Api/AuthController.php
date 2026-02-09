@@ -243,22 +243,22 @@ class AuthController extends ResourceController
             return $this->fail('Usuario no encontrado', 404);
         }
         
-        // Obtener datos del request
-        $contentType = $this->request->getHeaderLine('Content-Type');
+        // Obtener datos: form-urlencoded (POST) o JSON (PUT)
+        $contentType = $this->request->getHeaderLine('Content-Type') ?? '';
         $isJson = strpos($contentType, 'application/json') !== false;
         
         if ($isJson) {
-            $input = $this->request->getJSON(true) ?? [];
+            $raw = file_get_contents('php://input');
+            $input = is_string($raw) && $raw !== '' ? (json_decode($raw, true) ?? []) : [];
         } else {
-            $input = $this->request->getVar();
+            $input = $this->request->getPost() ?: $this->request->getVar();
         }
         
         $currentPassword = $input['current_password'] ?? null;
-        $newPassword = $input['new_password'] ?? null;
-        $confirmPassword = $input['confirm_password'] ?? null;
+        $newPassword = trim((string) ($input['new_password'] ?? ''));
         
-        // Validar que se recibieron todos los campos
-        if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+        // Validar que se recibieron los campos requeridos
+        if (empty($currentPassword) || empty($newPassword)) {
             return $this->respond([
                 'success' => false,
                 'message' => 'Todos los campos son requeridos'
@@ -273,15 +273,7 @@ class AuthController extends ResourceController
             ], 400);
         }
         
-        // Verificar que las nuevas contraseñas coincidan
-        if ($newPassword !== $confirmPassword) {
-            return $this->respond([
-                'success' => false,
-                'message' => 'Las contraseñas nuevas no coinciden'
-            ], 400);
-        }
-        
-        // Validar longitud mínima
+        // Validar longitud mínima (la coincidencia se valida en el frontend)
         if (strlen($newPassword) < 6) {
             return $this->respond([
                 'success' => false,

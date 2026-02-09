@@ -21,7 +21,9 @@ class UserModel extends Model
         'address',
         'plan',
         'estado',
-        'referido_por'
+        'referido_por',
+        'lat',
+        'lng'
     ];
 
     protected bool $allowEmptyInserts = false;

@@ -9,7 +9,7 @@
       <h3 class="text-lg font-semibold text-gray-900">{title}</h3>
     </div>
   {/if}
-  <div class="p-6">
+  <div class="p-0 sm:p-6">
     <slot />
   </div>
 </div>

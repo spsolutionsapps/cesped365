@@ -19,11 +19,7 @@ class PublicPlansSeeder extends Seeder
                 'price' => 45000.00,
                 'frequency' => 'mensual',
                 'visits_per_month' => 1,
-                'features' => json_encode([
-                    'Corte, bordes y repaso',
-                    'Monitoreo mensual con fotos',
-                    'Recomendaciones estacionales',
-                ], JSON_UNESCAPED_UNICODE),
+                'features' => json_encode([], JSON_UNESCAPED_UNICODE),
                 'is_active' => 1,
             ],
             [
@@ -32,11 +28,7 @@ class PublicPlansSeeder extends Seeder
                 'price' => 90000.00,
                 'frequency' => 'mensual',
                 'visits_per_month' => 1,
-                'features' => json_encode([
-                    'Corte, bordes y repaso',
-                    'Monitoreo mensual con fotos',
-                    'Recomendaciones estacionales',
-                ], JSON_UNESCAPED_UNICODE),
+                'features' => json_encode([], JSON_UNESCAPED_UNICODE),
                 'is_active' => 1,
             ],
             [
@@ -45,11 +37,7 @@ class PublicPlansSeeder extends Seeder
                 'price' => 120000.00,
                 'frequency' => 'mensual',
                 'visits_per_month' => 1,
-                'features' => json_encode([
-                    'Corte, bordes y repaso',
-                    'Monitoreo mensual con fotos',
-                    'Recomendaciones estacionales',
-                ], JSON_UNESCAPED_UNICODE),
+                'features' => json_encode([], JSON_UNESCAPED_UNICODE),
                 'is_active' => 1,
             ],
         ];

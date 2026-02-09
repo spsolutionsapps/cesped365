@@ -33,7 +33,9 @@ class ReportModel extends Model
         'fertilizer_applied',
         'fertilizer_type',
         'weather_conditions',
-        'technician_notes'
+        'technician_notes',
+        'client_rating',
+        'client_feedback'
     ];
 
     protected bool $allowEmptyInserts = false;

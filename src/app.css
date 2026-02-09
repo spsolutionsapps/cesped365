@@ -12,8 +12,27 @@
 
   .tandil {
     font-size: 24px;
-
   }
+
+
+.borderLeftGreen{
+  border-left: 6px solid #2a9652 !important;
+}
+
+.borderPlanActual {
+  border: 1px solid #2a9652;
+  background: linear-gradient(180deg, rgb(255 255 255) 0%, rgb(205 255 192) 100%);
+}
+
+.pendienteDePago {
+  border: 1px solid #fdc788;
+}
+
+.verdeDegrade {
+  background: #5dc068;
+    background: linear-gradient(90deg, rgb(32 192 91) 0%, rgb(18 125 57) 100%);
+}
+
   .subheading {
     font-size: 25px;
     display: block;

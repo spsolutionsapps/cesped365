@@ -24,8 +24,9 @@
   });
   
   function getBadgeType(estado) {
-    if (estado === 'Bueno') return 'success';
-    if (estado === 'Regular') return 'warning';
+    const e = (estado || '').toLowerCase();
+    if (e === 'bueno' || e === 'excelente') return 'success';
+    if (e === 'regular') return 'warning';
     return 'danger';
   }
 </script>
@@ -138,7 +139,7 @@
         <div>
           <p class="text-sm text-gray-600">Estado Bueno</p>
           <p class="text-2xl font-bold text-gray-900">
-            {historial.filter(v => v.estadoGeneral === 'Bueno').length}
+            {historial.filter(v => ['bueno', 'excelente'].includes((v.estadoGeneral || '').toLowerCase())).length}
           </p>
         </div>
       </div>
@@ -154,7 +155,7 @@
         <div>
           <p class="text-sm text-gray-600">Requiere Atención</p>
           <p class="text-2xl font-bold text-gray-900">
-            {historial.filter(v => v.estadoGeneral === 'Regular').length}
+            {historial.filter(v => (v.estadoGeneral || '').toLowerCase() === 'regular').length}
           </p>
         </div>
       </div>

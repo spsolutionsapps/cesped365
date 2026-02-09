@@ -76,6 +76,8 @@ class ClientesController extends ResourceController
                 'plan' => $cliente['plan'] ?? 'Urbano',
                 'estado' => $estado,
                 'referidoPor' => $cliente['referido_por'] ?? null,
+                'lat' => isset($cliente['lat']) ? (float) $cliente['lat'] : null,
+                'lng' => isset($cliente['lng']) ? (float) $cliente['lng'] : null,
                 'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
                 'proximaVisita' => null // Por implementar
             ];
@@ -124,6 +126,8 @@ class ClientesController extends ResourceController
             'plan' => $cliente['plan'] ?? 'Urbano',
             'estado' => $estado,
             'referidoPor' => $cliente['referido_por'] ?? null,
+            'lat' => isset($cliente['lat']) ? (float) $cliente['lat'] : null,
+            'lng' => isset($cliente['lng']) ? (float) $cliente['lng'] : null,
             'ultimaVisita' => $ultimoReporte ? $ultimoReporte['visit_date'] : null,
             'proximaVisita' => null
         ];
@@ -161,7 +165,10 @@ class ClientesController extends ResourceController
             'password' => 'required|min_length[6]',
             'phone' => 'permit_empty|max_length[20]',
             'address' => 'permit_empty|max_length[255]',
-            'referidoPor' => 'permit_empty|max_length[255]'
+            'referidoPor' => 'permit_empty|max_length[255]',
+            'estado' => 'permit_empty|in_list[Activo,Pendiente]',
+            'lat' => 'permit_empty|decimal',
+            'lng' => 'permit_empty|decimal'
         ];
         
         // Para JSON, necesitamos validar manualmente
@@ -200,9 +207,16 @@ class ClientesController extends ResourceController
             'phone' => !empty($input['phone']) ? $input['phone'] : null,
             'address' => !empty($input['address']) ? $input['address'] : null,
             'plan' => $input['plan'] ?? 'Urbano',
-            'estado' => 'Pendiente', // Siempre pendiente hasta que se active con MercadoPago
+            'estado' => in_array($input['estado'] ?? '', ['Activo', 'Pendiente']) ? $input['estado'] : 'Pendiente',
             'referido_por' => !empty($input['referidoPor']) ? $input['referidoPor'] : null
         ];
+        // Coordenadas GPS opcionales
+        if (isset($input['lat']) && $input['lat'] !== '' && $input['lat'] !== null) {
+            $userData['lat'] = is_numeric($input['lat']) ? $input['lat'] : null;
+        }
+        if (isset($input['lng']) && $input['lng'] !== '' && $input['lng'] !== null) {
+            $userData['lng'] = is_numeric($input['lng']) ? $input['lng'] : null;
+        }
         
         $userId = $this->userModel->insert($userData);
         
@@ -249,6 +263,9 @@ class ClientesController extends ResourceController
             'phone' => $this->request->getVar('phone'),
             'address' => $this->request->getVar('address'),
             'plan' => $this->request->getVar('plan'),
+            'estado' => $this->request->getVar('estado'),
+            'lat' => $this->request->getVar('lat'),
+            'lng' => $this->request->getVar('lng'),
         ];
         
         // Log de datos recibidos
@@ -268,7 +285,10 @@ class ClientesController extends ResourceController
             'email' => "permit_empty|valid_email|is_unique[users.email,id,{$id}]",
             'password' => 'permit_empty|min_length[6]',
             'phone' => 'permit_empty|max_length[20]',
-            'address' => 'permit_empty|max_length[255]'
+            'address' => 'permit_empty|max_length[255]',
+            'estado' => 'permit_empty|in_list[Activo,Pendiente]',
+            'lat' => 'permit_empty|decimal',
+            'lng' => 'permit_empty|decimal'
         ];
         
         if (!$this->validate($rules)) {
@@ -296,6 +316,15 @@ class ClientesController extends ResourceController
         if (isset($input['plan'])) {
             $userData['plan'] = $input['plan'];
             log_message('info', 'Plan a actualizar: ' . $input['plan']);
+        }
+        if (isset($input['estado']) && in_array($input['estado'], ['Activo', 'Pendiente'])) {
+            $userData['estado'] = $input['estado'];
+        }
+        if (array_key_exists('lat', $input)) {
+            $userData['lat'] = ($input['lat'] !== '' && $input['lat'] !== null && is_numeric($input['lat'])) ? $input['lat'] : null;
+        }
+        if (array_key_exists('lng', $input)) {
+            $userData['lng'] = ($input['lng'] !== '' && $input['lng'] !== null && is_numeric($input['lng'])) ? $input['lng'] : null;
         }
         
         // Log de datos a actualizar

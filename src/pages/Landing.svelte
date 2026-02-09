@@ -677,57 +677,94 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
 
 
-<!-- Características principales -->
-<section  class="py-20 bg-gray-100" id="como-funciona">
+<!-- Características principales - Cómo funciona -->
+<section class="py-20 bg-gray-100" id="como-funciona">
   <div data-aos-duration="1000" data-aos="fade-up" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <h2 class="text-2xl md:text-4xl font-bold text-gray-900">¿Cómo funciona?</h2>
       <p class="mt-4 text-xl text-gray-600">Simple, profesional y confiable</p>
     </div>
-    
-    <div class="grid md:grid-cols-4 gap-12">
-      <div class="text-center">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 justify-items-center">
+      <!-- 1. Elegís el plan -->
+      <div class="text-center w-full max-w-xs">
         <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           </svg>
         </div>
-        <h6 class=" font-bold text-gray-900 mb-4 lg:text-xl">Elegís la categoría y el plan <br> que mejor se adapta a tu jardín. </h6>
-        <!-- <p class="text-gray-600">Mantenimiento regular según tu plan. Sin preocupaciones, sin llamadas.</p> -->
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">1. Elegís el plan</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Seleccionás el plan que mejor se adapta a tu jardín o parque.</p>
       </div>
 
-      <div class="text-center">
+      <!-- 2. Cargás tus datos -->
+      <div class="text-center w-full max-w-xs">
+        <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">2. Cargás tus datos</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Ingresás tus datos para recibir reportes, fotos y acceder al panel de gestión.</p>
+      </div>
+
+      <!-- 3. Pagás el servicio -->
+      <div class="text-center w-full max-w-xs">
         <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
         </div>
-        <h6 class=" font-bold text-gray-900 mb-4 lg:text-xl">Elegís pago mensual o anual </h6>
-        <!-- <p class="text-gray-600">Después de cada visita, recibes un reporte completo con fotos y recomendaciones.</p> -->
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">3. Pagás el servicio</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Podés pagar con tarjeta de crédito o débito, Mercado Pago o transferencia.</p>
       </div>
 
-      <div class="text-center">
+      <!-- 4. Elegís la fecha de la visita -->
+      <div class="text-center w-full max-w-xs">
         <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>
-        <h6 class=" font-bold text-gray-900 mb-4 lg:text-xl">Al instante te agendamos <br> la primera visita y listo</h6>
-            <!-- <p class="text-gray-600">Accede a todo el historial, reportes y estado de tu jardín desde cualquier lugar.</p> -->
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">4. Elegís la fecha de la visita</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Desde el panel o por WhatsApp seleccionás el día en que querés que se realice el servicio.</p>
       </div>
 
-      <div class="text-center">
-        <a
-          href="https://wa.me/5491170985242"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="bg-green-600 hover:bg-green-700 mb-4 text-white w-20 h-20 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center mx-auto"
-        >
-          <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-          </svg>
-        </a>
-         <h6 class=" font-bold text-gray-900 mb-4 lg:text-xl"> Si necesitas mas información <br> mandanos un mensaje al WhatsApp</h6> 
+      <!-- Fila 2: últimos 3 ítems centrados respecto a los 4 de arriba -->
+      <div class="col-span-full flex flex-wrap justify-center gap-10 mt-0">
+        <!-- 5. Realizamos el servicio -->
+        <div class="text-center w-full max-w-xs">
+          <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">5. Realizamos el servicio</h6>
+          <p class="text-gray-600 text-sm lg:text-base">Nuestro equipo va en la fecha acordada y realiza el trabajo.</p>
+        </div>
+
+        <!-- 6. Seguimiento y control -->
+        <div class="text-center w-full max-w-xs">
+          <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">6. Seguimiento y control</h6>
+          <p class="text-gray-600 text-sm lg:text-base">Después de cada visita tenés el registro del trabajo realizado, con fotos y evaluación del estado del parque.</p>
+        </div>
+
+        <!-- 7. ¿Necesitás otra visita? -->
+        <div class="text-center w-full max-w-xs">
+          <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">7. ¿Necesitás otra visita?</h6>
+          <p class="text-gray-600 text-sm lg:text-base">La solicitás directamente desde el panel o por WhatsApp.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -745,7 +782,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           
       </div>
 
-      <div data-aos-duration="1000" data-aos="fade-left" class="bg-primary-600 rounded-2xl p-8 text-white">
+      <div data-aos-duration="1000" data-aos="fade-left" class="verdeDegrade rounded-2xl p-8 text-white">
         <ul class="space-y-4 mb-8">
             <li class="flex items-center lg:text-xl">
               <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">

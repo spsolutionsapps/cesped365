@@ -77,7 +77,7 @@ class Email extends BaseConfig
     /**
      * Type of mail, either 'text' or 'html'
      */
-    public string $mailType = 'text';
+    public string $mailType = 'html';
 
     /**
      * Character set (utf-8, iso-8859-1, etc.)
@@ -118,4 +118,44 @@ class Email extends BaseConfig
      * Enable notify message from server
      */
     public bool $DSN = false;
+
+    /**
+     * Load SMTP settings from environment (.env) when available.
+     * Set EMAIL_* in .env to use your hosting mail (no code changes needed).
+     */
+    public function __construct()
+    {
+        $from = env('EMAIL_FROM', '');
+        if ($from !== '') {
+            $this->fromEmail = $from;
+        }
+        $name = env('EMAIL_FROM_NAME', '');
+        if ($name !== '') {
+            $this->fromName = $name;
+        }
+        $protocol = env('EMAIL_PROTOCOL', '');
+        if ($protocol !== '') {
+            $this->protocol = $protocol;
+        }
+        $host = env('EMAIL_SMTP_HOST', '');
+        if ($host !== '') {
+            $this->SMTPHost = $host;
+        }
+        $user = env('EMAIL_SMTP_USER', '');
+        if ($user !== '') {
+            $this->SMTPUser = $user;
+        }
+        $pass = env('EMAIL_SMTP_PASS', '');
+        if ($pass !== '') {
+            $this->SMTPPass = $pass;
+        }
+        $port = env('EMAIL_SMTP_PORT', '');
+        if ($port !== '') {
+            $this->SMTPPort = (int) $port;
+        }
+        $crypto = env('EMAIL_SMTP_CRYPTO', '');
+        if ($crypto !== '') {
+            $this->SMTPCrypto = $crypto;
+        }
+    }
 }

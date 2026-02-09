@@ -1,13 +1,22 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { slide } from 'svelte/transition';
-  import { scheduledVisitsAPI } from '../../../services/api';
+  import { Calendar } from '@fullcalendar/core';
+  import dayGridPlugin from '@fullcalendar/daygrid';
+  import interactionPlugin from '@fullcalendar/interaction';
+  import esLocale from '@fullcalendar/core/locales/es';
+  import { scheduledVisitsAPI, blockedDaysAPI } from '../../../services/api';
   import Card from '../../../components/Card.svelte';
   import Badge from '../../../components/Badge.svelte';
+  import Modal from '../../../components/Modal.svelte';
   import AgendarVisitaModal from '../../../components/AgendarVisitaModal.svelte';
   import ReagendarVisitaModal from '../../../components/ReagendarVisitaModal.svelte';
   
   let visitas = [];
+  let visitasFiltradas = [];
+  let visitasHoy = [];
+  let visitasProximas = [];
+  let visitasPasadas = [];
   let loading = true;
   let error = null;
   let showAgendarModal = false;
@@ -15,29 +24,280 @@
   let filtroEstado = 'programada';
   let visitasAbiertas = new Set(); // IDs de visitas expandidas
   let filtrosAbiertos = false; // Estado de filtros colapsables
+  let vistaActiva = 'lista'; // 'lista' | 'calendario'
+  let calendarEl;
+  let calendar = null;
+  let occupiedDates = new Set();
+  /** Rango actual solicitado (from-to) para ignorar respuestas de peticiones obsoletas. */
+  let availabilityRequestKey = '';
+  let availabilityDebounceTimer = null;
+  const AVAILABILITY_DEBOUNCE_MS = 280;
   
   // Estado del modal de reagendar
   let visitaSeleccionada = null;
   let showReagendarModal = false;
   
+  // Modal detalle de visita (entrar a la reserva) y cancelar
+  let visitaDetalle = null;
+  let showDetalleModal = false;
+  let showCancelConfirmModal = false;
+  let submittingCancel = false;
+  let detalleError = null;
+
+  // Días bloqueados (admin) - nadie puede reservar
+  let blockedDays = [];
+  let blockedDateSet = new Set();
+  let showBloquearModal = false;
+  let bloqueoDate = '';
+  let bloqueoDescription = 'Feriado';
+  let submittingBloqueo = false;
+  let bloqueoError = null;
+  
   onMount(async () => {
     await cargarVisitas();
   });
-  
-  async function cargarVisitas() {
+
+  onDestroy(() => {
+    if (availabilityDebounceTimer) {
+      clearTimeout(availabilityDebounceTimer);
+      availabilityDebounceTimer = null;
+    }
+    if (calendar) {
+      calendar.destroy();
+      calendar = null;
+    }
+  });
+
+  function visitasToEvents() {
+    return visitas
+      .filter(v => v && (v.status === 'programada' || v.status === 'completada' || v.status === 'cancelada') && v.scheduled_date)
+      .map(v => ({
+        id: String(v.id),
+        title: v.status === 'cancelada'
+          ? (v.cliente_nombre || v.direccion || `Visita #${v.id}`) + ' (cancelada)'
+          : (v.cliente_nombre || v.direccion || `Visita #${v.id}`),
+        start: v.scheduled_date,
+        allDay: true,
+        extendedProps: { status: v.status, visita: v },
+      }));
+  }
+
+  function applyDayCellClassNames() {
+    if (!calendar) return;
+    calendar.setOption('dayCellClassNames', (arg) => {
+      const c = [];
+      if (blockedDateSet.has(arg.dateStr)) c.push('fc-day-blocked');
+      else if (occupiedDates.has(arg.dateStr)) c.push('fc-day-occupied');
+      return c;
+    });
     try {
-      loading = true;
+      const view = calendar.view ?? calendar.getCurrentData()?.viewApi;
+      if (view?.type) calendar.changeView(view.type);
+    } catch (_) {}
+    // Pintar amarillo en el DOM después del re-render (por si dayCellDidMount no se vuelve a ejecutar)
+    setTimeout(() => paintBlockedDaysInCalendar(), 50);
+  }
+
+  /** Pinta amarillo las celdas bloqueadas y QUITA el amarillo de las desbloqueadas (admin). */
+  function paintBlockedDaysInCalendar() {
+    if (!calendarEl) return;
+    const paintCell = (el) => {
+      el.style.setProperty('background-color', '#d97706', 'important');
+      el.style.setProperty('cursor', 'not-allowed');
+      el.querySelectorAll('*').forEach((child) => {
+        child.style.setProperty('background-color', '#d97706', 'important');
+      });
+    };
+    const clearCell = (el) => {
+      el.style.removeProperty('background-color');
+      el.style.removeProperty('cursor');
+      el.querySelectorAll('*').forEach((child) => {
+        if (child.classList.contains('fc-event') || child.closest('.fc-event')) return;
+        child.style.removeProperty('background-color');
+      });
+    };
+    // Todas las celdas de día (FullCalendar usa data-date en el td)
+    calendarEl.querySelectorAll('td[data-date]').forEach((el) => {
+      const dateStr = el.getAttribute('data-date');
+      if (!dateStr) return;
+      if (blockedDateSet.has(dateStr)) {
+        paintCell(el);
+      } else {
+        clearCell(el);
+      }
+    });
+    // Por si alguna celda no tiene data-date pero sí la clase
+    calendarEl.querySelectorAll('.fc-day-blocked').forEach(paintCell);
+  }
+
+  async function fetchAvailability(from, to) {
+    if (!from || !to) return;
+    const key = `${from}-${to}`;
+    availabilityRequestKey = key;
+    try {
+      const res = await scheduledVisitsAPI.getAvailability(from, to);
+      if (availabilityRequestKey !== key) return;
+      if (res.success && res.data?.occupied_dates) {
+        occupiedDates = new Set(res.data.occupied_dates);
+      } else {
+        occupiedDates = new Set();
+      }
+      applyDayCellClassNames();
+    } catch (e) {
+      if (availabilityRequestKey !== key) return;
+      occupiedDates = new Set();
+    }
+  }
+
+  async function fetchBlockedDays(from, to) {
+    if (!from || !to) return;
+    try {
+      const res = await blockedDaysAPI.getByRange(from, to);
+      if (res.success && Array.isArray(res.data)) {
+        blockedDays = res.data;
+        blockedDateSet = new Set(blockedDays.map((b) => String(b.blocked_date).slice(0, 10)));
+      } else {
+        blockedDays = [];
+        blockedDateSet = new Set();
+      }
+      applyDayCellClassNames();
+    } catch (e) {
+      blockedDays = [];
+      blockedDateSet = new Set();
+    }
+  }
+
+  /** Llamar disponibilidad y días bloqueados con debounce (para datesSet al cambiar de mes). */
+  function fetchAvailabilityDebounced(from, to) {
+    if (availabilityDebounceTimer) clearTimeout(availabilityDebounceTimer);
+    availabilityDebounceTimer = setTimeout(async () => {
+      availabilityDebounceTimer = null;
+      await fetchAvailability(from, to);
+      await fetchBlockedDays(from, to);
+    }, AVAILABILITY_DEBOUNCE_MS);
+  }
+
+  async function mostrarCalendario() {
+    vistaActiva = 'calendario';
+    await tick();
+    if (!calendarEl) return;
+    const now = new Date();
+    const viewStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const viewEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const fromStr = viewStart.toISOString().slice(0, 10);
+    const toStr = viewEnd.toISOString().slice(0, 10);
+
+    if (calendar) {
+      calendar.removeAllEvents();
+      calendar.addEventSource(visitasToEvents());
+      await fetchAvailability(fromStr, toStr);
+      await fetchBlockedDays(fromStr, toStr);
+      return;
+    }
+    // Primera vez: cargar días bloqueados y disponibilidad ANTES de crear el calendario para que el amarillo aparezca ya
+    await fetchAvailability(fromStr, toStr);
+    await fetchBlockedDays(fromStr, toStr);
+
+    calendar = new Calendar(calendarEl, {
+      plugins: [dayGridPlugin, interactionPlugin],
+      initialView: 'dayGridMonth',
+      locale: esLocale,
+      firstDay: 1,
+      headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+      height: 'auto',
+      events: visitasToEvents(),
+      dayCellClassNames: (arg) => {
+        const c = [];
+        if (blockedDateSet.has(arg.dateStr)) c.push('fc-day-blocked');
+        else if (occupiedDates.has(arg.dateStr)) c.push('fc-day-occupied');
+        return c;
+      },
+      dayCellDidMount: (arg) => {
+        const d = arg.date;
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (blockedDateSet.has(dateStr)) {
+          const el = arg.el;
+          el.style.setProperty('background-color', '#d97706', 'important');
+          el.style.setProperty('cursor', 'not-allowed');
+          el.querySelectorAll('*').forEach((child) => {
+            child.style.setProperty('background-color', '#d97706', 'important');
+          });
+        }
+      },
+      datesSet: (info) => {
+        const start = info?.start ?? info?.view?.activeStart;
+        const end = info?.end ?? info?.view?.activeEnd;
+        if (!start || !end) return;
+        fetchAvailabilityDebounced(start.toISOString().slice(0, 10), end.toISOString().slice(0, 10));
+      },
+      eventDidMount: (arg) => {
+        const status = arg.event.extendedProps.status;
+        if (status === 'completada') {
+          arg.el.style.backgroundColor = '#10b981';
+          arg.el.style.borderColor = '#059669';
+        } else if (status === 'cancelada') {
+          arg.el.style.backgroundColor = '#dc2626';
+          arg.el.style.borderColor = '#b91c1c';
+          arg.el.style.opacity = '0.9';
+        }
+        arg.el.style.cursor = 'pointer';
+      },
+      eventClick: (info) => {
+        info.jsEvent.preventDefault();
+        const v = info.event.extendedProps?.visita;
+        if (v) {
+          visitaDetalle = v;
+          detalleError = null;
+          showDetalleModal = true;
+        }
+      },
+    });
+    calendar.render();
+    calendar.removeAllEvents();
+    calendar.addEventSource(visitasToEvents());
+    setTimeout(() => paintBlockedDaysInCalendar(), 50);
+  }
+
+  function mostrarLista() {
+    vistaActiva = 'lista';
+    if (calendar) {
+      calendar.destroy();
+      calendar = null;
+    }
+  }
+
+  /** Refresca los eventos del calendario cuando cambian visitas o la vista. */
+  $: if (vistaActiva === 'calendario' && calendar && visitas) {
+    calendar.removeAllEvents();
+    calendar.addEventSource(visitasToEvents());
+  }
+  
+  /** @param {boolean} [showLoading=true] - Si es false, no muestra el spinner (evita desmontar el calendario). */
+  async function cargarVisitas(showLoading = true) {
+    try {
+      if (showLoading) loading = true;
       const response = await scheduledVisitsAPI.getAll();
       if (response.success) {
-        visitas = response.data;
-        // Ordenar por fecha
-        visitas.sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
+        const raw = response.data;
+        visitas = Array.isArray(raw) ? raw : [];
+        if (import.meta.env.DEV) {
+          console.log('[Agenda] Visitas cargadas:', visitas.length, visitas.length ? '(revisa el calendario)' : '— Si es 0, el backend no devuelve visitas para este usuario/sesión.');
+        }
+        if (visitas.length > 0) {
+          visitas.sort((a, b) => new Date(a.scheduled_date || 0) - new Date(b.scheduled_date || 0));
+        }
+        error = null;
+        // Si ya estamos en vista calendario, forzar que el calendario muestre los eventos recién cargados
+        if (vistaActiva === 'calendario' && calendar) {
+          await tick();
+          refrescarCalendario();
+        }
       }
-      loading = false;
     } catch (err) {
       console.error('Error cargando visitas:', err);
       error = 'Error al cargar las visitas programadas. Verifica que el backend esté corriendo.';
-      loading = false;
+    } finally {
+      if (showLoading) loading = false;
     }
   }
   
@@ -49,7 +309,8 @@
     try {
       const response = await scheduledVisitsAPI.delete(id);
       if (response.success) {
-        await cargarVisitas();
+        await cargarVisitas(false);
+        refrescarCalendario();
       }
     } catch (err) {
       console.error('Error eliminando visita:', err);
@@ -57,12 +318,19 @@
     }
   }
   
+  function refrescarCalendario() {
+    if (vistaActiva === 'calendario' && calendar) {
+      calendar.removeAllEvents();
+      calendar.addEventSource(visitasToEvents());
+    }
+  }
+
   async function marcarCompletada(id) {
     try {
-      loading = true;
       const response = await scheduledVisitsAPI.update(id, { status: 'completada' });
       if (response.success) {
-        await cargarVisitas();
+        await cargarVisitas(false); // no mostrar spinner para no desmontar el calendario
+        refrescarCalendario();
       } else {
         throw new Error(response.message || 'Error al actualizar la visita');
       }
@@ -70,8 +338,6 @@
       console.error('Error actualizando visita:', err);
       error = err.message || 'Error al marcar la visita como completada';
       alert(error);
-    } finally {
-      loading = false;
     }
   }
   
@@ -92,7 +358,90 @@
   async function handleReagendarSuccess() {
     showReagendarModal = false;
     visitaSeleccionada = null;
-    await cargarVisitas();
+    await cargarVisitas(false);
+    refrescarCalendario();
+  }
+
+  function abrirDetalle(visita) {
+    visitaDetalle = visita;
+    detalleError = null;
+    showDetalleModal = true;
+  }
+
+  function cerrarDetalle() {
+    if (!submittingCancel) {
+      showDetalleModal = false;
+      showCancelConfirmModal = false;
+      visitaDetalle = null;
+      detalleError = null;
+    }
+  }
+
+  async function cancelarVisita() {
+    if (!visitaDetalle) return;
+    submittingCancel = true;
+    detalleError = null;
+    try {
+      await scheduledVisitsAPI.update(visitaDetalle.id, { status: 'cancelada' });
+      await cargarVisitas(false);
+      refrescarCalendario();
+      showCancelConfirmModal = false;
+      showDetalleModal = false;
+      visitaDetalle = null;
+      detalleError = null;
+    } catch (e) {
+      detalleError = e.message || 'Error al cancelar la visita.';
+    } finally {
+      submittingCancel = false;
+    }
+  }
+
+  function abrirConfirmCancelar() {
+    showCancelConfirmModal = true;
+  }
+
+  function cerrarConfirmCancelar() {
+    if (!submittingCancel) showCancelConfirmModal = false;
+  }
+
+  function abrirBloquearModal() {
+    bloqueoDate = '';
+    bloqueoDescription = 'Feriado';
+    bloqueoError = null;
+    showBloquearModal = true;
+  }
+
+  async function guardarBloqueo() {
+    if (!bloqueoDate) {
+      bloqueoError = 'Elegí una fecha.';
+      return;
+    }
+    submittingBloqueo = true;
+    bloqueoError = null;
+    try {
+      await blockedDaysAPI.create(bloqueoDate, bloqueoDescription || '');
+      showBloquearModal = false;
+      const current = calendar?.getCurrentData()?.dateProfile?.currentRange?.start ?? new Date();
+      const start = new Date(current.getFullYear(), current.getMonth(), 1);
+      const end = new Date(current.getFullYear(), current.getMonth() + 1, 0);
+      await fetchBlockedDays(start.toISOString().slice(0, 10), end.toISOString().slice(0, 10));
+    } catch (e) {
+      bloqueoError = e.message || 'Error al bloquear el día.';
+    } finally {
+      submittingBloqueo = false;
+    }
+  }
+
+  async function eliminarBloqueo(id) {
+    try {
+      await blockedDaysAPI.delete(id);
+      const current = calendar?.getCurrentData()?.dateProfile?.currentRange?.start ?? new Date();
+      const start = new Date(current.getFullYear(), current.getMonth(), 1);
+      const end = new Date(current.getFullYear(), current.getMonth() + 1, 0);
+      await fetchBlockedDays(start.toISOString().slice(0, 10), end.toISOString().slice(0, 10));
+    } catch (e) {
+      console.error(e);
+    }
   }
   
   function getBadgeType(status) {
@@ -143,25 +492,61 @@
     return fechaVisita < hoy;
   }
   
-  $: visitasFiltradas = visitas.filter(visita => {
-    const matchesEstado = filtroEstado === 'todas' || visita.status === filtroEstado;
-    const matchesFecha = !filtroFecha || visita.scheduled_date.startsWith(filtroFecha);
-    return matchesEstado && matchesFecha;
-  });
-  
-  $: visitasHoy = visitasFiltradas.filter(v => esHoy(v.scheduled_date) && v.status === 'programada');
-  $: visitasProximas = visitasFiltradas.filter(v => !esPasada(v.scheduled_date) && !esHoy(v.scheduled_date) && v.status === 'programada');
-  $: visitasPasadas = visitasFiltradas.filter(v => esPasada(v.scheduled_date) || v.status !== 'programada');
-  
+  /** Un solo pase: filtrado + clasificación en hoy / próximas / pasadas. */
+  $: {
+    const filtradas = [];
+    const hoy = [];
+    const proximas = [];
+    const pasadas = [];
+    for (const visita of visitas) {
+      if (!visita || !visita.scheduled_date) continue;
+      const matchesEstado = filtroEstado === 'todas' || visita.status === filtroEstado;
+      const matchesFecha = !filtroFecha || String(visita.scheduled_date).startsWith(filtroFecha);
+      if (!matchesEstado || !matchesFecha) continue;
+      filtradas.push(visita);
+      const isHoy = esHoy(visita.scheduled_date);
+      const isPast = esPasada(visita.scheduled_date);
+      const isProgramada = visita.status === 'programada';
+      if (isHoy && isProgramada) hoy.push(visita);
+      else if (!isPast && !isHoy && isProgramada) proximas.push(visita);
+      else pasadas.push(visita);
+    }
+    visitasFiltradas = filtradas;
+    visitasHoy = hoy;
+    visitasProximas = proximas;
+    visitasPasadas = pasadas;
+  }
+
   // Contar filtros activos
   $: filtrosActivos = (filtroFecha ? 1 : 0) + (filtroEstado !== 'programada' ? 1 : 0);
 </script>
 
+<svelte:head>
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.min.css" rel="stylesheet" />
+</svelte:head>
+
 <div class="py-6">
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <h2 class="text-2xl font-semibold text-gray-700">
-      Agenda de Visitas
-    </h2>
+    <div class="flex items-center gap-3 flex-wrap">
+      <h2 class="text-2xl font-semibold text-gray-700">
+        Agenda de Visitas
+      </h2>
+      <div class="flex rounded-lg border border-gray-200 p-0.5 bg-gray-50">
+        <button
+          on:click={mostrarLista}
+          class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors {vistaActiva === 'lista' ? 'bg-white text-primary-600 shadow' : 'text-gray-600 hover:text-gray-900'}"
+        >
+          Lista
+        </button>
+        <button
+          on:click={mostrarCalendario}
+          class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors {vistaActiva === 'calendario' ? 'bg-white text-primary-600 shadow' : 'text-gray-600 hover:text-gray-900'}"
+        >
+          Calendario
+        </button>
+      </div>
+    </div>
     <button
       on:click={() => showAgendarModal = true}
       class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
@@ -180,7 +565,8 @@
     </div>
   {/if}
 
-  <!-- Filtros Colapsables -->
+  <!-- Filtros Colapsables (solo en vista lista) -->
+  {#if vistaActiva === 'lista'}
   <Card className="mb-6">
     <button
       on:click={() => filtrosAbiertos = !filtrosAbiertos}
@@ -203,9 +589,9 @@
     </button>
     
     <!-- Título en desktop (siempre visible) -->
-    <div class="hidden md:block mb-4">
+    <!-- <div class="hidden md:block">
       <h3 class="text-lg font-semibold text-gray-900">Filtros</h3>
-    </div>
+    </div> -->
     
     <!-- Contenido de filtros: colapsable en mobile, siempre visible en desktop -->
     <div class="hidden md:block">
@@ -296,6 +682,7 @@
       </div>
     {/if}
   </Card>
+  {/if}
 
   {#if loading}
     <div class="flex justify-center items-center py-12">
@@ -303,6 +690,45 @@
       <p class="ml-4 text-gray-600">Cargando agenda...</p>
     </div>
   {:else}
+    {#if vistaActiva === 'calendario'}
+      <Card className="mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 sm:px-4 pt-3 sm:pt-4 pb-1">
+          <p class="text-sm text-gray-500">
+            <span class="inline-flex items-center gap-1 mr-[10px]">Próximas <span class="inline-block w-3 h-3 rounded-full bg-blue-600 align-middle"></span></span><span class="inline-flex items-center gap-1 mr-[10px]">Completada <span class="inline-block w-3 h-3 rounded-full bg-green-600 align-middle"></span></span><span class="inline-flex items-center gap-1 mr-[10px]">Cancelada <span class="inline-block w-3 h-3 rounded-full bg-red-600 align-middle"></span></span><span class="inline-flex items-center gap-1">Día bloqueado <span class="inline-block w-3 h-3 rounded-full bg-amber-500 align-middle"></span></span>
+          </p>
+          <button
+            type="button"
+            on:click={abrirBloquearModal}
+            class="px-3 py-1.5 text-sm border border-amber-600 text-amber-700 rounded-lg hover:bg-amber-50 transition-colors whitespace-nowrap"
+          >
+            Bloquear día
+          </button>
+        </div>
+        <div class="overflow-x-auto p-2 sm:p-4">
+          <div bind:this={calendarEl} class="admin-agenda-calendar min-w-[280px]"></div>
+        </div>
+        {#if blockedDays.length > 0}
+          <div class="px-3 sm:px-4 pb-3 pt-2 border-t border-gray-100 mt-2">
+            <p class="text-sm font-medium text-gray-700 mb-2">Días bloqueados este mes</p>
+            <ul class="space-y-1.5">
+              {#each blockedDays as b (b.id)}
+                <li class="flex items-center justify-between gap-2 text-sm bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                  <span><strong>{formatearFechaCorta(b.blocked_date)}</strong> – {b.description || 'Sin descripción'}</span>
+                  <button
+                    type="button"
+                    on:click={() => eliminarBloqueo(b.id)}
+                    class="text-red-600 hover:text-red-800 text-xs font-medium"
+                    title="Desbloquear"
+                  >
+                    Desbloquear
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
+      </Card>
+    {:else}
     <!-- Visitas de hoy -->
     {#if visitasHoy.length > 0}
       <Card className="mb-6">
@@ -312,7 +738,7 @@
           <Badge type="danger">{visitasHoy.length}</Badge>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {#each visitasHoy as visita}
+          {#each visitasHoy as visita (visita.id)}
             <div class="bg-red-50 border border-red-200 rounded-lg overflow-hidden flex flex-col sm:shadow-md hover:shadow-lg transition-shadow">
               <!-- Header collapsable solo en mobile -->
               <button
@@ -362,6 +788,18 @@
                   {/if}
                 </div>
                 <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-red-200 sm:mt-auto">
+                  <button
+                    on:click={() => abrirDetalle(visita)}
+                    disabled={loading}
+                    class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
+                    title="Ver detalle"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Ver detalle
+                  </button>
                   {#if visita.status === 'programada'}
                     <button
                       on:click={() => abrirReagendarModal(visita)}
@@ -414,7 +852,7 @@
           <Badge type="info">{visitasProximas.length}</Badge>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {#each visitasProximas as visita}
+          {#each visitasProximas as visita (visita.id)}
             <div class="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden flex flex-col sm:shadow-md hover:shadow-lg transition-shadow">
               <!-- Header collapsable solo en mobile -->
               <button
@@ -464,6 +902,18 @@
                   {/if}
                 </div>
                 <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-blue-200 sm:mt-auto">
+                  <button
+                    on:click={() => abrirDetalle(visita)}
+                    disabled={loading}
+                    class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
+                    title="Ver detalle"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Ver detalle
+                  </button>
                   {#if visita.status === 'programada'}
                     <button
                       on:click={() => abrirReagendarModal(visita)}
@@ -512,11 +962,11 @@
       <Card>
         <div class="flex items-center gap-2 mb-4">
           <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-          <h3 class="text-lg font-semibold text-gray-900">Historial</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Historial de visitas</h3>
           <Badge type="default">{visitasPasadas.length}</Badge>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {#each visitasPasadas as visita}
+          {#each visitasPasadas as visita (visita.id)}
             <div class="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden flex flex-col sm:shadow-md hover:shadow-lg transition-shadow">
               <!-- Header collapsable solo en mobile -->
               <button
@@ -567,6 +1017,18 @@
                 </div>
                 <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 sm:mt-auto">
                   <button
+                    on:click={() => abrirDetalle(visita)}
+                    disabled={loading}
+                    class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
+                    title="Ver detalle"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Ver detalle
+                  </button>
+                  <button
                     on:click={() => eliminarVisita(visita.id)}
                     disabled={loading}
                     class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
@@ -596,8 +1058,245 @@
         </div>
       </Card>
     {/if}
+    {/if}
   {/if}
 </div>
+
+<style>
+  :global(.admin-agenda-calendar) {
+    --fc-border-color: #e5e7eb;
+    --fc-button-bg-color: #2563eb;
+    --fc-button-border-color: #2563eb;
+    --fc-button-hover-bg-color: #1d4ed8;
+    --fc-button-hover-border-color: #1d4ed8;
+    min-height: 400px;
+  }
+  :global(.admin-agenda-calendar .fc-day-occupied) {
+    background-color: #f3f4f6 !important;
+    opacity: 0.85;
+  }
+  /* Día bloqueado: celda entera en amarillo para admin y que no se pueda agendar */
+  :global(.admin-agenda-calendar td.fc-day-blocked),
+  :global(.admin-agenda-calendar td.fc-day-blocked *),
+  :global(.admin-agenda-calendar .fc-day-blocked),
+  :global(.admin-agenda-calendar .fc-day-blocked .fc-scrollgrid-sync-inner),
+  :global(.admin-agenda-calendar .fc-day-blocked .fc-daygrid-day-frame),
+  :global(.admin-agenda-calendar .fc-day-blocked .fc-daygrid-day-events) {
+    background-color: #d97706 !important;
+    background-image: none !important;
+    cursor: not-allowed !important;
+  }
+  :global(.admin-agenda-calendar .fc-day-blocked .fc-daygrid-day-number) {
+    color: #fff !important;
+    font-weight: 700;
+  }
+  :global(.admin-agenda-calendar .fc-day-blocked .fc-daygrid-day-frame) {
+    position: relative;
+    min-height: 100%;
+  }
+  :global(.admin-agenda-calendar .fc-day-blocked .fc-daygrid-day-frame::after) {
+    content: 'Bloqueado';
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    pointer-events: none;
+  }
+  /* Mobile-friendly */
+  @media (max-width: 640px) {
+    :global(.admin-agenda-calendar) {
+      min-height: 320px;
+      padding: 0.25rem !important;
+    }
+    :global(.admin-agenda-calendar .fc-toolbar) {
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+    }
+    :global(.admin-agenda-calendar .fc-toolbar-title) {
+      font-size: 1rem;
+      margin: 0;
+    }
+    :global(.admin-agenda-calendar .fc-button) {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      min-height: 44px;
+      min-width: 44px;
+    }
+    :global(.admin-agenda-calendar .fc-scrollgrid) {
+      font-size: 0.75rem;
+    }
+    :global(.admin-agenda-calendar .fc-col-header-cell-cushion),
+    :global(.admin-agenda-calendar .fc-daygrid-day-number) {
+      padding: 0.35rem;
+      font-size: 0.8rem;
+    }
+    :global(.admin-agenda-calendar .fc-daygrid-day) {
+      min-height: 44px;
+    }
+    :global(.admin-agenda-calendar .fc-daygrid-event) {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.25rem;
+    }
+  }
+</style>
+
+<!-- Modal bloquear día -->
+<Modal
+  isOpen={showBloquearModal}
+  title="Bloquear día"
+  onClose={() => { if (!submittingBloqueo) showBloquearModal = false; }}
+  size="sm"
+>
+  <p class="text-sm text-gray-600 mb-4">Nadie podrá reservar un turno en la fecha elegida (ej: feriado, mantenimiento).</p>
+  <div class="space-y-3">
+    <div>
+      <label for="bloqueo-date" class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+      <input
+        id="bloqueo-date"
+        type="date"
+        bind:value={bloqueoDate}
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+      />
+    </div>
+    <div>
+      <label for="bloqueo-desc" class="block text-sm font-medium text-gray-700 mb-1">Descripción (ej: Feriado)</label>
+      <input
+        id="bloqueo-desc"
+        type="text"
+        bind:value={bloqueoDescription}
+        placeholder="Feriado"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+      />
+    </div>
+    {#if bloqueoError}
+      <p class="text-sm text-red-600">{bloqueoError}</p>
+    {/if}
+    <div class="flex gap-2 justify-end pt-2">
+      <button
+        type="button"
+        on:click={() => { if (!submittingBloqueo) showBloquearModal = false; }}
+        disabled={submittingBloqueo}
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        Cerrar
+      </button>
+      <button
+        type="button"
+        on:click={guardarBloqueo}
+        disabled={submittingBloqueo}
+        class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50"
+      >
+        {#if submittingBloqueo}Guardando...{:else}Bloquear día{/if}
+      </button>
+    </div>
+  </div>
+</Modal>
+
+<!-- Modal detalle de visita (entrar a la reserva) -->
+<Modal
+  isOpen={showDetalleModal}
+  title={visitaDetalle ? `Visita – ${visitaDetalle.cliente_nombre || visitaDetalle.direccion || '#' + visitaDetalle.id}` : 'Detalle de la visita'}
+  onClose={cerrarDetalle}
+  size="sm"
+>
+  <div>
+    {#if visitaDetalle}
+      <p class="text-gray-700 mb-1"><strong>Cliente:</strong> {visitaDetalle.cliente_nombre || '—'}</p>
+      <p class="text-gray-700 mb-1"><strong>Dirección:</strong> {visitaDetalle.direccion || '—'}</p>
+      <p class="text-gray-700 mb-1"><strong>Fecha:</strong> {formatearFecha(visitaDetalle.scheduled_date)}</p>
+      <p class="text-gray-700 mb-1"><strong>Horario:</strong> {visitaDetalle.scheduled_time || '—'}</p>
+      <p class="text-gray-700 mb-3"><strong>Estado:</strong> {getStatusLabel(visitaDetalle.status)}</p>
+      {#if visitaDetalle.notes}
+        <p class="text-sm text-gray-600 mb-4 italic">"{visitaDetalle.notes}"</p>
+      {/if}
+      {#if detalleError}
+        <p class="text-sm text-red-600 mb-3">{detalleError}</p>
+      {/if}
+      <div class="flex flex-wrap gap-2">
+        {#if visitaDetalle.status === 'programada'}
+          <button
+            type="button"
+            on:click={() => { showDetalleModal = false; abrirReagendarModal(visitaDetalle); }}
+            disabled={submittingCancel}
+            class="px-3 py-1.5 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600"
+          >
+            Postergar por lluvia
+          </button>
+          <button
+            type="button"
+            on:click={async () => { await marcarCompletada(visitaDetalle.id); cerrarDetalle(); }}
+            disabled={loading || submittingCancel}
+            class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Completar
+          </button>
+          <button
+            type="button"
+            on:click={abrirConfirmCancelar}
+            disabled={submittingCancel}
+            class="px-3 py-1.5 text-sm border border-red-600 text-red-600 rounded hover:bg-red-50"
+          >
+            Cancelar visita
+          </button>
+        {/if}
+        <button
+          type="button"
+          on:click={async () => { if (confirm('¿Eliminar esta visita?')) { await eliminarVisita(visitaDetalle.id); cerrarDetalle(); } }}
+          disabled={loading || submittingCancel}
+          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Eliminar
+        </button>
+        <button
+          type="button"
+          on:click={cerrarDetalle}
+          disabled={submittingCancel}
+          class="px-3 py-1.5 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+        >
+          Cerrar
+        </button>
+      </div>
+    {/if}
+  </div>
+</Modal>
+
+<!-- Modal confirmar cancelación (admin) -->
+<Modal
+  isOpen={showCancelConfirmModal}
+  title="Cancelar visita"
+  onClose={cerrarConfirmCancelar}
+  size="sm"
+>
+  <p class="text-gray-700 mb-6">¿Estás seguro de que querés cancelar esta visita?</p>
+  <div class="flex gap-3 justify-end">
+    <button
+      type="button"
+      on:click={cerrarConfirmCancelar}
+      disabled={submittingCancel}
+      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+    >
+      No
+    </button>
+    <button
+      type="button"
+      on:click={cancelarVisita}
+      disabled={submittingCancel}
+      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
+    >
+      {#if submittingCancel}
+        <span class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+      {/if}
+      Sí, cancelar
+    </button>
+  </div>
+</Modal>
 
 <!-- Modal Agendar Visita -->
 <AgendarVisitaModal
@@ -605,7 +1304,7 @@
   onClose={() => showAgendarModal = false}
   onSuccess={async () => {
     showAgendarModal = false;
-    await cargarVisitas();
+    await cargarVisitas(false);
   }}
 />
 

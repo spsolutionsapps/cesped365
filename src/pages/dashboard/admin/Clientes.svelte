@@ -613,6 +613,29 @@ function getBadgeType(estado) {
                   <span class="text-sm text-gray-600">Referido por:</span>
                   <span class="text-sm font-medium text-gray-900">{clienteDetail.referidoPor || '-'}</span>
                 </div>
+                <div class="flex justify-between items-center gap-2 flex-wrap">
+                  <span class="text-sm text-gray-600">Ubicación GPS:</span>
+                  {#if clienteDetail.lat != null && clienteDetail.lng != null}
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm font-medium text-gray-900">
+                        {Number(clienteDetail.lat).toFixed(6)}, {Number(clienteDetail.lng).toFixed(6)}
+                      </span>
+                      <a
+                        href="https://www.google.com/maps?q={clienteDetail.lat},{clienteDetail.lng}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100"
+                      >
+                        Ver en Google Maps
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </div>
+                  {:else}
+                    <span class="text-sm text-gray-500">No registradas</span>
+                  {/if}
+                </div>
               </div>
             </div>
 

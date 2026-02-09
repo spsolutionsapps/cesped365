@@ -15,6 +15,18 @@
   let processingPayment = false;
   let showCancelModal = false;
 
+  function parseFeatures(features) {
+    if (!features) return [];
+    if (Array.isArray(features)) return features;
+    if (typeof features !== 'string') return [];
+    try {
+      const parsed = JSON.parse(features);
+      return Array.isArray(parsed) ? parsed : [features];
+    } catch {
+      return features ? [features] : [];
+    }
+  }
+
   onMount(async () => {
     try {
       loading = true;
@@ -142,7 +154,7 @@
 </script>
 
 <div class="container mx-auto px-6 py-8">
-  <h3 class="text-gray-700 text-3xl font-medium mb-6">Suscripciones</h3>
+  <h3 class="text-gray-700 text-3xl font-medium mb-1">Suscripciones</h3>
 
   <Modal
     isOpen={showCancelModal}
@@ -185,17 +197,6 @@
       <span class="block sm:inline">{error}</span>
     </div>
   {:else}
-    <!-- Debug info (temporal) -->
-    {#if import.meta.env.DEV}
-      <div class="mb-4 p-4 bg-gray-100 text-xs rounded">
-        <p><strong>Debug:</strong></p>
-        <p>Planes cargados: {plans.length}</p>
-        <p>Usuario: {currentUser ? currentUser.name : 'No cargado'}</p>
-        <p>Plan del usuario: {currentUser?.plan || 'N/A'}</p>
-        <p>Plan seleccionado encontrado: {selectedPlan ? selectedPlan.name : 'No encontrado'}</p>
-        <p>Suscripción activa: {mySubscription ? 'Sí' : 'No'}</p>
-      </div>
-    {/if}
     
     <!-- Suscripción Actual -->
     {#if mySubscription}
@@ -250,14 +251,14 @@
     {:else if selectedPlan}
       <!-- Plan Seleccionado para Pagar -->
       <div class="mb-10">
-        <h4 class="text-xl font-semibold text-gray-600 mb-4">Tu Plan Seleccionado</h4>
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-blue-500">
+        <h4 class="text-xl font-semibold text-gray-600 mb-4">Tu Plan <em>Seleccionado</em> </h4>
+        <div class="bg-white borderLeftGreen rounded-lg borderPlanActual  overflow-hidden ">
           <div class="p-6">
             <div class="flex justify-between items-start">
               <div>
                 <h5 class="text-2xl font-bold text-gray-800">{selectedPlan.name}</h5>
                 <p class="text-gray-600 mt-1">
-                  Estado: <Badge type="warning">PENDIENTE DE PAGO</Badge>
+                  Estado: <Badge type="warning" className="pendienteDePago">PENDIENTE DE PAGO</Badge>
                 </p>
               </div>
               <div class="text-right">
@@ -273,7 +274,7 @@
             <div class="mt-6 border-t pt-4">
               <ul class="space-y-2 text-sm text-gray-600 mb-6">
                 {#if selectedPlan.features && selectedPlan.features.length > 0}
-                  {#each (typeof selectedPlan.features === 'string' ? JSON.parse(selectedPlan.features) : selectedPlan.features) as feature}
+                  {#each parseFeatures(selectedPlan.features) as feature}
                     <li class="flex items-center">
                       <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                       {feature}
@@ -308,6 +309,61 @@
           </div>
         </div>
       </div>
+
+      <!-- Otros planes (por si cambia de parecer) -->
+      {#if plans.filter(p => p.id !== selectedPlan.id).length > 0}
+        <div class="mt-8 text-center">
+          <h4 class="text-xl font-semibold text-gray-600 mb-2">Otros planes</h4>
+          <p class="text-gray-500 text-sm md:text-base mb-6">¿Cambiaste de parecer? Podés elegir otro plan antes de pagar.</p>
+          <div class="flex flex-wrap justify-center gap-6">
+            {#each plans.filter(p => p.id !== selectedPlan.id) as plan}
+              <div class="flex flex-col w-full max-w-[380px] p-6 border-green-100 border-2 bg-white rounded-lg hover:shadow-lg transition-shadow duration-300 border border-gray-100 relative overflow-hidden">
+                {#if plan.name.includes('Premium') || plan.name.includes('Anual')}
+                  <div class="absolute top-0 right-0 bg-yellow-400 text-xs font-bold px-3 py-1 rounded-bl-lg">
+                    RECOMENDADO
+                  </div>
+                {/if}
+                <h3 class="text-lg font-bold text-gray-700 mb-2">{plan.name}</h3>
+                <div class="my-4">
+                  <span class="text-4xl font-bold text-gray-800">{formatCurrency(plan.price)}</span>
+                  <span class="text-gray-500">/{plan.frequency}</span>
+                </div>
+                <p class="text-gray-600 text-sm mb-6 flex-grow">{plan.description || 'Plan completo para el cuidado de tu jardín.'}</p>
+                <ul class="mb-6 space-y-2 text-sm text-gray-600">
+                  {#if plan.features}
+                    {#each parseFeatures(plan.features) as feature}
+                      <li class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        {feature}
+                      </li>
+                    {/each}
+                  {:else}
+                    <li class="flex items-center">
+                      <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      {plan.visitsPerMonth} visitas al mes
+                    </li>
+                    <li class="flex items-center">
+                      <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      Mantenimiento completo
+                    </li>
+                  {/if}
+                </ul>
+                <button
+                  on:click={() => handleSubscribe(plan.id)}
+                  disabled={processingPayment}
+                  class="w-full px-4 py-2 font-medium text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {#if processingPayment}
+                    Procesando...
+                  {:else}
+                    Cambiar de plan
+                  {/if}
+                </button>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
     {/if}
 
     <!-- Planes Disponibles (oculto cuando tiene plan pendiente de pago) -->
@@ -336,7 +392,7 @@
           
           <ul class="mb-6 space-y-2 text-sm text-gray-600">
             {#if plan.features}
-              {#each (typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features) as feature}
+              {#each parseFeatures(plan.features) as feature}
                 <li class="flex items-center">
                   <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                   {feature}

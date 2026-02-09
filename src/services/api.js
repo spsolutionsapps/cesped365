@@ -8,17 +8,18 @@ export function getApiBaseUrl() {
     return import.meta.env.VITE_API_URL;
   }
   
-  // En producción (cuando no hay localhost), usar el dominio actual
+  // En desarrollo local: same-origin para que Vite proxy reescriba /api/login → /login
   if (typeof window !== 'undefined') {
     const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-    if (isProduction) {
-      // En producción, usar el dominio actual + /api
-      return `${window.location.protocol}//${window.location.host}/api`;
+    if (!isProduction) {
+      return `${window.location.origin}/api`;
     }
+    // En producción, usar el dominio actual + /api
+    return `${window.location.protocol}//${window.location.host}/api`;
   }
   
-  // Por defecto, desarrollo local
-  return 'http://localhost:8080/api';
+  // Fallback desarrollo local (SSR o pre-hydration)
+  return 'http://localhost:3000/api';
 }
 
 const API_BASE_URL = getApiBaseUrl();
@@ -66,20 +67,32 @@ async function request(endpoint, options = {}) {
     
     console.log('Response status:', response.status);
     
-    // Verificar si la respuesta tiene contenido
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      // Si no es JSON, leer como texto para debugging
-      const text = await response.text();
+    const text = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+    
+    let data;
+    if (contentType.includes('application/json') && text.trim()) {
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        console.error('JSON parse error. Raw response:', text.substring(0, 300));
+        throw new Error(`Respuesta inválida del servidor (no es JSON válido). Status: ${response.status}`);
+      }
+    } else if (!contentType.includes('application/json')) {
       console.error('Response no es JSON:', text.substring(0, 200));
-      throw new Error(`El servidor no devolvió JSON. Status: ${response.status}. Response: ${text.substring(0, 100)}`);
+      throw new Error(`El servidor no devolvió JSON. Status: ${response.status}. ${text.substring(0, 80)}`);
+    } else {
+      data = {};
     }
     
-    const data = await response.json();
-    
-    // Manejar respuestas de error del backend
+    // Manejar respuestas de error del backend (CodeIgniter usa data.messages.error)
     if (!response.ok || !data.success) {
-      throw new Error(data.message || `Error en la petición (${response.status})`);
+      const msg = data.messages?.error ?? data.message ?? `Error en la petición (${response.status})`;
+      const err = new Error(typeof msg === 'string' ? msg : (msg.message || JSON.stringify(msg)));
+      if (data.errors && typeof data.errors === 'object') {
+        err.errors = data.errors;
+      }
+      throw err;
     }
     
     return data;
@@ -139,15 +152,20 @@ export const authAPI = {
     return data;
   },
   
-  // PUT /api/me/password
+  // POST /api/me/password (form-urlencoded para compatibilidad con CodeIgniter)
   updatePassword: async (passwordData) => {
+    const body = new URLSearchParams();
+    body.append('current_password', passwordData.current_password || '');
+    body.append('new_password', passwordData.new_password || '');
+    body.append('confirm_password', passwordData.confirm_password || '');
+    
     const response = await fetch(`${API_BASE_URL}/me/password`, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       credentials: 'include',
-      body: JSON.stringify(passwordData)
+      body: body.toString()
     });
     
     const contentType = response.headers.get('content-type');
@@ -180,6 +198,14 @@ export const reportesAPI = {
   // GET /api/reportes/:id
   getById: async (id) => {
     return await request(`/reportes/${id}`);
+  },
+
+  // PATCH /api/reportes/:id/rating - Cliente evalúa el servicio (estrellas 1-5 + comentario)
+  submitRating: async (id, { rating, feedback }) => {
+    return await request(`/reportes/${id}/rating`, {
+      method: 'PATCH',
+      body: { rating, feedback: feedback ?? '' }
+    });
   },
   
   // POST /api/reportes (admin only)
@@ -322,6 +348,11 @@ export const scheduledVisitsAPI = {
   getAll: async () => {
     return await request('/scheduled-visits');
   },
+
+  // GET /api/scheduled-visits/availability?from=YYYY-MM-DD&to=YYYY-MM-DD
+  getAvailability: async (from, to) => {
+    return await request(`/scheduled-visits/availability?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+  },
   
   // GET /api/scheduled-visits/:id
   getById: async (id) => {
@@ -389,5 +420,26 @@ export const scheduledVisitsAPI = {
     return await request(`/scheduled-visits/${id}`, {
       method: 'DELETE'
     });
+  }
+};
+
+// Días bloqueados (solo admin) - bloquear día para que nadie reserve turno
+export const blockedDaysAPI = {
+  getByRange: async (from, to) => {
+    return await request(`/blocked-days?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+  },
+  create: async (blocked_date, description = '') => {
+    const response = await fetch(`${API_BASE_URL}/blocked-days`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ blocked_date, description })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) throw new Error(data.message || 'Error al bloquear el día');
+    return data;
+  },
+  delete: async (id) => {
+    return await request(`/blocked-days/${id}`, { method: 'DELETE' });
   }
 };

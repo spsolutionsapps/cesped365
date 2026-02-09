@@ -23,19 +23,25 @@ class ReportesController extends ResourceController
         $page = $this->request->getGet('page') ?? 1;
         $limit = $this->request->getGet('limit') ?? 100; // Aumentar límite para mostrar todos
         
-        // Obtener reportes con paginación + datos de cliente/jardín (para títulos en frontend)
+        $session = \Config\Services::session();
+        $userId = $session->get('user_id');
+        $userRole = $session->get('user_role');
+        $roleNormalized = $userRole !== null ? strtolower(trim((string) $userRole)) : '';
+        $isCliente = ($roleNormalized === 'cliente' && $userId);
+        
+        // Todos ven todos los reportes. El cliente solo puede enviar evaluación en los de su jardín (can_rate + submitRating).
         $reports = $this->reportModel
-            ->select('reports.*, gardens.address as garden_address, users.name as client_name')
+            ->select('reports.*, gardens.address as garden_address, gardens.user_id as garden_user_id, users.name as client_name')
             ->join('gardens', 'gardens.id = reports.garden_id', 'left')
             ->join('users', 'users.id = gardens.user_id', 'left')
             ->orderBy('reports.id', 'DESC')
             ->paginate($limit);
-        
         $total = $this->reportModel->pager ? $this->reportModel->pager->getTotal() : count($reports);
         
-        // Formatear respuesta para coincidir con el formato del frontend
         $formatted = [];
         foreach ($reports as $report) {
+            $gardenUserId = $this->getGardenUserIdFromReport($report);
+            $canRate = $isCliente && $gardenUserId > 0 && $gardenUserId === (int) $userId;
             // Obtener imágenes del reporte
             $images = $this->imageModel->getByReport($report['id']);
             $baseUrl = config('App')->baseURL;
@@ -92,6 +98,11 @@ class ReportesController extends ResourceController
                 'grass_even' => $report['grass_even'] ?? null,
                 'spots' => $report['spots'] ?? null,
                 'weeds_visible' => $report['weeds_visible'] ?? null,
+                // Evaluación del cliente (estrellas 1-5 + comentario)
+                'client_rating' => isset($report['client_rating']) && $report['client_rating'] !== null ? (int) $report['client_rating'] : null,
+                'client_feedback' => $report['client_feedback'] ?? null,
+                // Si el usuario actual (cliente) es dueño del jardín de este reporte, puede evaluar
+                'can_rate' => $canRate,
             ];
         }
         
@@ -110,7 +121,7 @@ class ReportesController extends ResourceController
     public function show($id = null)
     {
         $report = $this->reportModel
-            ->select('reports.*, gardens.address as garden_address, users.name as client_name')
+            ->select('reports.*, gardens.address as garden_address, gardens.user_id as garden_user_id, users.name as client_name')
             ->join('gardens', 'gardens.id = reports.garden_id', 'left')
             ->join('users', 'users.id = gardens.user_id', 'left')
             ->where('reports.id', $id)
@@ -176,11 +187,121 @@ class ReportesController extends ResourceController
             'grass_even' => $report['grass_even'] ?? null,
             'spots' => $report['spots'] ?? null,
             'weeds_visible' => $report['weeds_visible'] ?? null,
+            // Evaluación del cliente
+            'client_rating' => isset($report['client_rating']) && $report['client_rating'] !== null ? (int) $report['client_rating'] : null,
+            'client_feedback' => $report['client_feedback'] ?? null,
+            // Si el usuario actual (cliente) es dueño del jardín, puede evaluar
+            'can_rate' => $this->reportCanRate($report),
         ];
         
         return $this->respond([
             'success' => true,
             'data' => $formatted
+        ]);
+    }
+    
+    /**
+     * Obtiene el user_id del dueño del jardín del reporte (desde el row o consultando gardens).
+     */
+    private function getGardenUserIdFromReport(array $report)
+    {
+        $gardenUserId = isset($report['garden_user_id']) && $report['garden_user_id'] !== null && $report['garden_user_id'] !== ''
+            ? (int) $report['garden_user_id']
+            : 0;
+        if ($gardenUserId <= 0 && !empty($report['garden_id'])) {
+            $garden = (new \App\Models\GardenModel())->find($report['garden_id']);
+            $gardenUserId = $garden ? (int) ($garden['user_id'] ?? 0) : 0;
+        }
+        return $gardenUserId;
+    }
+    
+    /**
+     * Indica si el usuario actual (cliente) puede evaluar este reporte (solo si es dueño del jardín).
+     */
+    private function reportCanRate(array $report)
+    {
+        $session = \Config\Services::session();
+        $userId = $session->get('user_id');
+        if (!$userId) {
+            return false;
+        }
+        $role = $session->get('user_role');
+        $role = $role !== null ? strtolower(trim((string) $role)) : '';
+        if ($role !== 'cliente') {
+            return false;
+        }
+        $gardenUserId = $this->getGardenUserIdFromReport($report);
+        return $gardenUserId > 0 && $gardenUserId === (int) $userId;
+    }
+    
+    /**
+     * Evaluación del servicio por el cliente (estrellas 1-5 + comentario opcional).
+     * Solo el cliente dueño del jardín del reporte puede evaluar.
+     */
+    public function submitRating($id = null)
+    {
+        $report = $this->reportModel->find($id);
+        if (!$report) {
+            return $this->fail('Reporte no encontrado', 404);
+        }
+
+        $session = \Config\Services::session();
+        $userId = $session->get('user_id');
+        $userRole = $session->get('user_role');
+
+        if (!$userId) {
+            return $this->failUnauthorized('Debes iniciar sesión para evaluar');
+        }
+
+        // Solo el cliente puede evaluar (no el admin)
+        $role = $userRole !== null ? trim((string) $userRole) : '';
+        if (strtolower($role) !== 'cliente') {
+            return $this->failForbidden('Solo el cliente puede evaluar este reporte');
+        }
+
+        // Verificar que el reporte pertenece a un jardín del cliente
+        $gardenModel = new \App\Models\GardenModel();
+        $garden = $gardenModel->find($report['garden_id']);
+        if (!$garden) {
+            return $this->fail('Jardín del reporte no encontrado', 404);
+        }
+        if ((int) $garden['user_id'] !== (int) $userId) {
+            return $this->failForbidden('No puedes evaluar este reporte');
+        }
+
+        // PATCH con body form-urlencoded no llena $_POST; leer de raw input. POST sí llena $_POST.
+        $rating = $this->request->getPost('rating');
+        $feedback = $this->request->getPost('feedback');
+        if ($rating === null || $rating === '') {
+            $rating = $this->request->getRawInputVar('rating');
+        }
+        if ($feedback === null) {
+            $feedback = $this->request->getRawInputVar('feedback');
+        }
+
+        $rating = $rating !== null && $rating !== '' ? (int) $rating : null;
+        if ($rating === null || $rating < 1 || $rating > 5) {
+            return $this->fail('La valoración debe ser entre 1 y 5 estrellas', 400);
+        }
+
+        $feedback = $feedback !== null && $feedback !== '' ? trim((string) $feedback) : null;
+
+        $updated = $this->reportModel->update($id, [
+            'client_rating' => $rating,
+            'client_feedback' => $feedback,
+        ]);
+
+        if (!$updated) {
+            return $this->fail('Error al guardar la evaluación', 500);
+        }
+
+        $updatedReport = $this->reportModel->find($id);
+        return $this->respond([
+            'success' => true,
+            'data' => [
+                'client_rating' => isset($updatedReport['client_rating']) ? (int) $updatedReport['client_rating'] : null,
+                'client_feedback' => $updatedReport['client_feedback'] ?? null,
+            ],
         ]);
     }
     
@@ -287,6 +408,9 @@ class ReportesController extends ResourceController
         
         // Obtener el reporte creado
         $report = $this->reportModel->find($reportId);
+
+        // Notificar por email al cliente (dueño del jardín)
+        $this->sendReportEmailToClient((int) $reportId);
         
         return $this->respondCreated([
             'success' => true,
@@ -580,5 +704,54 @@ class ReportesController extends ResourceController
                 'image_url' => $fullImageUrl
             ]
         ]);
+    }
+
+    /**
+     * Envía un email al cliente (dueño del jardín) cuando se crea un reporte.
+     * Usa la plantilla emails/reporte_cliente y SMTP configurado en .env.
+     * Si falla el envío, se registra en log pero no se falla la petición.
+     */
+    private function sendReportEmailToClient(int $reportId): void
+    {
+        $reportWithDetails = $this->reportModel->getWithDetails($reportId);
+        if (!$reportWithDetails) {
+            log_message('warning', 'Email reporte: no se encontró reporte con detalles para ID ' . $reportId);
+            return;
+        }
+
+        $toEmail = $reportWithDetails['email'] ?? '';
+        if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            log_message('warning', 'Email reporte: email de cliente inválido o vacío para reporte ' . $reportId);
+            return;
+        }
+
+        $frontendBaseUrl = rtrim(env('FRONTEND_BASE_URL', 'http://localhost:3000'), '/');
+        $viewReportUrl = $frontendBaseUrl . '/dashboard/reportes';
+        $logoUrl = $frontendBaseUrl . '/logo.png';
+
+        $data = [
+            'report'         => $reportWithDetails,
+            'viewReportUrl'  => $viewReportUrl,
+            'logoUrl'        => $logoUrl,
+        ];
+
+        $renderer = \Config\Services::renderer();
+        $renderer->setData($data);
+        $html = $renderer->render('emails/reporte_cliente');
+
+        try {
+            $email = \Config\Services::email();
+            $email->setTo($toEmail);
+            $email->setSubject('Nuevo reporte de tu jardín - Cesped365');
+            $email->setMessage($html);
+
+            if (!$email->send(false)) {
+                log_message('error', 'Email reporte: falló envío a ' . $toEmail . ' - ' . $email->printDebugger(['headers']));
+                return;
+            }
+            log_message('info', 'Email reporte: enviado correctamente a ' . $toEmail . ' para reporte ' . $reportId);
+        } catch (\Throwable $e) {
+            log_message('error', 'Email reporte: excepción al enviar a ' . $toEmail . ' - ' . $e->getMessage());
+        }
     }
 }

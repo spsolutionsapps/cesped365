@@ -337,7 +337,7 @@
         >
           {#each jardines as jardin}
             <option value={jardin.id}>
-              {jardin.address} - {jardin.user_name}
+              {jardin.user_name}
             </option>
           {/each}
         </select>

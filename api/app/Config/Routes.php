@@ -21,13 +21,16 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
     $routes->post('registro', 'Api\ClientesController::create'); // Registro público
     $routes->match(['get', 'post'], 'payment/webhook', 'Api\PaymentController::webhook'); // Webhook Mercado Pago (GET para test del panel, POST para notificaciones reales)
     $routes->get('payment/preapproval-return', 'Api\PaymentController::preapprovalReturn'); // Retorno público Preapproval
-    
+
+    // Desarrollo: previsualizar plantilla de email (solo CI_ENVIRONMENT=development)
+    $routes->get('dev/email-preview', 'Api\DevController::emailPreview');
+
     // Rutas protegidas (requieren autenticación)
     $routes->group('', ['filter' => 'auth'], function($routes) {
         // Auth
         $routes->get('me', 'Api\AuthController::me');
         $routes->put('me', 'Api\AuthController::updateProfile');
-        $routes->put('me/password', 'Api\AuthController::updatePassword');
+        $routes->match(['put', 'post'], 'me/password', 'Api\AuthController::updatePassword');
         $routes->post('logout', 'Api\AuthController::logout');
 
         // Pagos
@@ -41,6 +44,8 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
         // Reportes (accesible para admin y cliente)
         $routes->get('reportes', 'Api\ReportesController::index');
         $routes->get('reportes/(:num)', 'Api\ReportesController::show/$1');
+        // Cliente evalúa el servicio (estrellas + comentario)
+        $routes->patch('reportes/(:num)/rating', 'Api\ReportesController::submitRating/$1');
         
         // Historial (accesible para admin y cliente)
         $routes->get('historial', 'Api\HistorialController::index');
@@ -49,8 +54,12 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
         $routes->get('jardines', 'Api\JardinesController::index');
         
         // Visitas programadas (accesible para admin y cliente)
+        $routes->get('scheduled-visits/availability', 'Api\ScheduledVisitsController::availability');
         $routes->get('scheduled-visits', 'Api\ScheduledVisitsController::index');
         $routes->get('scheduled-visits/(:num)', 'Api\ScheduledVisitsController::show/$1');
+        // Cliente puede reservar, editar o cancelar su visita; admin también
+        $routes->post('scheduled-visits', 'Api\ScheduledVisitsController::create');
+        $routes->put('scheduled-visits/(:num)', 'Api\ScheduledVisitsController::update/$1');
         
         // Planes de suscripción (público para clientes)
         $routes->get('subscriptions/plans', 'Api\SubscriptionsController::plans');
@@ -73,10 +82,13 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
             $routes->post('reportes/(:num)/imagen', 'Api\ReportesController::uploadImage/$1');
             $routes->delete('reportes/(:num)', 'Api\ReportesController::delete/$1');
             
-            // Visitas programadas - CRUD completo (solo admin)
-            $routes->post('scheduled-visits', 'Api\ScheduledVisitsController::create');
-            $routes->put('scheduled-visits/(:num)', 'Api\ScheduledVisitsController::update/$1');
+            // Visitas programadas - Eliminar (solo admin)
             $routes->delete('scheduled-visits/(:num)', 'Api\ScheduledVisitsController::delete/$1');
+            
+            // Días bloqueados (solo admin) - para que nadie reserve turno
+            $routes->get('blocked-days', 'Api\BlockedDaysController::index');
+            $routes->post('blocked-days', 'Api\BlockedDaysController::create');
+            $routes->delete('blocked-days/(:num)', 'Api\BlockedDaysController::delete/$1');
             
             // Suscripciones - Gestión completa
             $routes->get('subscriptions', 'Api\SubscriptionsController::index');

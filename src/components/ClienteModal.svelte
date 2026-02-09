@@ -17,7 +17,10 @@
     phone: '',
     address: '',
     password: '',
-    plan: 'Urbano' // Plan por defecto
+    plan: 'Urbano',
+    estado: 'Pendiente',
+    lat: '',
+    lng: ''
   };
 
   let lastClienteId = null;
@@ -33,7 +36,10 @@
         phone: cliente.telefono || '',
         address: cliente.direccion || '',
         password: '', // No mostrar password en edición
-        plan: cliente.plan || 'Urbano'
+        plan: cliente.plan || 'Urbano',
+        estado: cliente.estado || 'Pendiente',
+        lat: (cliente.lat != null && cliente.lat !== '') ? String(cliente.lat) : '',
+        lng: (cliente.lng != null && cliente.lng !== '') ? String(cliente.lng) : ''
       };
       console.log('📝 Modal abierto para editar. Plan del cliente:', cliente.plan);
       console.log('📝 formData.plan:', formData.plan);
@@ -82,7 +88,12 @@
       onClose();
     } catch (err) {
       console.error('Error guardando cliente:', err);
-      error = err.message || 'Error al guardar el cliente. Por favor, intenta de nuevo.';
+      if (err.errors && typeof err.errors === 'object') {
+        const msgs = Object.values(err.errors);
+        error = msgs.join('. ') || err.message;
+      } else {
+        error = err.message || 'Error al guardar el cliente. Por favor, intenta de nuevo.';
+      }
     } finally {
       loading = false;
     }
@@ -95,7 +106,10 @@
       phone: '',
       address: '',
       password: '',
-      plan: 'Urbano'
+      plan: 'Urbano',
+      estado: 'Pendiente',
+      lat: '',
+      lng: ''
     };
     error = null;
     lastClienteId = null;
@@ -178,6 +192,38 @@
       ></textarea>
     </div>
 
+    <!-- Coordenadas GPS (opcional) -->
+    <div>
+      <p class="block text-sm font-medium text-gray-700 mb-2">
+        Coordenadas GPS (opcional)
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="lat" class="sr-only">Latitud</label>
+          <input
+            id="lat"
+            type="text"
+            inputmode="decimal"
+            bind:value={formData.lat}
+            placeholder="Ej: -34.6037"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label for="lng" class="sr-only">Longitud</label>
+          <input
+            id="lng"
+            type="text"
+            inputmode="decimal"
+            bind:value={formData.lng}
+            placeholder="Ej: -58.3816"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+      <p class="mt-1 text-xs text-gray-500">Para ver la ubicación en Google Maps desde el detalle del cliente</p>
+    </div>
+
     <!-- Plan -->
     <div>
       <label for="plan" class="block text-sm font-medium text-gray-700 mb-2">
@@ -197,6 +243,24 @@
       </select>
       <p class="mt-1 text-xs text-gray-500">
         Selecciona el tipo de jardín del cliente
+      </p>
+    </div>
+
+    <!-- Estado (Activo / Pendiente) -->
+    <div>
+      <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
+        Estado
+      </label>
+      <select
+        id="estado"
+        bind:value={formData.estado}
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+      >
+        <option value="Pendiente">Pendiente</option>
+        <option value="Activo">Activo</option>
+      </select>
+      <p class="mt-1 text-xs text-gray-500">
+        Marcar como Activo si el cliente ya pagó por otro medio
       </p>
     </div>
 

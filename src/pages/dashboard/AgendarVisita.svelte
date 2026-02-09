@@ -467,7 +467,7 @@
   <div class="mb-4 sm:mb-6">
     <h2 class="text-xl sm:text-2xl font-semibold text-gray-700">Agendar visita del jardinero</h2>
     <p class="mt-1 text-sm sm:text-base text-gray-600">
-      <strong>Elige un día disponible.</strong> En azul aparecen tus visitas reservadas y en amarillo los días bloqueados (no se puede reservar).
+      <strong>Elige un día disponible.</strong> En <strong style="color: #3788d8">azul</strong> aparecen tus visitas reservadas y en <strong style="color: rgb(217, 119, 6)">"Naranja"</strong> los días bloqueados (no se puede reservar).
     </p>
   </div>
 

@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { auth } from '../../stores/auth';
   import { reportesRefresh } from '../../stores/reportesRefresh';
   import { dashboardAPI, reportesAPI, historialAPI, scheduledVisitsAPI } from '../../services/api';
@@ -22,15 +22,17 @@
   // Estado del modal de reagendar
   let visitaSeleccionada = null;
   let showReagendarModal = false;
+
+  let unsubReportesRefresh;
   
   auth.subscribe(value => {
     userRole = value.role;
     userName = value.user?.name;
   });
 
-  // Refrescar último reporte cuando se crea/edita uno desde Reportes
-  reportesRefresh.subscribe((n) => {
-    if (n > 0) cargarDatos();
+  // Refrescar último reporte cuando se crea/edita uno desde Reportes (solo si no estamos ya cargando)
+  unsubReportesRefresh = reportesRefresh.subscribe((n) => {
+    if (n > 0 && !loading) cargarDatos();
   });
   
   // Función para cargar datos
@@ -76,21 +78,13 @@
     }
   }
   
-  // Cargar datos del backend
-  onMount(async () => {
-    await cargarDatos();
-    
-    // Recargar estadísticas cada 30 segundos para mantenerlas actualizadas
-    const interval = setInterval(async () => {
-      if (userRole === 'admin') {
-        const dashboardResponse = await dashboardAPI.getDashboard();
-        if (dashboardResponse.success) {
-          estadisticas = dashboardResponse.data.estadisticas || {};
-        }
-      }
-    }, 30000);
-    
-    return () => clearInterval(interval);
+  // Cargar datos al entrar a la página (sin polling para evitar requests en loop)
+  onMount(() => {
+    cargarDatos();
+  });
+
+  onDestroy(() => {
+    if (typeof unsubReportesRefresh === 'function') unsubReportesRefresh();
   });
   
   // Iconos SVG

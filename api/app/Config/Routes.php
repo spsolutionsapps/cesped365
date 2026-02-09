@@ -40,7 +40,7 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
         
         // Dashboard (accesible para admin y cliente)
         $routes->get('dashboard', 'Api\DashboardController::index');
-        
+
         // Reportes (accesible para admin y cliente)
         $routes->get('reportes', 'Api\ReportesController::index');
         $routes->get('reportes/(:num)', 'Api\ReportesController::show/$1');
@@ -101,6 +101,10 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
             
             // Planes de suscripción - Admin
             $routes->post('subscriptions/plans', 'Api\SubscriptionsController::createPlan');
+
+            // Ganancias manuales y por día (solo admin)
+            $routes->get('dashboard/ganancias-por-dia', 'Api\DashboardController::gananciasPorDia');
+            $routes->post('dashboard/ganancia', 'Api\DashboardController::addGanancia');
         });
     });
 });

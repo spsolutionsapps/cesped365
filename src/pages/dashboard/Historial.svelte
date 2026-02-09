@@ -42,8 +42,9 @@
       <table class="w-full whitespace-no-wrap">
         <thead>
           <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
+            <th class="px-4 py-3">Jardín</th>
             <th class="px-4 py-3">Fecha</th>
-            <th class="px-4 py-3">Tipo de Servicio</th>
+            <th class="px-4 py-3">Valoración del cliente</th>
             <th class="px-4 py-3">Jardinero</th>
             <th class="px-4 py-3">Estado</th>
             <th class="px-4 py-3">Acciones</th>
@@ -52,6 +53,9 @@
         <tbody class="bg-white divide-y">
           {#each historial as visita}
             <tr class="text-gray-700">
+              <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                {visita.jardin || '—'}
+              </td>
               <td class="px-4 py-3">
                 <div class="flex items-center text-sm">
                   <div>
@@ -71,7 +75,16 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-sm">
-                {visita.tipo}
+                {#if visita.client_rating != null && visita.client_rating >= 1 && visita.client_rating <= 5}
+                  <span class="inline-flex items-center gap-0.5" title="{visita.client_rating} de 5 estrellas">
+                    {#each { length: 5 } as _, i}
+                      <span class={i < visita.client_rating ? 'text-amber-500' : 'text-gray-300'} aria-hidden="true">★</span>
+                    {/each}
+                    <span class="ml-1 text-gray-600">({visita.client_rating}/5)</span>
+                  </span>
+                {:else}
+                  <span class="text-gray-400">No evaluado</span>
+                {/if}
               </td>
               <td class="px-4 py-3 text-sm">
                 {visita.jardinero}

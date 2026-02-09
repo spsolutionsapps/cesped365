@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS `user_subscriptions`;
 DROP TABLE IF EXISTS `gardens`;
 DROP TABLE IF EXISTS `subscriptions`;
 DROP TABLE IF EXISTS `blocked_days`;
+DROP TABLE IF EXISTS `manual_gains`;
 DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
@@ -195,9 +196,22 @@ CREATE TABLE `blocked_days` (
   UNIQUE KEY `blocked_date` (`blocked_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ------------------------------------------------------------
+-- 9. manual_gains (ganancias manuales por mes/año; columnas gain_year/gain_month por compatibilidad MySQL)
+-- ------------------------------------------------------------
+CREATE TABLE `manual_gains` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `gain_year` smallint(4) unsigned NOT NULL,
+  `gain_month` tinyint(2) unsigned NOT NULL,
+  `amount` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `manual_gains_year_month` (`gain_year`, `gain_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
 -- Listo. Tablas creadas: users, gardens, reports, report_images,
--- subscriptions, user_subscriptions, scheduled_visits, blocked_days.
+-- subscriptions, user_subscriptions, scheduled_visits, blocked_days, manual_gains.
 -- ============================================================

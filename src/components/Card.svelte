@@ -5,8 +5,9 @@
 
 <div class="bg-white rounded-lg overflow-hidden {className}">
   {#if title}
-    <div class="px-6 py-4 border-b border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-4 flex-wrap">
       <h3 class="text-lg font-semibold text-gray-900">{title}</h3>
+      <slot name="headerAction" />
     </div>
   {/if}
   <div class="p-0 sm:p-6">

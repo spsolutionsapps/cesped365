@@ -49,7 +49,7 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
           </tr>
           <tr>
             <td style="padding: 0 32px 20px;">
-              <p style="margin: 0; font-size: 15px; color: #4b5563; line-height: 1.5;">Tenés un nuevo reporte de mantenimiento de tu jardín. Resumen:</p>
+              <p style="margin: 0; font-size: 15px; color: #4b5563; line-height: 1.5;">Tenés un nuevo reporte de mantenimiento de tu jardín.</p>
             </td>
           </tr>
           <!-- Detalle del reporte -->
@@ -65,44 +65,10 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
                         <td style="padding: 4px 0; font-size: 13px; color: #111827; font-weight: 500;" align="right"><?= esc($visitDate) ?></td>
                       </tr>
                       <?php endif; ?>
-                      <?php if ($address): ?>
                       <tr>
-                        <td style="padding: 4px 0; font-size: 13px; color: #6b7280;">Dirección</td>
-                        <td style="padding: 4px 0; font-size: 13px; color: #111827; font-weight: 500;" align="right"><?= esc($address) ?></td>
+                        <td style="padding: 4px 0; font-size: 13px; color: #6b7280;">Jardinero</td>
+                        <td style="padding: 4px 0; font-size: 13px; color: #111827; font-weight: 500;" align="right"><?= esc($technicianNotes !== '' ? $technicianNotes : '—') ?></td>
                       </tr>
-                      <?php endif; ?>
-                      <tr>
-                        <td style="padding: 4px 0; font-size: 13px; color: #6b7280;">Estado del césped</td>
-                        <td style="padding: 4px 0; font-size: 13px; color: #111827; font-weight: 500;" align="right"><?= esc($grassLabel) ?></td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 4px 0; font-size: 13px; color: #6b7280;">Riego</td>
-                        <td style="padding: 4px 0; font-size: 13px; color: #111827; font-weight: 500;" align="right"><?= esc($wateringLabel) ?></td>
-                      </tr>
-                      <?php if ($technicianNotes !== ''): ?>
-                      <tr>
-                        <td style="padding: 8px 0 4px; font-size: 13px; color: #6b7280;" colspan="2">Jardinero</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 8px; font-size: 13px; color: #111827;" colspan="2"><?= esc($technicianNotes) ?></td>
-                      </tr>
-                      <?php endif; ?>
-                      <?php if ($workDone !== ''): ?>
-                      <tr>
-                        <td style="padding: 8px 0 4px; font-size: 13px; color: #6b7280;" colspan="2">Trabajo realizado</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 8px; font-size: 13px; color: #111827; line-height: 1.4;" colspan="2"><?= nl2br(esc($workDone)) ?></td>
-                      </tr>
-                      <?php endif; ?>
-                      <?php if ($recommendations !== ''): ?>
-                      <tr>
-                        <td style="padding: 8px 0 4px; font-size: 13px; color: #6b7280;" colspan="2">Recomendaciones</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 4px; font-size: 13px; color: #111827; line-height: 1.4;" colspan="2"><?= nl2br(esc($recommendations)) ?></td>
-                      </tr>
-                      <?php endif; ?>
                     </table>
                   </td>
                 </tr>
@@ -117,7 +83,7 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
           </tr>
           <tr>
             <td style="padding: 0 32px 24px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #9ca3af;">Iniciá sesión en tu cuenta para ver fotos y dejar tu evaluación.</p>
+              <p style="margin: 0; font-size: 12px; color: #9ca3af;">Iniciá sesión en tu cuenta para ver el reporte completo, fotos y dejar valoración del servicio. ¡Gracias!</p>
             </td>
           </tr>
         </table>

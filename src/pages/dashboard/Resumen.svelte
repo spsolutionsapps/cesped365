@@ -1,12 +1,16 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { Chart, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from 'chart.js';
   import { auth } from '../../stores/auth';
   import { reportesRefresh } from '../../stores/reportesRefresh';
   import { dashboardAPI, reportesAPI, historialAPI, scheduledVisitsAPI } from '../../services/api';
   import StatCard from '../../components/StatCard.svelte';
   import Card from '../../components/Card.svelte';
   import Badge from '../../components/Badge.svelte';
+  import Modal from '../../components/Modal.svelte';
   import ReagendarVisitaModal from '../../components/ReagendarVisitaModal.svelte';
+
+  Chart.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
   
   let userRole;
   let userName;
@@ -22,6 +26,12 @@
   // Estado del modal de reagendar
   let visitaSeleccionada = null;
   let showReagendarModal = false;
+
+  // Modal Agregar ganancia (solo admin)
+  let showAgregarGananciaModal = false;
+  let montoGanancia = '';
+  let loadingGanancia = false;
+  let errorGanancia = null;
 
   let unsubReportesRefresh;
   
@@ -83,10 +93,6 @@
     cargarDatos();
   });
 
-  onDestroy(() => {
-    if (typeof unsubReportesRefresh === 'function') unsubReportesRefresh();
-  });
-  
   // Iconos SVG
   const iconClientes = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>';
   const iconVisitas = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
@@ -149,13 +155,193 @@
       }
     }
   }
+
+  function openAgregarGananciaModal() {
+    montoGanancia = '';
+    errorGanancia = null;
+    showAgregarGananciaModal = true;
+  }
+
+  async function submitAgregarGanancia() {
+    const num = parseFloat(String(montoGanancia).replace(',', '.'));
+    if (isNaN(num) || num <= 0) {
+      errorGanancia = 'Ingresá un monto mayor a cero.';
+      return;
+    }
+    errorGanancia = null;
+    loadingGanancia = true;
+    try {
+      await dashboardAPI.addGanancia(num);
+      showAgregarGananciaModal = false;
+      montoGanancia = '';
+      await cargarDatos();
+    } catch (err) {
+      errorGanancia = err.message || 'Error al agregar la ganancia.';
+    } finally {
+      loadingGanancia = false;
+    }
+  }
+
+  // Para el gráfico: altura relativa de las barras (mes actual vs anterior)
+  // Gráficos Comparativa mensual (Chart.js)
+  let chartMesRef;
+  let chartDiaRef;
+  let chartMesInstance = null;
+  let chartDiaInstance = null;
+
+  // Select "Mes por día": valor elegido (year-month) y datos para el gráfico
+  let mesPorDiaValue = '';
+  let gananciasPorDiaSeleccionado = [];
+  let loadingMesPorDia = false;
+  const nombresMes = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  $: opcionesMesPorDia = (() => {
+    const list = [];
+    const d = new Date();
+    for (let i = 0; i < 12; i++) {
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      list.push({ value: `${y}-${m}`, label: `${nombresMes[m - 1]} ${y}` });
+      d.setMonth(d.getMonth() - 1);
+    }
+    return list;
+  })();
+  $: if (estadisticas?.gananciasMesPorDia?.length && !mesPorDiaValue) {
+    const now = new Date();
+    mesPorDiaValue = `${now.getFullYear()}-${now.getMonth() + 1}`;
+    gananciasPorDiaSeleccionado = estadisticas.gananciasMesPorDia;
+  }
+  async function onMesPorDiaChange() {
+    const [year, month] = mesPorDiaValue.split('-').map(Number);
+    const now = new Date();
+    const isCurrent = year === now.getFullYear() && month === now.getMonth() + 1;
+    if (isCurrent && estadisticas?.gananciasMesPorDia?.length) {
+      gananciasPorDiaSeleccionado = estadisticas.gananciasMesPorDia;
+      return;
+    }
+    loadingMesPorDia = true;
+    try {
+      const res = await dashboardAPI.getGananciasPorDia(year, month);
+      if (res.success && res.data?.gananciasMesPorDia) {
+        gananciasPorDiaSeleccionado = res.data.gananciasMesPorDia;
+      }
+    } catch (e) {
+      console.error('Error cargando ganancias por día:', e);
+      gananciasPorDiaSeleccionado = [];
+    } finally {
+      loadingMesPorDia = false;
+    }
+  }
+
+  $: if (typeof window !== 'undefined' && userRole === 'admin' && estadisticas?.gananciasPorMes?.length && chartMesRef) {
+    if (chartMesInstance) chartMesInstance.destroy();
+    const data = estadisticas.gananciasPorMes;
+    chartMesInstance = new Chart(chartMesRef, {
+      type: 'bar',
+      data: {
+        labels: data.map((d) => `${d.mes} ${String(d.año).slice(-2)}`),
+        datasets: [{
+          label: 'Ganancias ($)',
+          data: data.map((d) => d.total),
+          backgroundColor: 'rgba(37, 99, 235, 0.7)',
+          borderColor: 'rgb(37, 99, 235)',
+          borderWidth: 1,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `$${Number(ctx.raw).toLocaleString('es-AR')}`,
+            },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (v) => '$' + Number(v).toLocaleString('es-AR'),
+            },
+          },
+        },
+      },
+    });
+  }
+
+  $: if (typeof window !== 'undefined' && userRole === 'admin' && gananciasPorDiaSeleccionado?.length && chartDiaRef) {
+    if (chartDiaInstance) chartDiaInstance.destroy();
+    const data = gananciasPorDiaSeleccionado;
+    const now = new Date();
+    const [selYear, selMonth] = (mesPorDiaValue || '').split('-').map(Number);
+    const isCurrentMonth = selYear === now.getFullYear() && selMonth === now.getMonth() + 1;
+    const hoy = now.getDate();
+    chartDiaInstance = new Chart(chartDiaRef, {
+      type: 'bar',
+      data: {
+        labels: data.map((d) => 'Día ' + d.dia),
+        datasets: [{
+          label: 'Ganancias ($)',
+          data: data.map((d) => d.total),
+          backgroundColor: data.map((d) => (isCurrentMonth && d.dia === hoy ? 'rgba(34, 197, 94, 0.8)' : 'rgba(148, 163, 184, 0.6)')),
+          borderColor: data.map((d) => (isCurrentMonth && d.dia === hoy ? 'rgb(22, 163, 74)' : 'rgb(148, 163, 184)')),
+          borderWidth: 1,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `$${Number(ctx.raw).toLocaleString('es-AR')}`,
+            },
+          },
+        },
+        scales: {
+          y: { beginAtZero: true },
+          x: {
+            ticks: {
+              maxRotation: 45,
+              maxTicksLimit: 15,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  onDestroy(() => {
+    if (chartMesInstance) {
+      chartMesInstance.destroy();
+      chartMesInstance = null;
+    }
+    if (chartDiaInstance) {
+      chartDiaInstance.destroy();
+      chartDiaInstance = null;
+    }
+    if (typeof unsubReportesRefresh === 'function') unsubReportesRefresh();
+  });
 </script>
 
 <div class="py-6">
   <!-- Page title -->
-  <h2 class="mb-6 text-2xl font-semibold text-gray-700">
-    Bienvenido, {userName}
-  </h2>
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <h2 class="text-2xl font-semibold text-gray-700">
+      Bienvenido, {userName}
+    </h2>
+    {#if userRole === 'admin'}
+      <button
+        type="button"
+        on:click={openAgregarGananciaModal}
+        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium whitespace-nowrap"
+      >
+        Agregar ganancia
+      </button>
+    {/if}
+  </div>
 
   {#if error}
     <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -198,49 +384,74 @@
           color="orange"
         />
         <StatCard 
-          title="Ganancias del mes" 
-          value={'$' + (estadisticas.gananciasMes || 0).toLocaleString('es-AR')} 
-          icon={iconGanancias}
-          color="green"
-        />
-        <StatCard 
           title="Visitas del día" 
           value={(estadisticas.visitasHoy || 0).toString()} 
           icon={iconVisitas}
           color="primary"
         />
+        <StatCard 
+          title="Ganancias del mes" 
+          value={'$' + (estadisticas.gananciasMes || 0).toLocaleString('es-AR')} 
+          icon={iconGanancias}
+          color="green"
+        />
       </div>
-      
-      <div class="mb-8">
-        <!-- Próximas visitas -->
-        {#if userRole === 'admin'}
-          <Card title="Próximas Visitas">
-            <div class="space-y-4">
-              {#each proximasVisitas as visita}
-                  <div class="flex items-center py-3 border-b border-gray-100 last:border-0">
-                    <div class="flex-shrink-0">
-                      <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div class="ml-4">
-                      <p class="text-sm font-medium text-gray-900">{visita.cliente}</p>
-                      <p class="text-xs text-gray-600">{visita.jardin}</p>
-                      <p class="text-xs text-gray-500">{new Date(visita.fecha).toLocaleDateString('es-AR')}</p>
+
+      <!-- Comparativa mensual y Próximas visitas en la misma fila -->
+      <div class="grid gap-6 mb-8 md:grid-cols-2">
+        <Card title="Comparativa mensual">
+          <div slot="headerAction" class="flex items-center gap-2">
+            <label for="mes-por-dia" class="text-sm text-gray-600 whitespace-nowrap">Mes por día:</label>
+            <select
+              id="mes-por-dia"
+              bind:value={mesPorDiaValue}
+              on:change={onMesPorDiaChange}
+              disabled={loadingMesPorDia}
+              class="rounded-lg border border-gray-300 text-sm py-1.5 pl-2 pr-6 bg-white text-gray-700 focus:ring-primary-500 focus:border-primary-500"
+            >
+              {#each opcionesMesPorDia as opt}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
+            {#if loadingMesPorDia}
+              <span class="text-xs text-gray-500">Cargando...</span>
+            {/if}
+          </div>
+          <p class="text-sm text-gray-500 mb-2">Ganancias por mes (últimos 12 meses)</p>
+          <div class="h-48 mb-6">
+            <canvas bind:this={chartMesRef}></canvas>
+          </div>
+          <p class="text-sm text-gray-500 mb-2">Mes por día</p>
+          <div class="h-40">
+            <canvas bind:this={chartDiaRef}></canvas>
+          </div>
+        </Card>
+        <Card title="Próximas Visitas">
+          <div class="space-y-4">
+            {#each proximasVisitas as visita}
+                <div class="flex items-center py-3 border-b border-gray-100 last:border-0">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
                     </div>
                   </div>
-              {/each}
-              
-              <div class="pt-4">
-                <a href="/dashboard/agenda" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
-                  Ver toda la agenda →
-                </a>
-              </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-900">{visita.cliente}</p>
+                    <p class="text-xs text-gray-600">{visita.jardin}</p>
+                    <p class="text-xs text-gray-500">{new Date(visita.fecha).toLocaleDateString('es-AR')}</p>
+                  </div>
+                </div>
+            {/each}
+            
+            <div class="pt-4">
+              <a href="/dashboard/agenda" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
+                Ver toda la agenda →
+              </a>
             </div>
-          </Card>
-        {/if}
+          </div>
+        </Card>
       </div>
     {:else}
       {#if ultimoReporte}
@@ -401,6 +612,50 @@
     {/if}
   {/if}
 </div>
+
+<!-- Modal Agregar ganancia -->
+<Modal
+  isOpen={showAgregarGananciaModal}
+  title="Agregar ganancia"
+  size="sm"
+  onClose={() => { showAgregarGananciaModal = false; errorGanancia = null; }}
+>
+  <form on:submit|preventDefault={submitAgregarGanancia} class="space-y-4">
+    {#if errorGanancia}
+      <div class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{errorGanancia}</div>
+    {/if}
+    <div>
+      <label for="monto-ganancia" class="block text-sm font-medium text-gray-700 mb-1">Monto</label>
+      <input
+        id="monto-ganancia"
+        type="number"
+        step="0.01"
+        min="0.01"
+        bind:value={montoGanancia}
+        placeholder="Ej: 1500"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+      />
+      <p class="mt-2 text-sm text-gray-500">Se sumará a la ganancia total del mes.</p>
+    </div>
+  </form>
+  <div slot="footer" class="flex justify-end gap-3">
+    <button
+      type="button"
+      on:click={() => { showAgregarGananciaModal = false; errorGanancia = null; }}
+      class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      on:click={submitAgregarGanancia}
+      disabled={loadingGanancia}
+      class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+    >
+      {loadingGanancia ? 'Guardando...' : 'Agregar'}
+    </button>
+  </div>
+</Modal>
 
 <!-- Modal de reagendar visita -->
 <ReagendarVisitaModal

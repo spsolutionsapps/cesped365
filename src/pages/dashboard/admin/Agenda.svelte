@@ -1210,6 +1210,19 @@
     {#if visitaDetalle}
       <p class="text-gray-700 mb-1"><strong>Cliente:</strong> {visitaDetalle.cliente_nombre || '—'}</p>
       <p class="text-gray-700 mb-1"><strong>Dirección:</strong> {visitaDetalle.direccion || '—'}</p>
+      {#if visitaDetalle.direccion && visitaDetalle.direccion.trim() && visitaDetalle.direccion !== 'N/A'}
+        <p class="text-gray-700 mb-2 -mt-0.5">
+          <a
+            href="https://www.google.com/maps?q={encodeURIComponent(visitaDetalle.direccion)}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary-600 hover:text-primary-700 text-sm font-medium inline-flex items-center gap-1"
+          >
+            Ver con Google Maps
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+          </a>
+        </p>
+      {/if}
       <p class="text-gray-700 mb-1"><strong>Fecha:</strong> {formatearFecha(visitaDetalle.scheduled_date)}</p>
       <p class="text-gray-700 mb-1"><strong>Horario:</strong> {visitaDetalle.scheduled_time || '—'}</p>
       <p class="text-gray-700 mb-3"><strong>Estado:</strong> {getStatusLabel(visitaDetalle.status)}</p>

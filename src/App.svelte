@@ -27,6 +27,7 @@
   import PagoFallo from './pages/dashboard/pagos/Fallo.svelte';
   import PagoPendiente from './pages/dashboard/pagos/Pendiente.svelte';
   import ToastContainer from './components/ToastContainer.svelte';
+  import RedirectToLogin from './components/RedirectToLogin.svelte';
 
   export let url = "";
   
@@ -115,6 +116,7 @@
       <DashboardResumen />
     </Dashboard>
   </Route>
-  
-  <!-- Redirección por defecto según rol se maneja en Login -->
+
+  <!-- Ruta por defecto: cualquier path no definido redirige a login (evita 404) -->
+  <Route component={RedirectToLogin} />
 </Router>

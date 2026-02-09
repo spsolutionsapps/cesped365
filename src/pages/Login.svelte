@@ -8,28 +8,33 @@
   let loading = false;
   let showPassword = false;
 
+  function getRedirectPath() {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect && redirect.startsWith('/dashboard') && !redirect.includes('//')) return redirect;
+    return null;
+  }
+
   async function handleLogin(e) {
     e.preventDefault();
     error = '';
     loading = true;
 
     try {
-      // Llamar al backend real
       const result = await auth.login(email, password);
       
       if (result.success) {
-        // Verificar si hay un plan pendiente de pago
-        const planPendiente = sessionStorage.getItem('planSeleccionado');
-        
-        // Redirigir al dashboard según el rol
-        // El rol viene en result.role después del login
-        const userRole = result.role;
-        
-        if (userRole === 'admin') {
-          navigate('/dashboard/resumen', { replace: true });
+        const redirectPath = getRedirectPath();
+        if (redirectPath) {
+          navigate(redirectPath, { replace: true });
         } else {
-          // Cliente: ir a suscripciones (pagar o ver estado)
-          navigate('/dashboard/suscripciones', { replace: true });
+          const userRole = result.role;
+          if (userRole === 'admin') {
+            navigate('/dashboard/resumen', { replace: true });
+          } else {
+            navigate('/dashboard/suscripciones', { replace: true });
+          }
         }
       } else {
         error = result.error || 'Credenciales inválidas';

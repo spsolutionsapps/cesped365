@@ -15,7 +15,9 @@
   });
   
   $: if (!isChecking && !isAuthenticated) {
-    navigate('/login', { replace: true });
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const redirect = currentPath && currentPath !== '/login' ? '?redirect=' + encodeURIComponent(currentPath) : '';
+    navigate('/login' + redirect, { replace: true });
   }
   
   function toggleSidebar() {
@@ -47,5 +49,10 @@
         </div>
       </main>
     </div>
+  </div>
+{:else}
+  <!-- No autenticado: redirigiendo a login -->
+  <div class="flex justify-center items-center h-screen bg-gray-50">
+    <p class="text-gray-600">Redirigiendo a login...</p>
   </div>
 {/if}

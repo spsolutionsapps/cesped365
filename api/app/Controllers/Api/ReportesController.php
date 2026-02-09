@@ -725,9 +725,13 @@ class ReportesController extends ResourceController
             return;
         }
 
-        $frontendBaseUrl = rtrim(env('FRONTEND_BASE_URL', 'http://localhost:3000'), '/');
-        $viewReportUrl = $frontendBaseUrl . '/dashboard/reportes';
-        $logoUrl = $frontendBaseUrl . '/logo.png';
+        // URL pública del frontend para enlaces e imágenes en el email (debe ser accesible desde internet)
+        $publicBaseUrl = env('APP_PUBLIC_URL') ?: env('FRONTEND_BASE_URL');
+        $publicBaseUrl = $publicBaseUrl !== '' && $publicBaseUrl !== false
+            ? rtrim(preg_replace('#/$#', '', (string) $publicBaseUrl), '/')
+            : '';
+        $viewReportUrl = $publicBaseUrl !== '' ? $publicBaseUrl . '/login' : '';
+        $logoUrl = $publicBaseUrl !== '' ? $publicBaseUrl . '/logo_email.png' : '';
 
         $data = [
             'report'         => $reportWithDetails,
@@ -746,7 +750,8 @@ class ReportesController extends ResourceController
             $email->setMessage($html);
 
             if (!$email->send(false)) {
-                log_message('error', 'Email reporte: falló envío a ' . $toEmail . ' - ' . $email->printDebugger(['headers']));
+                $debug = $email->printDebugger([]);
+                log_message('error', 'Email reporte: falló envío a ' . $toEmail . ' - ' . $debug);
                 return;
             }
             log_message('info', 'Email reporte: enviado correctamente a ' . $toEmail . ' para reporte ' . $reportId);

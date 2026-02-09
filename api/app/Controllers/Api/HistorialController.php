@@ -28,20 +28,14 @@ class HistorialController extends ResourceController
         // Formatear para el frontend
         $formatted = [];
         foreach ($reports as $report) {
-            // Determinar tipo basado en las condiciones del reporte
-            $tipo = 'Mantenimiento Regular';
-            if (isset($report['pest_detected']) && $report['pest_detected']) {
-                $tipo = 'Mantenimiento + Tratamiento';
-            }
-            
             $formatted[] = [
                 'id' => $report['id'],
                 'fecha' => $report['visit_date'],
-                'tipo' => $tipo,
                 'estadoGeneral' => $report['grass_health'] ?? 'Sin datos',
                 'jardinero' => $report['technician_notes'] ?? 'Sin datos',
                 'cliente' => $report['client_name'] ?? 'Sin cliente',
-                'jardin' => $report['garden_address'] ?? 'Sin dirección'
+                'jardin' => $report['garden_address'] ?? 'Sin dirección',
+                'client_rating' => isset($report['client_rating']) && $report['client_rating'] !== null && $report['client_rating'] !== '' ? (int) $report['client_rating'] : null,
             ];
         }
         

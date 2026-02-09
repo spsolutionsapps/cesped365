@@ -480,26 +480,30 @@
         {#each reportesPaginados as reporte}
       <Card className="overflow-hidden transition-all duration-200 hover:shadow-lg border border-[#e2e2e2] rounded-[8px]">
         <div class="space-y-4">
-          <!-- Header del reporte -->
-          <div class="flex justify-between items-start gap-3">
-            <div class="min-w-0 flex-1">
-              <p class="text-base font-semibold text-gray-900 leading-snug">
-                {getReporteTitulo(reporte)}
-              </p>
-              <p class="text-sm text-gray-500 mt-1">
+          <!-- Header del reporte: usuario, dirección y estado en renglones; luego fecha y jardinero -->
+          <div class="min-w-0">
+            <p class="text-base font-semibold text-gray-900 leading-snug capitalize">
+              {reporte.cliente || getJardinInfoById(reporte.garden_id).cliente || '—'}
+            </p>
+            <p class="text-sm text-gray-900 mt-0.5">
+              {reporte.direccion || getJardinInfoById(reporte.garden_id).direccion || '—'}
+            </p>
+            <p class="mt-1.5 text-sm">
+              <span class="text-gray-600">Estado del césped:</span>
+              <Badge type={getBadgeType(reporte.estadoGeneral)} className="ml-1.5 capitalize">
+                {reporte.estadoGeneral}
+              </Badge>
+            </p>
+            <div class="flex items-center justify-between gap-2 mt-2 text-sm text-gray-500">
+              <span>
                 {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
                   year: 'numeric', 
                   month: 'long', 
                   day: 'numeric' 
                 })}
-              </p>
-              <p class="text-xs text-gray-400 mt-0.5">
-                por {reporte.jardinero || 'N/A'}
-              </p>
+              </span>
+              <span class="shrink-0 text-right inline-block"><span class="text-gray-500">Por:</span> <span class="font-semibold text-gray-800">{reporte.jardinero || 'N/A'}</span></span>
             </div>
-            <Badge type={getBadgeType(reporte.estadoGeneral)} className="flex-shrink-0">
-              {reporte.estadoGeneral}
-            </Badge>
           </div>
 
           <!-- Indicadores con iconos -->
@@ -534,10 +538,10 @@
             </div>
           </div>
 
-          <!-- Nota resumida -->
+          <!-- Recomendaciones (vista previa: 2 renglones) -->
           {#if reporte.notaJardinero}
-            <p class="text-sm text-gray-600 line-clamp-3 italic">
-              "{reporte.notaJardinero}"
+            <p class="text-sm text-gray-600 line-clamp-2 overflow-hidden text-ellipsis" title={reporte.notaJardinero}>
+              <span class="font-medium text-gray-700">Recomendaciones:</span> {reporte.notaJardinero}
             </p>
           {/if}
 
@@ -586,7 +590,7 @@
     {:else}
       <!-- Vista de tabla (Desktop) -->
       <div class="hidden md:block mt-6">
-        <Card>
+        <Card className="reportes-vista-tabla-card">
           <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -645,10 +649,10 @@
                   </td>
                   <td class="px-6 py-4">
                     <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                      <div><span class="text-gray-600">Parejo:</span> <span class="font-semibold text-gray-900">{siNo(reporte.cespedParejo)}</span></div>
-                      <div><span class="text-gray-600">Color:</span> <span class="font-semibold text-gray-900">{getColorLabel(reporte)}</span></div>
-                      <div><span class="text-gray-600">Manchas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.manchas)}</span></div>
-                      <div><span class="text-gray-600">Malezas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.malezasVisibles)}</span></div>
+                      <div class="whitespace-nowrap"><span class="text-gray-600">Parejo:</span> <span class="font-semibold text-gray-900">{siNo(reporte.cespedParejo)}</span></div>
+                      <div class="whitespace-nowrap"><span class="text-gray-600">Color:</span> <span class="font-semibold text-gray-900">{getColorLabel(reporte)}</span></div>
+                      <div class="whitespace-nowrap"><span class="text-gray-600">Manchas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.manchas)}</span></div>
+                      <div class="whitespace-nowrap"><span class="text-gray-600">Malezas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.malezasVisibles)}</span></div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -714,22 +718,28 @@
                 class="w-full min-w-0 px-3 py-3 sm:px-4 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between gap-2 text-left"
               >
                 <div class="flex-1 min-w-0 overflow-hidden">
-                  <div class="flex items-center gap-2 mb-1 min-w-0">
-                    <p class="font-semibold text-gray-900 truncate min-w-0 flex-1">
-                      {getReporteTitulo(reporte)}
-                    </p>
-                    <Badge type={getBadgeType(reporte.estadoGeneral)} class="flex-shrink-0">
+                  <p class="font-semibold text-gray-900 text-sm truncate capitalize">
+                    {reporte.cliente || getJardinInfoById(reporte.garden_id).cliente || '—'}
+                  </p>
+                  <p class="text-xs text-gray-900 truncate mt-0.5">
+                    {reporte.direccion || getJardinInfoById(reporte.garden_id).direccion || '—'}
+                  </p>
+                  <p class="mt-1 text-xs">
+                    <span class="text-gray-600">Estado del césped:</span>
+                    <Badge type={getBadgeType(reporte.estadoGeneral)} className="ml-1 capitalize">
                       {reporte.estadoGeneral}
                     </Badge>
-                  </div>
-                  <p class="text-xs text-gray-500">
-                    {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
                   </p>
-                  <p class="text-xs text-gray-600">por {reporte.jardinero || 'N/A'}</p>
+                  <div class="flex items-center justify-between gap-2 text-xs mt-1.5">
+                    <span class="text-gray-500">
+                      {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </span>
+                    <span class="shrink-0 text-right inline-block"><span class="text-gray-500">Por:</span> <span class="font-semibold text-gray-800">{reporte.jardinero || 'N/A'}</span></span>
+                  </div>
                 </div>
                 <svg 
                   class="w-5 h-5 text-gray-500 transition-transform duration-200 ml-2 flex-shrink-0 {expandedReportes.has(reporte.id) ? 'rotate-180' : ''}" 
@@ -773,12 +783,11 @@
                     <p class="text-sm text-gray-900 font-medium">{reporte.crecimientoCm} cm</p>
                   </div>
 
-                  <!-- Observaciones -->
+                  <!-- Recomendaciones (vista previa: 2 renglones) -->
                   {#if reporte.notaJardinero || reporte.observaciones}
                     <div>
-                      <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Observaciones</p>
-                      <p class="text-sm text-gray-600 line-clamp-2">
-                        {reporte.notaJardinero || reporte.observaciones}
+                      <p class="text-sm text-gray-600 line-clamp-2 overflow-hidden text-ellipsis" title={reporte.notaJardinero || reporte.observaciones}>
+                        <span class="font-medium text-gray-700">Recomendaciones:</span> {reporte.notaJardinero || reporte.observaciones}
                       </p>
                     </div>
                   {/if}
@@ -1139,12 +1148,3 @@
   onClose={closeImageGallery}
 />
 
-<style>
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>

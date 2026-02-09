@@ -284,6 +284,17 @@ export const dashboardAPI = {
   // GET /api/dashboard
   getDashboard: async () => {
     return await request('/dashboard');
+  },
+  // GET /api/dashboard/ganancias-por-dia?year=2025&month=2 (solo admin)
+  getGananciasPorDia: async (year, month) => {
+    return await request(`/dashboard/ganancias-por-dia?year=${year}&month=${month}`);
+  },
+  // POST /api/dashboard/ganancia (solo admin) - agrega monto a la ganancia del mes actual
+  addGanancia: async (monto) => {
+    return await request('/dashboard/ganancia', {
+      method: 'POST',
+      body: { monto }
+    });
   }
 };
 

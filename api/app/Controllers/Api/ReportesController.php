@@ -730,8 +730,10 @@ class ReportesController extends ResourceController
         $publicBaseUrl = $publicBaseUrl !== '' && $publicBaseUrl !== false
             ? rtrim(preg_replace('#/$#', '', (string) $publicBaseUrl), '/')
             : '';
-        $viewReportUrl = $publicBaseUrl !== '' ? $publicBaseUrl . '/dashboard/reportes' : '';
-        $logoUrl = $publicBaseUrl !== '' ? $publicBaseUrl . '/logo_email.png' : '';
+        // Fallback para que el botón "Ver reporte" siempre tenga URL válida (p. ej. si .env no carga)
+        $baseForLinks = $publicBaseUrl !== '' ? $publicBaseUrl : 'https://www.cesped365.com';
+        $viewReportUrl = $baseForLinks . '/dashboard/reportes';
+        $logoUrl = $baseForLinks !== '' ? $baseForLinks . '/logo_email.png' : '';
 
         $data = [
             'report'         => $reportWithDetails,

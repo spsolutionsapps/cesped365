@@ -730,9 +730,14 @@ class ReportesController extends ResourceController
         $publicBaseUrl = $publicBaseUrl !== '' && $publicBaseUrl !== false
             ? rtrim(preg_replace('#/$#', '', (string) $publicBaseUrl), '/')
             : '';
+        // Forzar dominio sin www: el hosting solo responde en cesped365.com
+        if ($publicBaseUrl !== '') {
+            $publicBaseUrl = preg_replace('#^(https?)://www\.#i', '$1://', $publicBaseUrl);
+        }
         // Fallback para que el botón "Ver reporte" siempre tenga URL válida (p. ej. si .env no carga)
         // Usar raíz + ?go=login para que el servidor siempre sirva index.html (evita página en blanco si /login no reescribe)
-        $baseForLinks = $publicBaseUrl !== '' ? $publicBaseUrl : 'https://www.cesped365.com';
+        // Sin www: www.cesped365.com no responde en el hosting; usar cesped365.com
+        $baseForLinks = $publicBaseUrl !== '' ? $publicBaseUrl : 'https://cesped365.com';
         $viewReportUrl = $baseForLinks . '/?go=login';
         $logoUrl = $baseForLinks !== '' ? $baseForLinks . '/logo_email.png' : '';
 

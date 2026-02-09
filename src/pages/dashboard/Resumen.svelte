@@ -453,6 +453,29 @@
           </div>
         </Card>
       </div>
+
+      <!-- Últimos 5 usuarios registrados (solo admin, siempre visible) -->
+      <div class="mb-8">
+        <Card title="Últimos 5 Usuarios Registrados">
+          <div class="space-y-3">
+            {#if estadisticas.ultimosUsuarios && estadisticas.ultimosUsuarios.length > 0}
+              {#each estadisticas.ultimosUsuarios as usuario}
+                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">{usuario.name}</p>
+                    <p class="text-xs text-gray-500">{usuario.email}</p>
+                  </div>
+                  <p class="text-xs text-gray-400">
+                    {new Date(usuario.created_at).toLocaleDateString('es-AR')}
+                  </p>
+                </div>
+              {/each}
+            {:else}
+              <p class="text-sm text-gray-500 text-center py-4">No hay usuarios registrados</p>
+            {/if}
+          </div>
+        </Card>
+      </div>
     {:else}
       {#if ultimoReporte}
         <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-3">
@@ -586,27 +609,6 @@
         </div>
       </div>
     </Card>
-        
-        <!-- Últimos usuarios registrados -->
-        <Card title="Últimos 5 Usuarios Registrados">
-          <div class="space-y-3">
-            {#if estadisticas.ultimosUsuarios && estadisticas.ultimosUsuarios.length > 0}
-              {#each estadisticas.ultimosUsuarios as usuario}
-                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                  <div>
-                    <p class="text-sm font-medium text-gray-900">{usuario.name}</p>
-                    <p class="text-xs text-gray-500">{usuario.email}</p>
-                  </div>
-                  <p class="text-xs text-gray-400">
-                    {new Date(usuario.created_at).toLocaleDateString('es-AR')}
-                  </p>
-                </div>
-              {/each}
-            {:else}
-              <p class="text-sm text-gray-500 text-center py-4">No hay usuarios registrados</p>
-            {/if}
-          </div>
-        </Card>
 
       </div>
     {/if}

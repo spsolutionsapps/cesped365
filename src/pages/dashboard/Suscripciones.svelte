@@ -220,31 +220,42 @@
             <div class="mt-6 border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p class="text-sm text-gray-500">Fecha de inicio</p>
-                <p class="font-medium">{mySubscription.startDate}</p>
+                <p class="font-medium">{mySubscription.startDate || '—'}</p>
               </div>
-              <div>
-                <p class="text-sm text-gray-500">Próximo cobro</p>
-                <p class="font-medium">{mySubscription.nextBillingDate}</p>
-              </div>
-              <div class="md:col-span-2">
-                <p class="text-sm text-gray-500">ID externo (Mercado Pago)</p>
-                <p class="font-mono text-sm break-all">{mySubscription.externalPaymentId || '—'}</p>
-              </div>
+              {#if !mySubscription.isManualActivation}
+                <div>
+                  <p class="text-sm text-gray-500">Próximo cobro</p>
+                  <p class="font-medium">{mySubscription.nextBillingDate || '—'}</p>
+                </div>
+                <div class="md:col-span-2">
+                  <p class="text-sm text-gray-500">ID externo (Mercado Pago)</p>
+                  <p class="font-mono text-sm break-all">{mySubscription.externalPaymentId || '—'}</p>
+                </div>
+              {:else}
+                <div class="md:col-span-2">
+                  <p class="text-sm text-gray-500">Activación</p>
+                  <p class="font-medium text-green-600">Activado por administración</p>
+                </div>
+              {/if}
             </div>
 
-            <div class="mt-6 flex flex-col sm:flex-row gap-3">
-              <button
-                on:click={openCancelModal}
-                disabled={processingPayment}
-                class="px-6 py-2 font-semibold text-white transition-colors duration-150 bg-red-600 border border-transparent rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {#if processingPayment}
-                  Procesando...
-                {:else}
-                  Cancelar suscripción
-                {/if}
-              </button>
-            </div>
+            {#if !mySubscription.isManualActivation}
+              <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                <button
+                  on:click={openCancelModal}
+                  disabled={processingPayment}
+                  class="px-6 py-2 font-semibold text-white transition-colors duration-150 bg-red-600 border border-transparent rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {#if processingPayment}
+                    Procesando...
+                  {:else}
+                    Cancelar suscripción
+                  {/if}
+                </button>
+              </div>
+            {:else}
+              <p class="mt-6 text-sm text-gray-500">Para cambios o cancelación, contactá al administrador.</p>
+            {/if}
           </div>
         </div>
       </div>

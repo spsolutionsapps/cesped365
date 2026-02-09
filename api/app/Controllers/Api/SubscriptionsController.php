@@ -5,17 +5,20 @@ namespace App\Controllers\Api;
 use CodeIgniter\RESTful\ResourceController;
 use App\Models\SubscriptionModel;
 use App\Models\UserSubscriptionModel;
+use App\Models\UserModel;
 
 class SubscriptionsController extends ResourceController
 {
     protected $format = 'json';
     protected $subscriptionModel;
     protected $userSubscriptionModel;
+    protected $userModel;
     
     public function __construct()
     {
         $this->subscriptionModel = new SubscriptionModel();
         $this->userSubscriptionModel = new UserSubscriptionModel();
+        $this->userModel = new UserModel();
     }
     
     /**
@@ -358,6 +361,7 @@ class SubscriptionsController extends ResourceController
     /**
      * Obtener suscripción activa del usuario actual (cliente)
      * GET /api/subscriptions/my-subscription
+     * Si no hay fila en user_subscriptions pero el admin marcó users.estado=Activo, devuelve suscripción virtual
      */
     public function mySubscription()
     {
@@ -369,7 +373,54 @@ class SubscriptionsController extends ResourceController
         
         $subscription = $this->userSubscriptionModel->getActiveByUser($userId);
         
+        // Si no hay suscripción MP, verificar si fue activado manualmente por admin
         if (!$subscription) {
+            $user = $this->userModel->find($userId);
+            $userPlan = $user['plan'] ?? null;
+            $userEstado = $user['estado'] ?? null;
+            
+            if ($userEstado === 'Activo' && !empty($userPlan)) {
+                // Buscar plan en subscriptions que coincida con users.plan
+                $plan = $this->subscriptionModel->getByName($userPlan);
+                if (!$plan) {
+                    $allPlans = $this->subscriptionModel->getActivePlans();
+                    foreach ($allPlans as $p) {
+                        $pName = strtolower($p['name']);
+                        $uPlan = strtolower($userPlan);
+                        if ($pName === $uPlan || strpos($pName, $uPlan) !== false || strpos($uPlan, $pName) !== false) {
+                            $plan = $p;
+                            break;
+                        }
+                    }
+                }
+                
+                $planName = $plan ? $plan['name'] : $userPlan;
+                $price = $plan ? (float)$plan['price'] : 0;
+                $frequency = $plan ? $plan['frequency'] : 'mensual';
+                $visitsPerMonth = $plan ? (int)($plan['visits_per_month'] ?? 0) : 0;
+                
+                $formatted = [
+                    'id' => null,
+                    'subscriptionId' => $plan ? (int)$plan['id'] : null,
+                    'planName' => $planName,
+                    'price' => $price,
+                    'frequency' => $frequency,
+                    'visitsPerMonth' => $visitsPerMonth,
+                    'status' => 'activa',
+                    'startDate' => date('Y-m-d'),
+                    'nextBillingDate' => null,
+                    'autoRenew' => false,
+                    'paymentMethod' => null,
+                    'externalPaymentId' => null,
+                    'isManualActivation' => true,
+                ];
+                
+                return $this->respond([
+                    'success' => true,
+                    'data' => $formatted
+                ]);
+            }
+            
             return $this->respond([
                 'success' => true,
                 'data' => null,
@@ -390,6 +441,7 @@ class SubscriptionsController extends ResourceController
             'autoRenew' => (bool)$subscription['auto_renew'],
             'paymentMethod' => $subscription['payment_method'] ?? null,
             'externalPaymentId' => $subscription['external_payment_id'] ?? null,
+            'isManualActivation' => false,
         ];
         
         return $this->respond([

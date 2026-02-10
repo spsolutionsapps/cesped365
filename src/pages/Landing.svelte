@@ -402,7 +402,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">30% de descuento en cortes adicionales y servicios complementarios</p>
+            <p class="text-gray-700 font-medium lg:text-xl">20% de descuento en cortes adicionales y servicios complementarios</p>
           </div>
 
           <div class="flex items-start gap-3">

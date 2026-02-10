@@ -86,7 +86,7 @@
     try {
       // Validar que garden_id esté seleccionado
       if (!formData.garden_id) {
-        error = 'Por favor selecciona un jardín';
+        error = 'Por favor selecciona un cliente';
         loading = false;
         return;
       }
@@ -151,16 +151,16 @@
 
     {#if jardines.length === 0 && !error}
       <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg text-sm">
-        Cargando jardines...
+        Cargando clientes...
       </div>
     {/if}
 
-    <!-- Jardín y Fecha en la misma fila (desktop) -->
+    <!-- Cliente y Fecha en la misma fila (desktop) -->
     <div class="flex flex-col sm:flex-row gap-4">
-      <!-- Jardín -->
+      <!-- Cliente (nombre y apellido); internamente se usa garden_id del jardín del cliente -->
       <div class="flex-1">
         <label for="garden_id" class="block text-sm font-medium text-gray-700 mb-2">
-          Jardín *
+          Cliente *
         </label>
         <select
           id="garden_id"
@@ -169,15 +169,15 @@
           disabled={jardines.length === 0}
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
         >
-          <option value="">Selecciona un jardín</option>
+          <option value="">Selecciona un cliente</option>
           {#each jardines as jardin}
             <option value={jardin.id}>
-              {jardin.address || `Jardín #${jardin.id}`} {jardin.user_name ? `(${jardin.user_name})` : ''}
+              {jardin.user_name || `Cliente #${jardin.id}`}
             </option>
           {/each}
         </select>
         {#if jardines.length === 0}
-          <p class="mt-1 text-xs text-red-500">No hay jardines disponibles</p>
+          <p class="mt-1 text-xs text-red-500">No hay clientes disponibles</p>
         {/if}
       </div>
 

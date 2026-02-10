@@ -33,7 +33,7 @@
           if (userRole === 'admin') {
             navigate('/dashboard/resumen', { replace: true });
           } else {
-            navigate('/dashboard/suscripciones', { replace: true });
+            navigate('/dashboard/reportes', { replace: true });
           }
         }
       } else {

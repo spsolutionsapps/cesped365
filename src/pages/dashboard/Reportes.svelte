@@ -32,8 +32,8 @@
   let paginaActual = 1;
   let reportesPorPagina = 9;
   
-  // Vista: 'cards' o 'tabla'
-  let vista = 'cards';
+  // Vista: 'cards' o 'tabla' — por defecto tabla para admin y cliente
+  let vista = 'tabla';
   
   // Estado de filtros colapsables
   let filtrosAbiertos = false;
@@ -131,6 +131,17 @@
     if (direccion) return direccion;
     if (cliente) return cliente;
     return `Jardín #${reporte.garden_id}`;
+  }
+
+  /** Nombre y apellido del cliente (para columna de tabla). */
+  function getReporteClienteNombre(reporte) {
+    if (reporte?.cliente) return reporte.cliente;
+    return getJardinInfoById(reporte?.garden_id).cliente || '—';
+  }
+
+  /** Etiqueta de plan: Quintas → Especiales. */
+  function getPlanLabel(plan) {
+    return plan === 'Quintas' ? 'Especiales' : (plan || '—');
   }
 
   function aplicarFiltros() {
@@ -595,85 +606,63 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Jardinero
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Evaluación
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Crecimiento
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Observaciones
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre y apellido</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jardinero</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observaciones</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación del servicio</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               {#each reportesPaginados as reporte}
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-semibold text-gray-900 max-w-xs truncate">
-                      {getReporteTitulo(reporte)}
-                    </div>
                     <div class="text-sm font-medium text-gray-900">
-                      {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
+                      {new Date(reporte.fecha).toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </div>
                     <div class="text-xs text-gray-500">
-                      {new Date(reporte.fecha).toLocaleTimeString('es-AR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
+                      {new Date(reporte.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                     </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{getReporteClienteNombre(reporte)}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">{reporte.jardinero || 'N/A'}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <Badge type={getBadgeType(reporte.estadoGeneral)}>
-                      {reporte.estadoGeneral}
-                    </Badge>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                      <div class="whitespace-nowrap"><span class="text-gray-600">Parejo:</span> <span class="font-semibold text-gray-900">{siNo(reporte.cespedParejo)}</span></div>
-                      <div class="whitespace-nowrap"><span class="text-gray-600">Color:</span> <span class="font-semibold text-gray-900">{getColorLabel(reporte)}</span></div>
-                      <div class="whitespace-nowrap"><span class="text-gray-600">Manchas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.manchas)}</span></div>
-                      <div class="whitespace-nowrap"><span class="text-gray-600">Malezas:</span> <span class="font-semibold text-gray-900">{siNo(reporte.malezasVisibles)}</span></div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900 font-medium">{reporte.crecimientoCm} cm</div>
+                    <div class="text-sm text-gray-900">{getPlanLabel(reporte.plan)}</div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="text-sm text-gray-600 max-w-xs truncate" title={reporte.notaJardinero || reporte.observaciones || 'Sin observaciones'}>
                       {reporte.notaJardinero || reporte.observaciones || '-'}
                     </div>
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-0.5" aria-label={reporte.client_rating != null ? `Valoración: ${reporte.client_rating} de 5` : 'Sin calificar'}>
+                      {#each [1, 2, 3, 4, 5] as star}
+                        <svg class="w-5 h-5 {reporte.client_rating != null && star <= reporte.client_rating ? 'text-amber-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      {/each}
+                    </div>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex items-center gap-2">
                       <button
                         on:click={() => selectReporte(reporte)}
-                        class="text-primary-600 hover:text-primary-900 transition-colors"
-                        title="Ver detalle"
+                        class="text-primary-600 hover:text-primary-900 transition-colors inline-flex items-center gap-1"
+                        title={userRole === 'cliente' ? 'Ver reporte' : 'Ver detalle'}
                       >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
+                        {#if userRole === 'cliente'}
+                          <span class="text-sm font-medium">Ver reporte</span>
+                        {/if}
                       </button>
                       {#if userRole === 'admin'}
                         <button
@@ -706,40 +695,28 @@
       </div>
     {/if}
     
-    <!-- Vista mobile (lista colapsable) -->
+    <!-- Vista mobile (lista colapsable, misma data que la tabla) -->
     <div class="block md:hidden mt-6 overflow-x-hidden min-w-0">
       <Card>
         <div class="space-y-3">
           {#each reportesPaginados as reporte}
             <div class="border border-gray-200 rounded-lg overflow-hidden min-w-0">
-              <!-- Header del collapsable -->
+              <!-- Header: Fecha + Nombre (como fila de tabla) -->
               <button
                 on:click={() => toggleReporteExpand(reporte.id)}
                 class="w-full min-w-0 px-3 py-3 sm:px-4 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between gap-2 text-left"
               >
-                <div class="flex-1 min-w-0 overflow-hidden">
-                  <p class="font-semibold text-gray-900 text-sm truncate capitalize">
-                    {reporte.cliente || getJardinInfoById(reporte.garden_id).cliente || '—'}
+                <div class="flex-1 min-w-0 overflow-hidden text-sm font-medium text-gray-700">
+                  <p class="truncate">
+                    {new Date(reporte.fecha).toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    <span class="ml-1">{new Date(reporte.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
                   </p>
-                  <p class="text-xs text-gray-900 truncate mt-0.5">
-                    {reporte.direccion || getJardinInfoById(reporte.garden_id).direccion || '—'}
+                  <p class="truncate mt-0.5">
+                    Cliente: {getReporteClienteNombre(reporte)}
                   </p>
-                  <p class="mt-1 text-xs">
-                    <span class="text-gray-600">Estado del césped:</span>
-                    <Badge type={getBadgeType(reporte.estadoGeneral)} className="ml-1 capitalize">
-                      {reporte.estadoGeneral}
-                    </Badge>
+                  <p class="truncate mt-0.5">
+                    Jardinero: {reporte.jardinero || 'N/A'} · Categoría: {getPlanLabel(reporte.plan)}
                   </p>
-                  <div class="flex items-center justify-between gap-2 text-xs mt-1.5">
-                    <span class="text-gray-500">
-                      {new Date(reporte.fecha).toLocaleDateString('es-AR', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
-                    </span>
-                    <span class="shrink-0 text-right inline-block"><span class="text-gray-500">Por:</span> <span class="font-semibold text-gray-800">{reporte.jardinero || 'N/A'}</span></span>
-                  </div>
                 </div>
                 <svg 
                   class="w-5 h-5 text-gray-500 transition-transform duration-200 ml-2 flex-shrink-0 {expandedReportes.has(reporte.id) ? 'rotate-180' : ''}" 
@@ -751,80 +728,77 @@
                 </svg>
               </button>
 
-              <!-- Contenido collapsable -->
+              <!-- Contenido: mismas columnas que la tabla (Fecha, Nombre, Jardinero, Plan, Observaciones, Calificación, Acciones) -->
               {#if expandedReportes.has(reporte.id)}
                 <div class="px-4 py-4 bg-white border-t border-gray-200 space-y-3">
-                  <!-- Evaluación técnica -->
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Evaluación</p>
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                      <div class="flex items-center gap-1">
-                        <span class="text-gray-600">Parejo:</span>
-                        <span class="font-semibold text-gray-900">{siNo(reporte.cespedParejo)}</span>
-                      </div>
-                      <div class="flex items-center gap-1">
-                        <span class="text-gray-600">Color:</span>
-                        <span class="font-semibold text-gray-900">{getColorLabel(reporte)}</span>
-                      </div>
-                      <div class="flex items-center gap-1">
-                        <span class="text-gray-600">Manchas:</span>
-                        <span class="font-semibold text-gray-900">{siNo(reporte.manchas)}</span>
-                      </div>
-                      <div class="flex items-center gap-1">
-                        <span class="text-gray-600">Malezas:</span>
-                        <span class="font-semibold text-gray-900">{siNo(reporte.malezasVisibles)}</span>
+                  <div class="grid gap-2 text-sm">
+                    <p class="text-gray-700"><span class="font-medium text-gray-500">Fecha:</span>
+                      <span class="ml-1">{new Date(reporte.fecha).toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })} {new Date(reporte.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </p>
+                    <p class="text-gray-700"><span class="font-medium text-gray-500">Cliente:</span>
+                      <span class="ml-1">{getReporteClienteNombre(reporte)}</span>
+                    </p>
+                    <p class="text-gray-700"><span class="font-medium text-gray-500">Jardinero:</span>
+                      <span class="ml-1">{reporte.jardinero || 'N/A'}</span>
+                    </p>
+                    <p class="text-gray-700"><span class="font-medium text-gray-500">Categoría:</span>
+                      <span class="ml-1">{getPlanLabel(reporte.plan)}</span>
+                    </p>
+                    <p class="text-gray-700"><span class="font-medium text-gray-500">Observaciones:</span>
+                      <span class="ml-1 text-gray-600">{reporte.notaJardinero || reporte.observaciones || '-'}</span>
+                    </p>
+                    <div class="text-gray-700">
+                      <p class="font-medium text-gray-500 mb-1">Calificación del servicio</p>
+                      <div class="flex items-center gap-0.5" aria-label={reporte.client_rating != null ? `Valoración: ${reporte.client_rating} de 5` : 'Sin calificar'}>
+                        {#each [1, 2, 3, 4, 5] as star}
+                          <svg class="w-5 h-5 {reporte.client_rating != null && star <= reporte.client_rating ? 'text-amber-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        {/each}
+                        {#if reporte.client_rating != null}
+                          <span class="text-gray-600 text-xs ml-0.5">({reporte.client_rating}/5)</span>
+                        {:else}
+                          <span class="text-gray-400 text-xs ml-0.5">Sin calificar</span>
+                        {/if}
                       </div>
                     </div>
                   </div>
 
-                  <!-- Crecimiento -->
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Crecimiento</p>
-                    <p class="text-sm text-gray-900 font-medium">{reporte.crecimientoCm} cm</p>
-                  </div>
-
-                  <!-- Recomendaciones (vista previa: 2 renglones) -->
-                  {#if reporte.notaJardinero || reporte.observaciones}
-                    <div>
-                      <p class="text-sm text-gray-600 line-clamp-2 overflow-hidden text-ellipsis" title={reporte.notaJardinero || reporte.observaciones}>
-                        <span class="font-medium text-gray-700">Recomendaciones:</span> {reporte.notaJardinero || reporte.observaciones}
-                      </p>
-                    </div>
-                  {/if}
-
-                  <!-- Acciones -->
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Acciones</p>
-                    <div class="flex space-x-2">
+                  <!-- Acciones (misma fila, se adaptan) -->
+                  <div class="flex flex-nowrap items-center gap-2 pt-2 border-t border-gray-100 min-w-0">
+                    <button
+                      on:click={() => selectReporte(reporte)}
+                      class="flex-1 min-w-0 inline-flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100"
+                      title={userRole === 'cliente' ? 'Ver reporte' : 'Ver detalle'}
+                    >
+                      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span class="truncate">{userRole === 'cliente' ? 'Ver reporte' : 'Ver detalle'}</span>
+                    </button>
+                    {#if userRole === 'admin'}
                       <button
-                        on:click={() => selectReporte(reporte)}
-                        class="flex-1 flex items-center justify-center px-3 py-2 text-xs font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100"
+                        on:click={() => editarReporte(reporte)}
+                        class="flex-1 min-w-0 inline-flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+                        title="Editar reporte"
                       >
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Ver
+                        <span class="truncate">Editar</span>
                       </button>
-                      {#if userRole === 'admin'}
-                        <button
-                          on:click={() => editarReporte(reporte)}
-                          class="flex items-center px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          on:click={() => eliminarReporte(reporte.id)}
-                          class="flex items-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      {/if}
-                    </div>
+                      <button
+                        on:click={() => eliminarReporte(reporte.id)}
+                        class="flex-1 min-w-0 inline-flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100"
+                        title="Eliminar reporte"
+                      >
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span class="truncate">Eliminar</span>
+                      </button>
+                    {/if}
                   </div>
                 </div>
               {/if}

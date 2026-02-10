@@ -13,19 +13,19 @@
   };
 </script>
 
-<div class="bg-white rounded-lg p-6">
+<div class="bg-white rounded-lg p-4 md:p-6">
   <div class="flex items-center">
     <div class="flex-shrink-0">
-      <div class="p-3 rounded-full {colorClasses[color]}">
+      <div class="p-2 rounded-full md:p-3 {colorClasses[color]} [&_svg]:w-4 [&_svg]:h-4 md:[&_svg]:w-6 md:[&_svg]:h-6">
         {@html icon}
       </div>
     </div>
-    <div class="ml-5 w-0 flex-1">
-      <dl>
-        <dt class="text-sm font-medium text-gray-500 truncate">
+    <div class="ml-3 md:ml-5 w-0 flex-1 min-w-0">
+      <dl class="flex justify-between items-center gap-2 md:flex-col md:items-stretch md:gap-0">
+        <dt class="text-xs md:text-sm font-medium text-gray-500 truncate">
           {title}
         </dt>
-        <dd class="text-3xl font-bold text-gray-900">
+        <dd class="text-lg font-bold text-gray-900 shrink-0 md:text-3xl md:mt-1">
           {value}
         </dd>
       </dl>

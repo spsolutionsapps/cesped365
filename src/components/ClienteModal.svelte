@@ -16,6 +16,7 @@
     email: '',
     phone: '',
     address: '',
+    referido_por: '',
     password: '',
     plan: 'Urbano',
     estado: 'Pendiente',
@@ -35,6 +36,7 @@
         email: cliente.email || '',
         phone: cliente.telefono || '',
         address: cliente.direccion || '',
+        referido_por: cliente.referidoPor || cliente.referido_por || '',
         password: '', // No mostrar password en edición
         plan: cliente.plan || 'Urbano',
         estado: cliente.estado || 'Pendiente',
@@ -105,6 +107,7 @@
       email: '',
       phone: '',
       address: '',
+      referido_por: '',
       password: '',
       plan: 'Urbano',
       estado: 'Pendiente',
@@ -172,24 +175,38 @@
           id="phone"
           type="tel"
           bind:value={formData.phone}
-          placeholder="+54 11 1234-5678"
+          placeholder="2494 11-2558"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
       </div>
     </div>
 
-    <!-- Dirección -->
-    <div>
-      <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-        Dirección del Jardín
-      </label>
-      <textarea
-        id="address"
-        bind:value={formData.address}
-        rows="2"
-        placeholder="Av. Corrientes 1234, CABA"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-      ></textarea>
+    <!-- Dirección y Referido por (misma fila) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+          Dirección del Jardín
+        </label>
+        <input
+          id="address"
+          type="text"
+          bind:value={formData.address}
+          placeholder="Reforma universitaria 2832, Tandil"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        />
+      </div>
+      <div>
+        <label for="referido_por" class="block text-sm font-medium text-gray-700 mb-2">
+          Referido por
+        </label>
+        <input
+          id="referido_por"
+          type="text"
+          bind:value={formData.referido_por}
+          placeholder="Nombre o canal"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        />
+      </div>
     </div>
 
     <!-- Coordenadas GPS (opcional) -->
@@ -224,45 +241,44 @@
       <p class="mt-1 text-xs text-gray-500">Para ver la ubicación en Google Maps desde el detalle del cliente</p>
     </div>
 
-    <!-- Plan -->
-    <div>
-      <label for="plan" class="block text-sm font-medium text-gray-700 mb-2">
-        Plan *
-      </label>
-      <select
-        id="plan"
-        bind:value={formData.plan}
-        on:change={(e) => console.log('🔄 Plan cambiado a:', e.target.value, 'formData.plan:', formData.plan)}
-        required
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      >
-        <option value="Urbano">Urbano</option>
-        <option value="Residencial">Residencial</option>
-        <option value="Parque">Parque</option>
-        <option value="Quintas">Quintas / Terrenos grandes</option>
-      </select>
-      <p class="mt-1 text-xs text-gray-500">
-        Selecciona el tipo de jardín del cliente
-      </p>
-    </div>
-
-    <!-- Estado (Activo / Pendiente / Cancelado) -->
-    <div>
-      <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
-        Estado
-      </label>
-      <select
-        id="estado"
-        bind:value={formData.estado}
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      >
-        <option value="Pendiente">Pendiente</option>
-        <option value="Activo">Activo</option>
-        <option value="Cancelado">Cancelado</option>
-      </select>
-      <p class="mt-1 text-xs text-gray-500">
-        Marcar como Activo si el cliente ya pagó por otro medio. Cancelado si dio de baja el servicio.
-      </p>
+    <!-- Categoría y Estado (misma fila) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="plan" class="block text-sm font-medium text-gray-700 mb-2">
+          Categoría *
+        </label>
+        <select
+          id="plan"
+          bind:value={formData.plan}
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="Urbano">Urbano</option>
+          <option value="Residencial">Residencial</option>
+          <option value="Parque">Parque</option>
+          <option value="Quintas">Especiales</option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500">
+          Selecciona la categoría del cliente
+        </p>
+      </div>
+      <div>
+        <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
+          Estado
+        </label>
+        <select
+          id="estado"
+          bind:value={formData.estado}
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        >
+          <option value="Pendiente">Pendiente</option>
+          <option value="Activo">Activo</option>
+          <option value="Cancelado">Finalizado</option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500">
+          Marcar como Activo si el cliente ya pagó por otro medio. Finalizado si dio de baja el servicio.
+        </p>
+      </div>
     </div>
 
     <!-- Contraseña -->

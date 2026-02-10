@@ -164,7 +164,7 @@ class ClientesController extends ResourceController
         log_message('info', 'Registro - Content-Type: ' . $contentType);
         log_message('info', 'Registro - Input recibido: ' . json_encode($input));
         
-        // Validar datos directamente
+        // Validar datos directamente (aceptar referidoPor o referido_por según cómo llegue el body)
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]',
             'email' => 'required|valid_email|is_unique[users.email]',
@@ -172,6 +172,7 @@ class ClientesController extends ResourceController
             'phone' => 'permit_empty|max_length[20]',
             'address' => 'permit_empty|max_length[255]',
             'referidoPor' => 'permit_empty|max_length[255]',
+            'referido_por' => 'permit_empty|max_length[255]',
             'estado' => 'permit_empty|in_list[Activo,Pendiente,Cancelado]',
             'lat' => 'permit_empty|decimal',
             'lng' => 'permit_empty|decimal'
@@ -214,7 +215,7 @@ class ClientesController extends ResourceController
             'address' => !empty($input['address']) ? $input['address'] : null,
             'plan' => $input['plan'] ?? 'Urbano',
             'estado' => in_array($input['estado'] ?? '', ['Activo', 'Pendiente', 'Cancelado']) ? $input['estado'] : 'Pendiente',
-            'referido_por' => !empty($input['referidoPor']) ? $input['referidoPor'] : null
+            'referido_por' => !empty($input['referidoPor']) ? $input['referidoPor'] : (!empty($input['referido_por']) ? $input['referido_por'] : null)
         ];
         // Coordenadas GPS opcionales
         if (isset($input['lat']) && $input['lat'] !== '' && $input['lat'] !== null) {
@@ -273,6 +274,7 @@ class ClientesController extends ResourceController
                 'address' => $json['address'] ?? null,
                 'plan' => $json['plan'] ?? null,
                 'estado' => $json['estado'] ?? null,
+                'referido_por' => $json['referido_por'] ?? $json['referidoPor'] ?? null,
                 'lat' => $json['lat'] ?? null,
                 'lng' => $json['lng'] ?? null,
             ];
@@ -286,6 +288,7 @@ class ClientesController extends ResourceController
                 'address' => $raw['address'] ?? $this->request->getVar('address'),
                 'plan' => $raw['plan'] ?? $this->request->getVar('plan'),
                 'estado' => $raw['estado'] ?? $this->request->getVar('estado'),
+                'referido_por' => $raw['referido_por'] ?? $this->request->getVar('referido_por'),
                 'lat' => $raw['lat'] ?? $this->request->getVar('lat'),
                 'lng' => $raw['lng'] ?? $this->request->getVar('lng'),
             ];
@@ -309,6 +312,7 @@ class ClientesController extends ResourceController
             'password' => 'permit_empty|min_length[6]',
             'phone' => 'permit_empty|max_length[20]',
             'address' => 'permit_empty|max_length[255]',
+            'referido_por' => 'permit_empty|max_length[255]',
             'estado' => 'permit_empty|in_list[Activo,Pendiente,Cancelado]',
             'lat' => 'permit_empty|decimal',
             'lng' => 'permit_empty|decimal'
@@ -342,6 +346,9 @@ class ClientesController extends ResourceController
         }
         if (isset($input['estado']) && in_array($input['estado'], ['Activo', 'Pendiente', 'Cancelado'])) {
             $userData['estado'] = $input['estado'];
+        }
+        if (array_key_exists('referido_por', $input)) {
+            $userData['referido_por'] = ($input['referido_por'] !== '' && $input['referido_por'] !== null) ? $input['referido_por'] : null;
         }
         if (array_key_exists('lat', $input)) {
             $userData['lat'] = ($input['lat'] !== '' && $input['lat'] !== null && is_numeric($input['lat'])) ? $input['lat'] : null;

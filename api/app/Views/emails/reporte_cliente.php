@@ -47,7 +47,7 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
           </tr>
           <tr>
             <td style="padding: 0 32px 20px;">
-              <p style="margin: 0; font-size: 15px; color: #4b5563; line-height: 1.5;">Tenés un nuevo reporte de mantenimiento de tu jardín.</p>
+              <p style="margin: 0; font-size: 15px; color: #4b5563; line-height: 1.5;">Ya está disponible el reporte de la visita a tu jardín.</p>
             </td>
           </tr>
           <!-- Detalle del reporte -->
@@ -87,7 +87,7 @@ $wateringLabel = $wateringLabels[$wateringStatus] ?? $wateringStatus;
           </tr>
           <tr>
             <td style="padding: 0 32px 24px; text-align: center;">
-              <p style="margin: 0; font-size: 15px; color: #212121;">Iniciá sesión en tu cuenta para ver el reporte completo, <br> fotos y dejar valoración del servicio. <br> ¡Gracias!</p>
+              <p style="margin: 0; font-size: 15px; color: #212121;">Gracias por confiar en Césped 365.<br>Recomendanos a un amigo y obtené un <strong>corte sin cargo</strong>.</p>
             </td>
           </tr>
         </table>

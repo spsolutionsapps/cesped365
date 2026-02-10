@@ -5,6 +5,7 @@ namespace App\Controllers\Api;
 use CodeIgniter\RESTful\ResourceController;
 use App\Models\ReportModel;
 use App\Models\ReportImageModel;
+use App\Models\GardenModel;
 
 class ReportesController extends ResourceController
 {
@@ -29,13 +30,32 @@ class ReportesController extends ResourceController
         $roleNormalized = $userRole !== null ? strtolower(trim((string) $userRole)) : '';
         $isCliente = ($roleNormalized === 'cliente' && $userId);
         
-        // Todos ven todos los reportes. El cliente solo puede enviar evaluación en los de su jardín (can_rate + submitRating).
-        $reports = $this->reportModel
-            ->select('reports.*, gardens.address as garden_address, gardens.user_id as garden_user_id, users.name as client_name')
+        // Admin: ve todos los reportes. Cliente: solo los reportes de sus jardines.
+        $builder = $this->reportModel
+            ->select('reports.*, gardens.address as garden_address, gardens.user_id as garden_user_id, users.name as client_name, users.plan as client_plan')
             ->join('gardens', 'gardens.id = reports.garden_id', 'left')
-            ->join('users', 'users.id = gardens.user_id', 'left')
-            ->orderBy('reports.id', 'DESC')
-            ->paginate($limit);
+            ->join('users', 'users.id = gardens.user_id', 'left');
+        
+        if ($isCliente) {
+            $gardenModel = new GardenModel();
+            $userGardens = $gardenModel->getByUser($userId);
+            $gardenIds = array_column($userGardens, 'id');
+            if (empty($gardenIds)) {
+                return $this->respond([
+                    'success' => true,
+                    'data' => [],
+                    'pagination' => [
+                        'page' => (int) $page,
+                        'limit' => (int) $limit,
+                        'total' => 0,
+                        'pages' => 0
+                    ]
+                ]);
+            }
+            $builder->whereIn('reports.garden_id', $gardenIds);
+        }
+        
+        $reports = $builder->orderBy('reports.id', 'DESC')->paginate($limit);
         $total = $this->reportModel->pager ? $this->reportModel->pager->getTotal() : count($reports);
         
         $formatted = [];
@@ -69,6 +89,7 @@ class ReportesController extends ResourceController
                 // Datos para título: "Nombre Apellido — Dirección"
                 'cliente' => $report['client_name'] ?? '',
                 'direccion' => $report['garden_address'] ?? '',
+                'plan' => $report['client_plan'] ?? null,
                 'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
                 'plagas' => (bool)($report['pest_detected'] ?? false),
                 'notaJardinero' => $report['recommendations'] ?? 'Sin observaciones',
@@ -120,8 +141,14 @@ class ReportesController extends ResourceController
     
     public function show($id = null)
     {
+        $session = \Config\Services::session();
+        $userId = $session->get('user_id');
+        $userRole = $session->get('user_role');
+        $roleNormalized = $userRole !== null ? strtolower(trim((string) $userRole)) : '';
+        $isCliente = ($roleNormalized === 'cliente' && $userId);
+        
         $report = $this->reportModel
-            ->select('reports.*, gardens.address as garden_address, gardens.user_id as garden_user_id, users.name as client_name')
+            ->select('reports.*, gardens.address as garden_address, gardens.user_id as garden_user_id, users.name as client_name, users.plan as client_plan')
             ->join('gardens', 'gardens.id = reports.garden_id', 'left')
             ->join('users', 'users.id = gardens.user_id', 'left')
             ->where('reports.id', $id)
@@ -129,6 +156,14 @@ class ReportesController extends ResourceController
         
         if (!$report) {
             return $this->fail('Reporte no encontrado', 404);
+        }
+        
+        // Cliente solo puede ver reportes de sus jardines
+        if ($isCliente) {
+            $gardenUserId = (int) ($report['garden_user_id'] ?? 0);
+            if ($gardenUserId !== (int) $userId) {
+                return $this->fail('Reporte no encontrado', 404);
+            }
         }
         
         // Obtener imágenes
@@ -158,6 +193,7 @@ class ReportesController extends ResourceController
             'grass_color' => $grassColor,
             'cliente' => $report['client_name'] ?? '',
             'direccion' => $report['garden_address'] ?? '',
+            'plan' => $report['client_plan'] ?? null,
             'crecimientoCm' => (float)($report['growth_cm'] ?? 0),
             'plagas' => (bool)($report['pest_detected'] ?? false),
             'notaJardinero' => $report['recommendations'] ?? 'Sin observaciones',

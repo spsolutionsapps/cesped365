@@ -7,7 +7,7 @@
   
   let clientes = [];
   let searchTerm = '';
-  let selectedPlan = 'Todos los planes';
+  let selectedPlan = 'Todas las categorías';
   let selectedEstado = 'Todos los estados';
   let loading = true;
   let error = null;
@@ -44,8 +44,8 @@
       cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cliente.direccion.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filtro de plan
-    const matchesPlan = selectedPlan === 'Todos los planes' || cliente.plan === selectedPlan;
+    // Filtro de categoría
+    const matchesPlan = selectedPlan === 'Todas las categorías' || cliente.plan === selectedPlan;
     
     // Filtro de estado
     const matchesEstado = selectedEstado === 'Todos los estados' || cliente.estado === selectedEstado;
@@ -53,6 +53,16 @@
     return matchesSearch && matchesPlan && matchesEstado;
   });
   
+  /** Muestra "Especiales" cuando el plan guardado es "Quintas". */
+  function getCategoriaLabel(plan) {
+    return plan === 'Quintas' ? 'Especiales' : (plan || '-');
+  }
+
+  /** Muestra "Finalizado" cuando el estado guardado es "Cancelado". */
+  function getEstadoLabel(estado) {
+    return estado === 'Cancelado' ? 'Finalizado' : (estado || '-');
+  }
+
 function getBadgeType(estado) {
     switch(estado) {
       case 'Activo': return 'success';
@@ -175,16 +185,17 @@ function getBadgeType(estado) {
         </div>
       </div>
       <select bind:value={selectedPlan} class="w-full lg:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-        <option>Todos los planes</option>
+        <option>Todas las categorías</option>
         <option>Urbano</option>
         <option>Residencial</option>
         <option>Parque</option>
+        <option value="Quintas">Especiales</option>
       </select>
       <select bind:value={selectedEstado} class="w-full lg:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
         <option>Todos los estados</option>
         <option>Activo</option>
         <option>Pendiente</option>
-        <option>Cancelado</option>
+        <option value="Cancelado">Finalizado</option>
         <option>Pausada</option>
         <option>Inactivo</option>
       </select>
@@ -201,7 +212,7 @@ function getBadgeType(estado) {
             <th class="px-4 py-3">Cliente</th>
             <th class="px-4 py-3">Contacto</th>
             <th class="px-4 py-3">Dirección</th>
-            <th class="px-4 py-3">Plan</th>
+            <th class="px-4 py-3">Categoría</th>
             <th class="px-4 py-3">Estado</th>
             <th class="px-4 py-3">Referido por</th>
             <th class="px-4 py-3">Última Visita</th>
@@ -235,12 +246,12 @@ function getBadgeType(estado) {
               </td>
               <td class="px-4 py-3 text-sm">
                 <Badge type={cliente.plan === 'Premium' ? 'info' : 'default'}>
-                  {cliente.plan}
+                  {getCategoriaLabel(cliente.plan)}
                 </Badge>
               </td>
               <td class="px-4 py-3 text-sm">
                 <Badge type={getBadgeType(cliente.estado)}>
-                  {cliente.estado}
+                  {getEstadoLabel(cliente.estado)}
                 </Badge>
               </td>
               <td class="px-4 py-3 text-sm">
@@ -322,7 +333,7 @@ function getBadgeType(estado) {
             </div>
             <div class="flex items-center space-x-2">
               <Badge type={getBadgeType(cliente.estado)} class="text-xs">
-                {cliente.estado}
+                {getEstadoLabel(cliente.estado)}
               </Badge>
               <svg 
                 class="w-4 h-4 text-gray-500 transition-transform duration-200 {expandedClients.has(cliente.id) ? 'rotate-180' : ''}" 
@@ -354,9 +365,9 @@ function getBadgeType(estado) {
               <!-- Plan y Referido -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Plan</p>
+                  <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Categoría</p>
                   <Badge type={cliente.plan === 'Premium' ? 'info' : 'default'}>
-                    {cliente.plan}
+                    {getCategoriaLabel(cliente.plan)}
                   </Badge>
                 </div>
                 <div>
@@ -447,99 +458,115 @@ function getBadgeType(estado) {
     </Card>
   </div>
 
-  <!-- Estadísticas rápidas -->
-  <div class="grid gap-6 mt-8 md:grid-cols-3 lg:grid-cols-6">
+  <!-- Estadísticas rápidas: mobile 4 filas x 2; desktop igual -->
+  <div class="grid grid-cols-2 gap-4 mt-8 md:gap-6 md:grid-cols-3 lg:grid-cols-6">
     <Card>
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-primary-100 text-primary-600 mr-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center min-w-0">
+          <div class="p-2 rounded-full bg-primary-100 text-primary-600 mr-2 md:p-3 md:mr-4 shrink-0">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <p class="text-xs text-gray-600 md:text-sm truncate">Total</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-600">Total</p>
-          <p class="text-2xl font-bold text-gray-900">{clientes.length}</p>
-        </div>
+        <p class="text-lg font-bold text-gray-900 md:text-2xl shrink-0 ml-2">{clientes.length}</p>
       </div>
     </Card>
 
     <Card>
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center min-w-0">
+          <div class="p-2 rounded-full bg-green-100 text-green-600 mr-2 md:p-3 md:mr-4 shrink-0">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p class="text-xs text-gray-600 md:text-sm truncate">Activos</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-600">Activos</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {clientes.filter(c => c.estado === 'Activo').length}
-          </p>
-        </div>
+        <p class="text-lg font-bold text-gray-900 md:text-2xl shrink-0 ml-2">
+          {clientes.filter(c => c.estado === 'Activo').length}
+        </p>
       </div>
     </Card>
 
     <Card>
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-orange-100 text-orange-600 mr-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center min-w-0">
+          <div class="p-2 rounded-full bg-orange-100 text-orange-600 mr-2 md:p-3 md:mr-4 shrink-0">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p class="text-xs text-gray-600 md:text-sm truncate">Pendientes</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-600">Pendientes</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {clientes.filter(c => c.estado === 'Pendiente').length}
-          </p>
-        </div>
+        <p class="text-lg font-bold text-gray-900 md:text-2xl shrink-0 ml-2">
+          {clientes.filter(c => c.estado === 'Pendiente').length}
+        </p>
       </div>
     </Card>
 
     <Card>
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center min-w-0">
+          <div class="p-2 rounded-full bg-blue-100 text-blue-600 mr-2 md:p-3 md:mr-4 shrink-0">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <p class="text-xs text-gray-600 md:text-sm truncate">Urbano</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-600">Urbano</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {clientes.filter(c => c.plan === 'Urbano').length}
-          </p>
-        </div>
+        <p class="text-lg font-bold text-gray-900 md:text-2xl shrink-0 ml-2">
+          {clientes.filter(c => c.plan === 'Urbano').length}
+        </p>
       </div>
     </Card>
 
     <Card>
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center min-w-0">
+          <div class="p-2 rounded-full bg-purple-100 text-purple-600 mr-2 md:p-3 md:mr-4 shrink-0">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <p class="text-xs text-gray-600 md:text-sm truncate">Residencial</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-600">Residencial</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {clientes.filter(c => c.plan === 'Residencial').length}
-          </p>
-        </div>
+        <p class="text-lg font-bold text-gray-900 md:text-2xl shrink-0 ml-2">
+          {clientes.filter(c => c.plan === 'Residencial').length}
+        </p>
       </div>
     </Card>
 
     <Card>
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-teal-100 text-teal-600 mr-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center min-w-0">
+          <div class="p-2 rounded-full bg-teal-100 text-teal-600 mr-2 md:p-3 md:mr-4 shrink-0">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+          </div>
+          <p class="text-xs text-gray-600 md:text-sm truncate">Parque</p>
         </div>
-        <div>
-          <p class="text-sm text-gray-600">Parque</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {clientes.filter(c => c.plan === 'Parque').length}
-          </p>
+        <p class="text-lg font-bold text-gray-900 md:text-2xl shrink-0 ml-2">
+          {clientes.filter(c => c.plan === 'Parque').length}
+        </p>
+      </div>
+    </Card>
+
+    <Card>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center min-w-0">
+          <div class="p-2 rounded-full bg-amber-100 text-amber-600 mr-2 md:p-3 md:mr-4 shrink-0">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+          </div>
+          <p class="text-xs text-gray-600 md:text-sm truncate">Especiales</p>
         </div>
+        <p class="text-lg font-bold text-gray-900 md:text-2xl shrink-0 ml-2">
+          {clientes.filter(c => c.plan === 'Quintas').length}
+        </p>
       </div>
     </Card>
   </div>
@@ -645,15 +672,15 @@ function getBadgeType(estado) {
               <h4 class="font-semibold text-gray-900 mb-3">Suscripción</h4>
               <div class="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Plan:</span>
+                  <span class="text-sm text-gray-600">Categoría:</span>
                   <Badge type={clienteDetail.plan === 'Premium' ? 'info' : 'default'}>
-                    {clienteDetail.plan}
+                    {getCategoriaLabel(clienteDetail.plan)}
                   </Badge>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-gray-600">Estado:</span>
                   <Badge type={getBadgeType(clienteDetail.estado)}>
-                    {clienteDetail.estado}
+                    {getEstadoLabel(clienteDetail.estado)}
                   </Badge>
                 </div>
               </div>

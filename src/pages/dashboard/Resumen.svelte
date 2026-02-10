@@ -328,15 +328,15 @@
 
 <div class="py-6">
   <!-- Page title -->
-  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-    <h2 class="text-2xl font-semibold text-gray-700">
-      Bienvenido, {userName}
+  <div class="flex flex-nowrap items-center justify-between gap-3 mb-6">
+    <h2 class="text-lg font-semibold text-gray-700 min-w-0 md:text-2xl">
+      Bienvenido,<br class="md:hidden" /> {userName}
     </h2>
     {#if userRole === 'admin'}
       <button
         type="button"
         on:click={openAgregarGananciaModal}
-        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium whitespace-nowrap"
+        class="shrink-0 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium whitespace-nowrap"
       >
         Agregar ganancia
       </button>
@@ -358,7 +358,7 @@
   {:else}
     <!-- Stats cards -->
     {#if userRole === 'admin'}
-      <div class="grid gap-6 mb-8 grid-cols-1 md:grid-cols-3">
+      <div class="grid grid-cols-2 gap-4 mb-8 md:gap-6 md:grid-cols-3">
         <StatCard 
           title="Total Clientes" 
           value={(estadisticas.totalClientes || 0).toString()} 

@@ -56,3 +56,11 @@ body {
 * {
   @apply transition-colors duration-200;
 }
+
+/* AOS deshabilitado en mobile: forzar que el contenido sea visible (evitar opacity:0) */
+@media (max-width: 767px) {
+  [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

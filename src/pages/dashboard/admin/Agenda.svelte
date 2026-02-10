@@ -24,7 +24,7 @@
   let filtroEstado = 'programada';
   let visitasAbiertas = new Set(); // IDs de visitas expandidas
   let filtrosAbiertos = false; // Estado de filtros colapsables
-  let vistaActiva = 'lista'; // 'lista' | 'calendario'
+  let vistaActiva = 'calendario'; // 'lista' | 'calendario' — por defecto calendario para el admin
   let calendarEl;
   let calendar = null;
   let occupiedDates = new Set();
@@ -298,6 +298,12 @@
       error = 'Error al cargar las visitas programadas. Verifica que el backend esté corriendo.';
     } finally {
       if (showLoading) loading = false;
+      // Si la vista activa es calendario, inicializarlo después de que el DOM tenga calendarEl (solo al cargar la página)
+      if (vistaActiva === 'calendario') {
+        tick().then(() => {
+          if (calendarEl && !calendar) mostrarCalendario();
+        });
+      }
     }
   }
   
@@ -692,9 +698,9 @@
   {:else}
     {#if vistaActiva === 'calendario'}
       <Card className="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 sm:px-4 pt-3 sm:pt-4 pb-1">
-          <p class="text-sm text-gray-500">
-            <span class="inline-flex items-center gap-1 mr-[10px]">Próximas <span class="inline-block w-3 h-3 rounded-full bg-blue-600 align-middle"></span></span><span class="inline-flex items-center gap-1 mr-[10px]">Completada <span class="inline-block w-3 h-3 rounded-full bg-green-600 align-middle"></span></span><span class="inline-flex items-center gap-1 mr-[10px]">Cancelada <span class="inline-block w-3 h-3 rounded-full bg-red-600 align-middle"></span></span><span class="inline-flex items-center gap-1">Día bloqueado <span class="inline-block w-3 h-3 rounded-full bg-amber-500 align-middle"></span></span>
+        <div class="flex flex-col sm:flex-row flex-wrap justify-center items-center sm:justify-between gap-2 px-3 sm:px-4 pt-3 sm:pt-4 pb-1">
+          <p class="text-sm text-gray-500 text-center sm:text-left flex flex-wrap justify-center items-center gap-x-3 gap-y-1">
+            <span class="inline-flex items-center gap-1">Próximas <span class="inline-block w-3 h-3 rounded-full bg-blue-600 align-middle"></span></span><span class="inline-flex items-center gap-1">Completada <span class="inline-block w-3 h-3 rounded-full bg-green-600 align-middle"></span></span><span class="inline-flex items-center gap-1">Cancelada <span class="inline-block w-3 h-3 rounded-full bg-red-600 align-middle"></span></span><span class="inline-flex items-center gap-1">Día bloqueado <span class="inline-block w-3 h-3 rounded-full bg-amber-500 align-middle"></span></span>
           </p>
           <button
             type="button"
@@ -704,7 +710,7 @@
             Bloquear día
           </button>
         </div>
-        <div class="overflow-x-auto p-2 sm:p-4">
+        <div class="overflow-x-auto p-2 pb-0 sm:p-4 sm:pb-4">
           <div bind:this={calendarEl} class="admin-agenda-calendar min-w-[280px]"></div>
         </div>
         {#if blockedDays.length > 0}
@@ -729,322 +735,173 @@
         {/if}
       </Card>
     {:else}
-    <!-- Visitas de hoy -->
-    {#if visitasHoy.length > 0}
-      <Card className="mb-6">
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-          <h3 class="text-lg font-semibold text-gray-900">Visitas de Hoy</h3>
-          <Badge type="danger">{visitasHoy.length}</Badge>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {#each visitasHoy as visita (visita.id)}
-            <div class="bg-red-50 border border-red-200 rounded-lg overflow-hidden flex flex-col sm:shadow-md hover:shadow-lg transition-shadow">
-              <!-- Header collapsable solo en mobile -->
-              <button
-                on:click={() => toggleVisita(visita.id)}
-                class="w-full p-4 flex items-center justify-between hover:bg-red-100 transition-colors sm:pointer-events-none sm:hover:bg-transparent sm:p-4"
-              >
-                <div class="flex items-center gap-3 flex-1 min-w-0 sm:flex-col sm:items-start sm:gap-2">
-                  <svg 
-                    class="w-5 h-5 text-gray-600 flex-shrink-0 transition-transform {visitasAbiertas.has(visita.id) ? 'rotate-90' : ''} sm:hidden"
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                  <div class="flex-1 min-w-0 sm:flex-1 sm:w-full">
-                    <h4 class="font-semibold text-gray-900 truncate sm:text-base">{visita.cliente_nombre}</h4>
-                    <p class="text-xs text-gray-600 mt-1 sm:text-sm">{formatearFechaCorta(visita.scheduled_date)}</p>
-                  </div>
-                  <Badge type={getBadgeType(visita.status)} class="sm:mt-2">
-                    {getStatusLabel(visita.status)}
-                  </Badge>
-                </div>
-              </button>
-              
-              <!-- Contenido: collapsable en mobile, siempre visible en desktop -->
-              <div class="px-4 pb-4 border-t border-red-200 sm:block sm:flex-1 sm:flex sm:flex-col {visitasAbiertas.has(visita.id) ? 'block' : 'hidden'}">
-                <div class="pt-4 space-y-2 sm:flex-1">
-                  <p class="text-sm text-gray-700">
-                    <strong>Dirección:</strong> <span class="block sm:inline">{visita.direccion}</span>
-                  </p>
-                  <p class="text-sm text-gray-700">
-                    <strong>Fecha:</strong> {formatearFecha(visita.scheduled_date)}
-                  </p>
-                  {#if visita.scheduled_time}
-                    <p class="text-sm text-gray-700">
-                      <strong>Hora:</strong> {visita.scheduled_time}
-                    </p>
-                  {/if}
-                  {#if visita.gardener_name}
-                    <p class="text-sm text-gray-700">
-                      <strong>Jardinero:</strong> {visita.gardener_name}
-                    </p>
-                  {/if}
-                  {#if visita.notes}
-                    <p class="text-sm text-gray-600 mt-2 italic">"{visita.notes}"</p>
-                  {/if}
-                </div>
-                <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-red-200 sm:mt-auto">
-                  <button
-                    on:click={() => abrirDetalle(visita)}
-                    disabled={loading}
-                    class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                    title="Ver detalle"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Ver detalle
-                  </button>
-                  {#if visita.status === 'programada'}
-                    <button
-                      on:click={() => abrirReagendarModal(visita)}
-                      disabled={loading}
-                      class="px-3 py-1.5 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                      title="Postergar por lluvia"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-                      </svg>
-                      Postergar por lluvia
-                    </button>
-                    <button
-                      on:click={() => marcarCompletada(visita.id)}
-                      disabled={loading}
-                      class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                      title="Marcar como completada"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      Completar
-                    </button>
-                  {/if}
-                  <button
-                    on:click={() => eliminarVisita(visita.id)}
-                    disabled={loading}
-                    class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                    title="Eliminar"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            </div>
-          {/each}
+    <!-- Vista Lista: tabla (desktop) + lista colapsable (mobile) -->
+    {#if visitasFiltradas.length > 0}
+      <!-- Tabla: solo desktop -->
+      <Card className="mb-6 hidden md:block">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dirección</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jardinero</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {#each visitasFiltradas as visita (visita.id)}
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{formatearFechaCorta(visita.scheduled_date)}</div>
+                    {#if visita.scheduled_time}
+                      <div class="text-xs text-gray-500">{visita.scheduled_time}</div>
+                    {/if}
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="text-sm text-gray-900">{visita.cliente_nombre || '—'}</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="text-sm text-gray-600 max-w-xs truncate" title={visita.direccion || ''}>{visita.direccion || '—'}</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{visita.gardener_name || '—'}</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <Badge type={getBadgeType(visita.status)}>{getStatusLabel(visita.status)}</Badge>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center gap-1 flex-wrap">
+                      <button
+                        on:click={() => abrirDetalle(visita)}
+                        disabled={loading}
+                        class="p-1.5 text-primary-600 hover:bg-primary-50 rounded disabled:opacity-50"
+                        title="Ver detalle"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      {#if visita.status === 'programada'}
+                        <button
+                          on:click={() => abrirReagendarModal(visita)}
+                          disabled={loading}
+                          class="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded disabled:opacity-50"
+                          title="Postergar por lluvia"
+                        >
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                          </svg>
+                        </button>
+                        <button
+                          on:click={() => marcarCompletada(visita.id)}
+                          disabled={loading}
+                          class="p-1.5 text-green-600 hover:bg-green-50 rounded disabled:opacity-50"
+                          title="Marcar como completada"
+                        >
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
+                      {/if}
+                      <button
+                        on:click={() => eliminarVisita(visita.id)}
+                        disabled={loading}
+                        class="p-1.5 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
+                        title="Eliminar"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
         </div>
       </Card>
-    {/if}
 
-    <!-- Próximas visitas -->
-    {#if visitasProximas.length > 0}
-      <Card className="mb-6">
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-          <h3 class="text-lg font-semibold text-gray-900">Próximas Visitas</h3>
-          <Badge type="info">{visitasProximas.length}</Badge>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {#each visitasProximas as visita (visita.id)}
-            <div class="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden flex flex-col sm:shadow-md hover:shadow-lg transition-shadow">
-              <!-- Header collapsable solo en mobile -->
-              <button
-                on:click={() => toggleVisita(visita.id)}
-                class="w-full p-4 flex items-center justify-between hover:bg-blue-100 transition-colors sm:pointer-events-none sm:hover:bg-transparent sm:p-4"
-              >
-                <div class="flex items-center gap-3 flex-1 min-w-0 sm:flex-col sm:items-start sm:gap-2">
-                  <svg 
-                    class="w-5 h-5 text-gray-600 flex-shrink-0 transition-transform {visitasAbiertas.has(visita.id) ? 'rotate-90' : ''} sm:hidden"
-                    fill="none" 
-                    stroke="currentColor" 
+      <!-- Lista colapsable: solo mobile -->
+      <div class="block md:hidden mb-6">
+        <Card>
+          <div class="space-y-3">
+            {#each visitasFiltradas as visita (visita.id)}
+              <div class="border border-gray-200 rounded-lg overflow-hidden min-w-0">
+                <button
+                  on:click={() => toggleVisita(visita.id)}
+                  class="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between gap-2 text-left"
+                >
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-900 text-sm truncate">{visita.cliente_nombre || '—'}</p>
+                    <p class="text-xs text-gray-600 mt-0.5">{formatearFechaCorta(visita.scheduled_date)}{visita.scheduled_time ? ` · ${visita.scheduled_time}` : ''}</p>
+                  </div>
+                  <Badge type={getBadgeType(visita.status)} class="shrink-0">{getStatusLabel(visita.status)}</Badge>
+                  <svg
+                    class="w-5 h-5 text-gray-500 shrink-0 transition-transform {visitasAbiertas.has(visita.id) ? 'rotate-180' : ''}"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
-                  <div class="flex-1 min-w-0 sm:flex-1 sm:w-full">
-                    <h4 class="font-semibold text-gray-900 truncate sm:text-base">{visita.cliente_nombre}</h4>
-                    <p class="text-xs text-gray-600 mt-1 sm:text-sm">{formatearFechaCorta(visita.scheduled_date)}</p>
+                </button>
+                {#if visitasAbiertas.has(visita.id)}
+                  <div class="px-4 py-4 bg-white border-t border-gray-200 space-y-3">
+                    <p class="text-sm text-gray-700"><strong>Dirección:</strong> {visita.direccion || '—'}</p>
+                    {#if visita.gardener_name}
+                      <p class="text-sm text-gray-700"><strong>Jardinero:</strong> {visita.gardener_name}</p>
+                    {/if}
+                    {#if visita.notes}
+                      <p class="text-sm text-gray-600 italic">"{visita.notes}"</p>
+                    {/if}
+                    <div class="flex flex-wrap gap-2 pt-2">
+                      <button
+                        on:click={() => abrirDetalle(visita)}
+                        disabled={loading}
+                        class="flex-1 min-w-[120px] px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        Ver detalle
+                      </button>
+                      {#if visita.status === 'programada'}
+                        <button
+                          on:click={() => abrirReagendarModal(visita)}
+                          disabled={loading}
+                          class="flex-1 min-w-[120px] px-3 py-2 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 flex items-center justify-center gap-1"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
+                          Postergar
+                        </button>
+                        <button
+                          on:click={() => marcarCompletada(visita.id)}
+                          disabled={loading}
+                          class="flex-1 min-w-[120px] px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                          Completar
+                        </button>
+                      {/if}
+                      <button
+                        on:click={() => eliminarVisita(visita.id)}
+                        disabled={loading}
+                        class="flex-1 min-w-[120px] px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
-                  <Badge type={getBadgeType(visita.status)} class="sm:mt-2">
-                    {getStatusLabel(visita.status)}
-                  </Badge>
-                </div>
-              </button>
-              
-              <!-- Contenido: collapsable en mobile, siempre visible en desktop -->
-              <div class="px-4 pb-4 border-t border-blue-200 sm:block sm:flex-1 sm:flex sm:flex-col {visitasAbiertas.has(visita.id) ? 'block' : 'hidden'}">
-                <div class="pt-4 space-y-2 sm:flex-1">
-                  <p class="text-sm text-gray-700">
-                    <strong>Dirección:</strong> <span class="block sm:inline">{visita.direccion}</span>
-                  </p>
-                  <p class="text-sm text-gray-700">
-                    <strong>Fecha:</strong> {formatearFecha(visita.scheduled_date)}
-                  </p>
-                  {#if visita.scheduled_time}
-                    <p class="text-sm text-gray-700">
-                      <strong>Hora:</strong> {visita.scheduled_time}
-                    </p>
-                  {/if}
-                  {#if visita.gardener_name}
-                    <p class="text-sm text-gray-700">
-                      <strong>Jardinero:</strong> {visita.gardener_name}
-                    </p>
-                  {/if}
-                  {#if visita.notes}
-                    <p class="text-sm text-gray-600 mt-2 italic">"{visita.notes}"</p>
-                  {/if}
-                </div>
-                <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-blue-200 sm:mt-auto">
-                  <button
-                    on:click={() => abrirDetalle(visita)}
-                    disabled={loading}
-                    class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                    title="Ver detalle"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Ver detalle
-                  </button>
-                  {#if visita.status === 'programada'}
-                    <button
-                      on:click={() => abrirReagendarModal(visita)}
-                      disabled={loading}
-                      class="px-3 py-1.5 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                      title="Postergar por lluvia"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-                      </svg>
-                      Postergar por lluvia
-                    </button>
-                    <button
-                      on:click={() => marcarCompletada(visita.id)}
-                      disabled={loading}
-                      class="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                      title="Marcar como completada"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      Completar
-                    </button>
-                  {/if}
-                  <button
-                    on:click={() => eliminarVisita(visita.id)}
-                    disabled={loading}
-                    class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                    title="Eliminar"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Eliminar
-                  </button>
-                </div>
+                {/if}
               </div>
-            </div>
-          {/each}
-        </div>
-      </Card>
-    {/if}
-
-    <!-- Visitas pasadas/completadas -->
-    {#if visitasPasadas.length > 0}
-      <Card>
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-          <h3 class="text-lg font-semibold text-gray-900">Historial de visitas</h3>
-          <Badge type="default">{visitasPasadas.length}</Badge>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {#each visitasPasadas as visita (visita.id)}
-            <div class="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden flex flex-col sm:shadow-md hover:shadow-lg transition-shadow">
-              <!-- Header collapsable solo en mobile -->
-              <button
-                on:click={() => toggleVisita(visita.id)}
-                class="w-full p-4 flex items-center justify-between hover:bg-gray-100 transition-colors sm:pointer-events-none sm:hover:bg-transparent sm:p-4"
-              >
-                <div class="flex items-center gap-3 flex-1 min-w-0 sm:flex-col sm:items-start sm:gap-2">
-                  <svg 
-                    class="w-5 h-5 text-gray-600 flex-shrink-0 transition-transform {visitasAbiertas.has(visita.id) ? 'rotate-90' : ''} sm:hidden"
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                  <div class="flex-1 min-w-0 sm:flex-1 sm:w-full">
-                    <h4 class="font-semibold text-gray-900 truncate sm:text-base">{visita.cliente_nombre}</h4>
-                    <p class="text-xs text-gray-600 mt-1 sm:text-sm">{formatearFechaCorta(visita.scheduled_date)}</p>
-                  </div>
-                  <Badge type={getBadgeType(visita.status)} class="sm:mt-2">
-                    {getStatusLabel(visita.status)}
-                  </Badge>
-                </div>
-              </button>
-              
-              <!-- Contenido: collapsable en mobile, siempre visible en desktop -->
-              <div class="px-4 pb-4 border-t border-gray-200 sm:block sm:flex-1 sm:flex sm:flex-col {visitasAbiertas.has(visita.id) ? 'block' : 'hidden'}">
-                <div class="pt-4 space-y-2 sm:flex-1">
-                  <p class="text-sm text-gray-700">
-                    <strong>Dirección:</strong> <span class="block sm:inline">{visita.direccion}</span>
-                  </p>
-                  <p class="text-sm text-gray-700">
-                    <strong>Fecha:</strong> {formatearFecha(visita.scheduled_date)}
-                  </p>
-                  {#if visita.scheduled_time}
-                    <p class="text-sm text-gray-700">
-                      <strong>Hora:</strong> {visita.scheduled_time}
-                    </p>
-                  {/if}
-                  {#if visita.gardener_name}
-                    <p class="text-sm text-gray-700">
-                      <strong>Jardinero:</strong> {visita.gardener_name}
-                    </p>
-                  {/if}
-                  {#if visita.notes}
-                    <p class="text-sm text-gray-600 mt-2 italic">"{visita.notes}"</p>
-                  {/if}
-                </div>
-                <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 sm:mt-auto">
-                  <button
-                    on:click={() => abrirDetalle(visita)}
-                    disabled={loading}
-                    class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                    title="Ver detalle"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Ver detalle
-                  </button>
-                  <button
-                    on:click={() => eliminarVisita(visita.id)}
-                    disabled={loading}
-                    class="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 flex-1 sm:flex-none justify-center"
-                    title="Eliminar"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            </div>
-          {/each}
-        </div>
-      </Card>
+            {/each}
+          </div>
+        </Card>
+      </div>
     {/if}
 
     {#if visitasFiltradas.length === 0}
@@ -1074,6 +931,13 @@
   :global(.admin-agenda-calendar .fc-day-occupied) {
     background-color: #f3f4f6 !important;
     opacity: 0.85;
+  }
+  /* Título del mes: primera letra en mayúscula (ej. "Febrero de 2026") */
+  :global(.admin-agenda-calendar .fc-toolbar-title) {
+    text-transform: lowercase;
+  }
+  :global(.admin-agenda-calendar .fc-toolbar-title::first-letter) {
+    text-transform: uppercase;
   }
   /* Día bloqueado: celda entera en amarillo para admin y que no se pueda agendar */
   :global(.admin-agenda-calendar td.fc-day-blocked),
@@ -1113,6 +977,14 @@
     :global(.admin-agenda-calendar) {
       min-height: 320px;
       padding: 0.25rem !important;
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
+    }
+    :global(.admin-agenda-calendar .fc) {
+      margin-bottom: 0 !important;
+    }
+    :global(.admin-agenda-calendar .fc-view-harness) {
+      margin-bottom: 0 !important;
     }
     :global(.admin-agenda-calendar .fc-toolbar) {
       flex-direction: column;

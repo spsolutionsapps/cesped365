@@ -29,6 +29,17 @@
     if (e === 'regular') return 'warning';
     return 'danger';
   }
+
+  // Estado expandido para lista colapsable en mobile
+  let expandedVisitas = new Set();
+  function toggleVisitaExpand(key) {
+    if (expandedVisitas.has(key)) {
+      expandedVisitas.delete(key);
+    } else {
+      expandedVisitas.add(key);
+    }
+    expandedVisitas = expandedVisitas;
+  }
 </script>
 
 <div class="py-6">
@@ -37,8 +48,8 @@
   </h2>
 
   <Card>
-    <!-- Table -->
-    <div class="overflow-x-auto">
+    <!-- Table: oculto en mobile -->
+    <div class="overflow-x-auto hidden md:block">
       <table class="w-full whitespace-no-wrap">
         <thead>
           <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
@@ -106,6 +117,63 @@
           {/each}
         </tbody>
       </table>
+    </div>
+
+    <!-- Lista colapsable: solo mobile -->
+    <div class="block md:hidden border-t border-gray-200">
+      <div class="divide-y divide-gray-200">
+        {#each historial as visita, i}
+          <div class="min-w-0">
+            <button
+              on:click={() => toggleVisitaExpand(i)}
+              class="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between gap-2 text-left"
+            >
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-gray-900 text-sm truncate">{visita.jardin || '—'}</p>
+                <p class="text-xs text-gray-600 mt-0.5">
+                  {new Date(visita.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', weekday: 'short' })}
+                </p>
+                <div class="mt-1.5">
+                  <Badge type={getBadgeType(visita.estadoGeneral)}>{visita.estadoGeneral}</Badge>
+                </div>
+              </div>
+              <svg
+                class="w-5 h-5 text-gray-500 shrink-0 transition-transform duration-200 {expandedVisitas.has(i) ? 'rotate-180' : ''}"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {#if expandedVisitas.has(i)}
+              <div class="px-4 py-4 bg-white space-y-3">
+                <div class="grid grid-cols-1 gap-2 text-sm">
+                  <p class="text-gray-700"><span class="font-medium text-gray-500">Valoración cliente:</span>
+                    {#if visita.client_rating != null && visita.client_rating >= 1 && visita.client_rating <= 5}
+                      <span class="inline-flex items-center gap-0.5 ml-1">
+                        {#each { length: 5 } as _, starIdx}
+                          <span class={starIdx < visita.client_rating ? 'text-amber-500' : 'text-gray-300'}>★</span>
+                        {/each}
+                        <span class="text-gray-600">({visita.client_rating}/5)</span>
+                      </span>
+                    {:else}
+                      <span class="text-gray-400 ml-1">No evaluado</span>
+                    {/if}
+                  </p>
+                  <p class="text-gray-700"><span class="font-medium text-gray-500">Jardinero:</span> {visita.jardinero}</p>
+                </div>
+                <a
+                  href="/dashboard/reportes"
+                  class="inline-block px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100"
+                >
+                  Ver reporte
+                </a>
+              </div>
+            {/if}
+          </div>
+        {/each}
+      </div>
     </div>
 
     <!-- Pagination placeholder -->

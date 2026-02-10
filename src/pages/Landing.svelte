@@ -67,7 +67,7 @@
     },
     {
       question: "¿En qué día del mes vienen?",
-      answer: "Te asignamos una fecha fija según tu zona y plan."
+      answer: "Vos asignás tu propia fecha en el panel."
     },
     {
       question: "¿Qué incluye exactamente la visita?",
@@ -94,7 +94,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
     },
     {
       question: "¿Puedo pedir un corte extra o un tema puntual?",
-      answer: "Sí, con 30% de descuento para suscriptores."
+      answer: "Sí, desde tu panel podes asignar una nueva visita."
     },
     {
       question: "No sé cuántos m² tiene mi jardín, ¿qué hago?",
@@ -123,7 +123,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 <div class="min-h-screen bg-white">
   <!-- Header/Navbar -->
   <nav data-aos="fade-down" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {scrolled ? 'bg-gray-900 shadow-lg' : 'bg-transparent'}">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full mx-auto px-4 sm:px-6 md:max-w-7xl lg:px-8">
       <div class="flex justify-between items-center h-20">
         <!-- Logo -->
         <div class="flex items-center">
@@ -149,18 +149,19 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           </Link>
         </div>
 
-        <!-- Mobile Menu Button -->
-        <div class="md:hidden">
+        <!-- Mobile Menu Button (siempre visible: fondo para contrastar con hero) -->
+        <div class="md:hidden flex items-center shrink-0">
           <button
+            type="button"
             on:click={toggleMobileMenu}
-            class="p-2 text-white hover:text-green-400 focus:outline-none focus:text-green-400 transition-colors"
-            aria-label="Toggle mobile menu"
+            class="flex items-center justify-center w-11 h-11 rounded-lg bg-gray-900/90 text-white hover:bg-gray-800 hover:text-green-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+            aria-label="Abrir menú"
           >
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
               {#if mobileMenuOpen}
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               {:else}
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               {/if}
             </svg>
           </button>
@@ -567,7 +568,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div data-aos-duration="1000" data-aos="fade-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Urbano</h3>
           <div class="mb-6">
-            <span class="text-3xl font-bold text-green-600">$45.000</span>
+            <span class="text-3xl font-bold text-green-600">$60.000</span>
             <span class="text-gray-600">/mes</span>
           </div>
           <p class="text-gray-600 mb-6 text-xl">Hasta 500 m² de tu jardín</p>
@@ -775,10 +776,10 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid md:grid-cols-2 gap-12 items-center">
       <div data-aos-duration="1000" data-aos="fade-right">
-        <h2 class="text-3xl lg:text-[34px] font-bold text-gray-900 mb-6">Servicios complementarios  <span class="text-green-600">para tu jardín</span></h2>
+        <h2 class="text-3xl lg:text-[34px] font-bold text-gray-900 mb-6 w-[80%] md:w-auto">Servicios complementarios  <span class="text-green-600">para tu jardín</span></h2>
      
 
-              <p class="mt-2 text-gray-600 lg:text-xl">Además del corte mensual incluido, los suscriptores pueden acceder a servicios complementarios para el mantenimiento del jardín, con prioridad y un descuento del 30%. </p>
+              <p class="mt-2 text-gray-600 lg:text-xl">Además del corte mensual incluido, los suscriptores pueden acceder a servicios complementarios para el mantenimiento del jardín, con prioridad y un descuento del 20%. </p>
           
       </div>
 
@@ -845,7 +846,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
     <div class="px-4 sm:px-6 lg:px-8 bgAmigo">
       <div class="text-center mb-12 max-w-7xl mx-auto py-12 gap-4 flex flex-col items-center justify-center">
         <h2 class="text-2xl md:text-5xl font-bold text-white">PROGRAMA CLIENTE AMIGO</h2>
-        <p class="text-white text-xl">Recomendá <strong>CESPED365 </strong>a un amigo y obtené descuento de <em>2 cortes exclusivos</em> en tu suscripción. </p>
+        <p class="text-white text-xl">Recomendá <strong>CESPED365 </strong>a un amigo y obtené descuento de <em>1 corte exclusivo</em> en tu suscripción. </p>
       </div>
     </div>
   </section>

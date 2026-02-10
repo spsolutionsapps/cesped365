@@ -18,7 +18,19 @@ class ReportesController extends ResourceController
         $this->reportModel = new ReportModel();
         $this->imageModel = new ReportImageModel();
     }
-    
+
+    /**
+     * URL pública de una imagen de reporte.
+     * En producción los archivos están en api/public/uploads/ → URL con /api/public/
+     * En local (spark serve) la raíz es public/ → URL sin prefijo.
+     */
+    private function getImageUrl(string $imagePath): string
+    {
+        $baseUrl = rtrim(config('App')->baseURL, '/');
+        $prefix = (ENVIRONMENT === 'production') ? 'api/public/' : '';
+        return $baseUrl . '/' . $prefix . $imagePath;
+    }
+
     public function index()
     {
         $page = $this->request->getGet('page') ?? 1;
@@ -64,12 +76,10 @@ class ReportesController extends ResourceController
             $canRate = $isCliente && $gardenUserId > 0 && $gardenUserId === (int) $userId;
             // Obtener imágenes del reporte
             $images = $this->imageModel->getByReport($report['id']);
-            $baseUrl = config('App')->baseURL;
-            $baseUrl = rtrim($baseUrl, '/');
-            $imageList = array_map(function($img) use ($baseUrl) {
+            $imageList = array_map(function($img) {
                 return [
                     'id' => (int) $img['id'],
-                    'image_url' => $baseUrl . '/' . $img['image_path'],
+                    'image_url' => $this->getImageUrl($img['image_path']),
                 ];
             }, $images);
             
@@ -169,12 +179,10 @@ class ReportesController extends ResourceController
         
         // Obtener imágenes (con id para que el frontend pueda eliminar una)
         $images = $this->imageModel->getByReport($id);
-        $baseUrl = config('App')->baseURL;
-        $baseUrl = rtrim($baseUrl, '/');
-        $imageList = array_map(function($img) use ($baseUrl) {
+        $imageList = array_map(function($img) {
             return [
                 'id' => (int) $img['id'],
-                'image_url' => $baseUrl . '/' . $img['image_path'],
+                'image_url' => $this->getImageUrl($img['image_path']),
             ];
         }, $images);
         
@@ -734,11 +742,8 @@ class ReportesController extends ResourceController
             return $this->fail('Error al guardar la imagen', 500);
         }
         
-        // Construir URL completa de la imagen
-        $baseUrl = config('App')->baseURL;
-        $baseUrl = rtrim($baseUrl, '/');
-        $fullImageUrl = $baseUrl . '/' . $imagePath;
-        
+        $fullImageUrl = $this->getImageUrl($imagePath);
+
         return $this->respondCreated([
             'success' => true,
             'message' => 'Imagen subida exitosamente',

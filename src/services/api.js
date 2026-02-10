@@ -26,6 +26,7 @@ const API_BASE_URL = getApiBaseUrl();
 
 // Helper para hacer requests
 async function request(endpoint, options = {}) {
+  const isFormData = options.body instanceof FormData;
   const config = {
     credentials: 'include', // IMPORTANTE: Enviar cookies de sesión
     headers: {
@@ -33,9 +34,14 @@ async function request(endpoint, options = {}) {
     },
     ...options,
   };
+  // Con FormData no debe enviarse Content-Type: el navegador pone multipart/form-data; boundary=...
+  if (isFormData && config.headers) {
+    delete config.headers['Content-Type'];
+    delete config.headers['content-type'];
+  }
 
   // Para form data (usado por CodeIgniter) o JSON (ej. PUT clientes)
-  if (options.body && !(options.body instanceof FormData)) {
+  if (options.body && !isFormData) {
     // Si ya es string (ej. JSON), no convertir
     if (typeof options.body === 'string') {
       config.body = options.body;
@@ -235,6 +241,13 @@ export const reportesAPI = {
     return await request(`/reportes/${reporteId}/imagen`, {
       method: 'POST',
       body: formData
+    });
+  },
+
+  // DELETE /api/reportes/:reportId/imagen/:imageId (admin only)
+  deleteImage: async (reporteId, imageId) => {
+    return await request(`/reportes/${reporteId}/imagen/${imageId}`, {
+      method: 'DELETE'
     });
   },
 

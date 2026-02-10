@@ -65,11 +65,12 @@ class ReportesController extends ResourceController
             // Obtener imágenes del reporte
             $images = $this->imageModel->getByReport($report['id']);
             $baseUrl = config('App')->baseURL;
-            // Remover trailing slash si existe
             $baseUrl = rtrim($baseUrl, '/');
-            $imageUrls = array_map(function($img) use ($baseUrl) {
-                // image_path ya incluye 'uploads/reportes/...', agregamos /api/public/ porque CodeIgniter está en subdirectorio
-                return $baseUrl . '/api/public/' . $img['image_path'];
+            $imageList = array_map(function($img) use ($baseUrl) {
+                return [
+                    'id' => (int) $img['id'],
+                    'image_url' => $baseUrl . '/' . $img['image_path'],
+                ];
             }, $images);
             
             $grassHealth = $report['grass_health'] ?? null;
@@ -96,7 +97,7 @@ class ReportesController extends ResourceController
                 'jardinero' => $report['technician_notes'] ?? 'Sin jardinero',
                 'observaciones' => $report['recommendations'] ?? '',
                 'garden_id' => $report['garden_id'],
-                'imagenes' => $imageUrls,
+                'imagenes' => $imageList,
                 // Campos de evaluación técnica con datos reales
                 'grass_height_cm' => (float)($report['grass_height_cm'] ?? 0),
                 'watering_status' => $report['watering_status'] ?? 'optimo',
@@ -166,14 +167,15 @@ class ReportesController extends ResourceController
             }
         }
         
-        // Obtener imágenes
+        // Obtener imágenes (con id para que el frontend pueda eliminar una)
         $images = $this->imageModel->getByReport($id);
         $baseUrl = config('App')->baseURL;
-        // Remover trailing slash si existe
         $baseUrl = rtrim($baseUrl, '/');
-        $imageUrls = array_map(function($img) use ($baseUrl) {
-            // image_path ya incluye 'uploads/reportes/...', agregamos /api/public/ porque CodeIgniter está en subdirectorio
-            return $baseUrl . '/api/public/' . $img['image_path'];
+        $imageList = array_map(function($img) use ($baseUrl) {
+            return [
+                'id' => (int) $img['id'],
+                'image_url' => $baseUrl . '/' . $img['image_path'],
+            ];
         }, $images);
         
         // Formatear respuesta
@@ -200,7 +202,7 @@ class ReportesController extends ResourceController
             'jardinero' => $report['technician_notes'] ?? 'Sin jardinero',
             'observaciones' => $report['recommendations'] ?? '',
             'garden_id' => $report['garden_id'],
-            'imagenes' => $imageUrls,
+            'imagenes' => $imageList,
             // Campos de evaluación técnica con datos reales
             'grass_height_cm' => (float)($report['grass_height_cm'] ?? 0),
             'watering_status' => $report['watering_status'] ?? 'optimo',
@@ -687,21 +689,26 @@ class ReportesController extends ResourceController
             return $this->fail('Reporte no encontrado', 404);
         }
         
-        // Validar archivo
+        // Validar archivo (aceptar jpg, jpeg, png, webp; máx 4MB)
         $validationRule = [
             'image' => [
-                'rules' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpg,image/jpeg,image/png]|max_size[image,2048]',
+                'label' => 'Imagen',
+                'rules' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpg,image/jpeg,image/png,image/webp]|max_size[image,4096]',
             ],
         ];
-        
+
         if (!$this->validate($validationRule)) {
-            return $this->fail($this->validator->getErrors(), 400);
+            $errors = $this->validator->getErrors();
+            $message = is_array($errors) ? implode(' ', $errors) : (string) $errors;
+            return $this->respond(['success' => false, 'message' => $message, 'errors' => $errors], 400);
         }
-        
+
         $file = $this->request->getFile('image');
-        
-        if (!$file->isValid()) {
-            return $this->fail('Archivo inválido', 400);
+
+        if (!$file || !$file->isValid()) {
+            $err = $file ? $file->getError() : UPLOAD_ERR_NO_FILE;
+            $message = $err === UPLOAD_ERR_NO_FILE ? 'No se recibió ningún archivo' : 'Archivo inválido (código ' . $err . ')';
+            return $this->respond(['success' => false, 'message' => $message], 400);
         }
         
         // Generar nombre único
@@ -730,7 +737,7 @@ class ReportesController extends ResourceController
         // Construir URL completa de la imagen
         $baseUrl = config('App')->baseURL;
         $baseUrl = rtrim($baseUrl, '/');
-        $fullImageUrl = $baseUrl . '/api/public/' . $imagePath;
+        $fullImageUrl = $baseUrl . '/' . $imagePath;
         
         return $this->respondCreated([
             'success' => true,
@@ -739,6 +746,34 @@ class ReportesController extends ResourceController
                 'id' => $imageId,
                 'image_url' => $fullImageUrl
             ]
+        ]);
+    }
+
+    /**
+     * Elimina una imagen de un reporte (solo admin).
+     * DELETE /api/reportes/:reportId/imagen/:imageId
+     */
+    public function deleteImage($reportId, $imageId)
+    {
+        $report = $this->reportModel->find($reportId);
+        if (!$report) {
+            return $this->fail('Reporte no encontrado', 404);
+        }
+
+        $image = $this->imageModel->where('id', $imageId)->where('report_id', $reportId)->first();
+        if (!$image) {
+            return $this->fail('Imagen no encontrada', 404);
+        }
+
+        $filePath = FCPATH . $image['image_path'];
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+        $this->imageModel->delete($imageId);
+
+        return $this->respond([
+            'success' => true,
+            'message' => 'Imagen eliminada',
         ]);
     }
 

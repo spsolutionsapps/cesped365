@@ -54,24 +54,43 @@
     next_visit: ''
   };
 
-  // Imágenes
-  let selectedImages = [];
-  let imagePreviews = [];
-  let existingImages = []; // Imágenes existentes del reporte
+  // Imágenes: una sola lista. Cada ítem es { type: 'existing', id, image_url } o { type: 'new', file, dataUrl }
+  let imageItems = [];
+  let existingImageIds = []; // IDs que tenía el reporte al abrir (para saber cuáles eliminar al guardar)
+  let lastLoadedReportId = null; // Evitar que el reactive recargue y pise los cambios del usuario
 
   onMount(async () => {
     await cargarJardines();
   });
 
-  // Cargar datos del reporte cuando se está editando
+  // Cargar datos del reporte UNA SOLA VEZ al abrir para editar (evitar recargas que pisan cambios)
   $: if (reporte && isOpen) {
-    // Usar un pequeño delay para asegurar que el modal esté completamente abierto
-    setTimeout(() => {
-      cargarDatosReporte();
-    }, 100);
+    const reportId = reporte?.id;
+    if (reportId && lastLoadedReportId !== reportId) {
+      lastLoadedReportId = reportId;
+      (async () => {
+        await new Promise((r) => setTimeout(r, 100));
+        try {
+          const res = await reportesAPI.getById(reportId);
+          if (res.success && res.data) {
+            cargarDatosReporte(res.data);
+          } else {
+            cargarDatosReporte(reporte);
+          }
+        } catch (err) {
+          console.error('Error cargando reporte para editar:', err);
+          cargarDatosReporte(reporte);
+        }
+      })();
+    }
   }
-  
-  // Resetear cuando se cierra el modal sin reporte
+
+  // Al cerrar el modal, resetear para que la próxima apertura vuelva a cargar
+  $: if (!isOpen) {
+    if (lastLoadedReportId != null) lastLoadedReportId = null;
+  }
+
+  // Resetear formulario cuando se cierra sin reporte
   $: if (!isOpen && !reporte) {
     resetForm();
   }
@@ -90,12 +109,13 @@
     }
   }
 
-  function cargarDatosReporte() {
-    if (!reporte) return;
-    
+  function cargarDatosReporte(reporteData = null) {
+    const data = reporteData ?? reporte;
+    if (!data) return;
+
     // Cargar datos del reporte en el formulario
     formData = {
-      garden_id: reporte.garden_id || '',
+      garden_id: data.garden_id || '',
       visit_date: reporte.fecha || getFechaActual(),
       grass_health: reporte.estadoGeneral || 'bueno',
       grass_color: reporte.grass_color || (reporte.colorOk ? 'bueno' : 'regular'),
@@ -116,37 +136,40 @@
       next_visit: reporte.next_visit || ''
     };
     
-    // Cargar imágenes existentes
-    if (reporte.imagenes && reporte.imagenes.length > 0) {
-      existingImages = reporte.imagenes;
-      imagePreviews = [...reporte.imagenes];
+    // Cargar imágenes existentes (API devuelve { id, image_url }); normalizar id a número
+    if (data.imagenes && data.imagenes.length > 0) {
+      imageItems = data.imagenes.map((img) => ({
+        type: 'existing',
+        id: Number(typeof img === 'object' && img.id != null ? img.id : 0),
+        image_url: typeof img === 'string' ? img : img.image_url
+      })).filter((it) => it.id > 0);
+      existingImageIds = data.imagenes
+        .map((img) => (typeof img === 'object' && img.id != null ? Number(img.id) : null))
+        .filter((id) => id != null && id > 0);
     } else {
-      existingImages = [];
-      imagePreviews = [];
+      imageItems = [];
+      existingImageIds = [];
     }
-    
-    selectedImages = []; // Las nuevas imágenes seleccionadas
   }
 
   function handleImageSelect(e) {
     const files = Array.from(e.target.files);
-    
-    files.forEach(file => {
-      if (file.type.startsWith('image/')) {
-        selectedImages = [...selectedImages, file];
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          imagePreviews = [...imagePreviews, e.target.result];
-        };
-        reader.readAsDataURL(file);
-      }
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) return;
+      const newItem = { type: 'new', file, dataUrl: null };
+      imageItems = [...imageItems, newItem];
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imageItems = imageItems.map((it) =>
+          it.type === 'new' && it.file === file ? { ...it, dataUrl: ev.target.result } : it
+        );
+      };
+      reader.readAsDataURL(file);
     });
   }
 
   function removeImage(index) {
-    selectedImages = selectedImages.filter((_, i) => i !== index);
-    imagePreviews = imagePreviews.filter((_, i) => i !== index);
+    imageItems = imageItems.filter((_, i) => i !== index);
   }
 
   async function handleSubmit(e) {
@@ -189,6 +212,22 @@
         }
         
         console.log('✅ Reporte actualizado con ID:', reporteId);
+
+        // Eliminar en el servidor las imágenes que el usuario quitó en el modal
+        const currentExistingIds = imageItems.filter((i) => i.type === 'existing').map((i) => Number(i.id));
+        const imagesToDelete = existingImageIds.filter((id) => !currentExistingIds.includes(Number(id)));
+        const reporteIdNum = Number(reporteId);
+        if (imagesToDelete.length > 0) {
+          console.log('🗑️ Eliminando imágenes del servidor:', imagesToDelete, 'reporteId:', reporteIdNum);
+        }
+        for (const imageId of imagesToDelete) {
+          try {
+            await reportesAPI.deleteImage(reporteIdNum, Number(imageId));
+            console.log('  ✓ Imagen', imageId, 'eliminada');
+          } catch (err) {
+            console.error('  ✗ Error eliminando imagen', imageId, err);
+          }
+        }
       } else {
         progressMessage = 'Creando reporte...';
         uploadProgress = 10;
@@ -213,30 +252,37 @@
       }
 
       // 2. Subir nuevas imágenes (80% del progreso)
-      if (selectedImages.length > 0) {
-        const progressPerImage = 80 / selectedImages.length;
-        console.log(`📸 Subiendo ${selectedImages.length} imágenes nuevas...`);
+      const newImageFiles = imageItems.filter((i) => i.type === 'new').map((i) => i.file);
+      let uploadFailed = false;
+      if (newImageFiles.length > 0) {
+        console.log('📤 Subiendo', newImageFiles.length, 'imagen(es) nueva(s), reporteId:', reporteId);
+        const progressPerImage = 80 / newImageFiles.length;
         let imagenesSubidas = 0;
-        
-        for (let i = 0; i < selectedImages.length; i++) {
-          const image = selectedImages[i];
-          progressMessage = `Subiendo imagen ${i + 1} de ${selectedImages.length}...`;
-          
+
+        for (let i = 0; i < newImageFiles.length; i++) {
+          const image = newImageFiles[i];
+          progressMessage = `Subiendo imagen ${i + 1} de ${newImageFiles.length}...`;
+
           try {
             await reportesAPI.uploadImage(reporteId, image);
             imagenesSubidas++;
             uploadProgress = 20 + (imagenesSubidas * progressPerImage);
-            console.log(`✅ Imagen ${imagenesSubidas}/${selectedImages.length} subida`);
+            console.log(`✅ Imagen ${imagenesSubidas}/${newImageFiles.length} subida`);
           } catch (imgErr) {
-            console.error('Error subiendo imagen:', imgErr);
-            // Continuar con las demás imágenes aunque una falle
+            const msg = imgErr.message || (imgErr.errors && Object.values(imgErr.errors).join(' ')) || 'Error subiendo imagen';
+            console.error('Error subiendo imagen:', msg, imgErr);
+            error = msg;
+            uploadFailed = true;
             uploadProgress = 20 + (imagenesSubidas * progressPerImage);
           }
         }
-        
-        progressMessage = 'Finalizando...';
+
+        progressMessage = uploadFailed ? 'Error en subida' : 'Finalizando...';
         uploadProgress = 100;
-        console.log(`✅ Total imágenes subidas: ${imagenesSubidas}/${selectedImages.length}`);
+        if (uploadFailed) {
+          throw new Error(error || 'Error al subir una o más imágenes');
+        }
+        console.log(`✅ Total imágenes subidas: ${imagenesSubidas}/${newImageFiles.length}`);
       } else {
         uploadProgress = 100;
         progressMessage = 'Completado';
@@ -244,10 +290,7 @@
 
       // Éxito
       console.log(`🎉 Reporte ${isEditing ? 'actualizado' : 'creado'} exitosamente`);
-      
-      // Pequeño delay para que se vea el 100%
       await new Promise(resolve => setTimeout(resolve, 300));
-      
       onSuccess();
       resetForm();
       onClose();
@@ -283,9 +326,8 @@
       weather_conditions: '',
       next_visit: ''
     };
-    selectedImages = [];
-    imagePreviews = [];
-    existingImages = [];
+    imageItems = [];
+    existingImageIds = [];
     error = null;
     uploadProgress = 0;
     progressMessage = '';
@@ -592,11 +634,19 @@
       </div>
 
       <!-- Preview de Imágenes -->
-      {#if imagePreviews.length > 0}
+      {#if imageItems.length > 0}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          {#each imagePreviews as preview, index}
+          {#each imageItems as item, index}
             <div class="relative group">
-              <img src={preview} alt="Preview {index + 1}" class="w-full h-32 object-cover rounded-lg" />
+              {#if item.type === 'existing' || item.dataUrl}
+                <img
+                  src={item.type === 'existing' ? item.image_url : item.dataUrl}
+                  alt="Preview {index + 1}"
+                  class="w-full h-32 object-cover rounded-lg"
+                />
+              {:else}
+                <div class="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm">Cargando...</div>
+              {/if}
               <button
                 type="button"
                 on:click={() => removeImage(index)}

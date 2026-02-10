@@ -142,15 +142,15 @@ class DashboardController extends ResourceController
         // Último reporte
         $ultimoReporte = $this->reportModel->orderBy('visit_date', 'DESC')->first();
         
-        // Visitas completadas de este mes (de scheduled_visits)
-        $visitasCompletadasEsteMes = $this->scheduledVisitModel
+        // Visitas completadas de este mes (de scheduled_visits) - usar tabla directa para evitar estado compartido
+        $visitasCompletadasEsteMes = $db->table('scheduled_visits')
             ->where('status', 'completada')
             ->where('MONTH(scheduled_date)', date('m'))
             ->where('YEAR(scheduled_date)', date('Y'))
             ->countAllResults();
-        
-        // Visitas de hoy (completadas)
-        $visitasHoy = $this->scheduledVisitModel
+
+        // Visitas del día: completadas hoy (scheduled_date = hoy)
+        $visitasHoy = $db->table('scheduled_visits')
             ->where('status', 'completada')
             ->where('DATE(scheduled_date)', date('Y-m-d'))
             ->countAllResults();
@@ -200,6 +200,7 @@ class DashboardController extends ResourceController
                     'clientesActivos' => $totalClientes, // Por ahora, todos están activos
                     'visitasEsteMes' => $visitasCompletadasEsteMes,
                     'visitasHoy' => $visitasHoy,
+                    'reportesTotales' => $totalReportes,
                     'gananciasMes' => $gananciasMes,
                     'gananciasMesAnterior' => $gananciasMesAnterior,
                     'gananciasPorMes' => $gananciasPorMes,

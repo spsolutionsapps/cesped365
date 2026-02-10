@@ -97,7 +97,7 @@
   }
   
   function openImageGallery(images, index = 0) {
-    galleryImages = images;
+    galleryImages = Array.isArray(images) ? images.map((img) => (typeof img === 'string' ? img : img.image_url)) : [];
     galleryInitialIndex = index;
     showImageGallery = true;
   }
@@ -261,9 +261,9 @@
                         on:click={() => openImageGallery(reporte.imagenes, index)}
                         class="w-full h-24 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary-500"
                       >
-                        <img 
-                          src={imagen} 
-                          alt="Foto del reporte {index + 1}" 
+                        <img
+                          src={typeof imagen === 'string' ? imagen : imagen.image_url}
+                          alt="Foto del reporte {index + 1}"
                           class="w-full h-full object-cover"
                           on:error={(e) => {
                             console.error('Error cargando imagen:', imagen);

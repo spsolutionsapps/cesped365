@@ -80,6 +80,7 @@ $routes->group('', ['filter' => 'corscustom'], function($routes) {
             $routes->post('reportes', 'Api\ReportesController::create');
             $routes->put('reportes/(:num)', 'Api\ReportesController::update/$1');
             $routes->post('reportes/(:num)/imagen', 'Api\ReportesController::uploadImage/$1');
+            $routes->delete('reportes/(:num)/imagen/(:num)', 'Api\ReportesController::deleteImage/$1/$2');
             $routes->delete('reportes/(:num)', 'Api\ReportesController::delete/$1');
             
             // Visitas programadas - Eliminar (solo admin)

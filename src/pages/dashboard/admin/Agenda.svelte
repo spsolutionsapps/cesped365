@@ -284,7 +284,17 @@
           console.log('[Agenda] Visitas cargadas:', visitas.length, visitas.length ? '(revisa el calendario)' : '— Si es 0, el backend no devuelve visitas para este usuario/sesión.');
         }
         if (visitas.length > 0) {
-          visitas.sort((a, b) => new Date(a.scheduled_date || 0) - new Date(b.scheduled_date || 0));
+          visitas.sort((a, b) => {
+            const d = new Date(a.scheduled_date || 0) - new Date(b.scheduled_date || 0);
+            if (d !== 0) return d;
+            // Mismo día: ordenar por horario
+            const toMinutes = (t) => {
+              if (!t) return 24 * 60 + 59;
+              const [h, m] = String(t).split(':').map(Number);
+              return (h || 0) * 60 + (m || 0);
+            };
+            return toMinutes(a.scheduled_time) - toMinutes(b.scheduled_time);
+          });
         }
         error = null;
         // Si ya estamos en vista calendario, forzar que el calendario muestre los eventos recién cargados

@@ -608,9 +608,9 @@
 
     <!-- Upload de Imágenes -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
+      <span class="block text-sm font-medium text-gray-700 mb-2">
         Imágenes
-      </label>
+      </span>
       <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-500 transition-colors">
         <input
           type="file"

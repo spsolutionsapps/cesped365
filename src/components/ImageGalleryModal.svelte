@@ -29,15 +29,24 @@
 <svelte:window on:keydown={handleKeydown} />
 
 {#if isOpen}
-  <div class="fixed inset-0 z-50 overflow-y-auto" on:click={onClose}>
+  <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions a11y-no-noninteractive-element-interactions -->
+  <div
+    class="fixed inset-0 z-50 overflow-y-auto"
+    on:click={onClose}
+    role="dialog"
+    aria-modal="true"
+    aria-label="Galería de imágenes"
+  >
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <!-- Overlay -->
-      <div class="fixed inset-0 transition-opacity bg-black bg-opacity-90"></div>
+      <div class="fixed inset-0 transition-opacity bg-black bg-opacity-90" aria-hidden="true"></div>
 
-      <!-- Modal -->
-      <div 
+      <!-- Modal content: click no cierra (stopPropagation para no cerrar al hacer clic en la imagen) -->
+      <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions a11y-no-noninteractive-element-interactions -->
+      <div
         class="inline-block align-middle w-full max-w-6xl text-left overflow-hidden transform transition-all"
         on:click|stopPropagation
+        role="document"
       >
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">

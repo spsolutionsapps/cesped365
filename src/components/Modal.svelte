@@ -27,11 +27,15 @@
 <svelte:window on:keydown={handleEscape} />
 
 {#if isOpen}
-  <div 
+  <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions a11y-no-noninteractive-element-interactions -->
+  <div
     class="fixed inset-0 z-50 overflow-y-auto"
     on:click={handleBackdropClick}
+    on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClose(); } }}
     role="dialog"
     aria-modal="true"
+    aria-label={title || 'Diálogo'}
+    tabindex="-1"
   >
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>

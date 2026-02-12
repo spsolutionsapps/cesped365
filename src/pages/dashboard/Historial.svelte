@@ -54,7 +54,7 @@
         <thead>
           <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
             <th class="px-4 py-3">Fecha</th>
-            <th class="px-4 py-3">Jardín</th>
+            <th class="px-4 py-3">Cliente</th>
             <th class="px-4 py-3">Valoración del cliente</th>
             <th class="px-4 py-3">Jardinero</th>
             <th class="px-4 py-3">Estado</th>
@@ -83,7 +83,7 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                {visita.jardin || '—'}
+                {visita.cliente || '—'}
               </td>
               <td class="px-4 py-3 text-sm">
                 {#if visita.client_rating != null && visita.client_rating >= 1 && visita.client_rating <= 5}
@@ -132,7 +132,7 @@
                 <p class="font-semibold text-gray-900 text-sm">
                   {new Date(visita.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', weekday: 'short' })}
                 </p>
-                <p class="text-xs text-gray-600 mt-0.5">{visita.jardin || '—'}</p>
+                <p class="text-xs text-gray-600 mt-0.5">{visita.cliente || '—'}</p>
                 <div class="mt-1.5">
                   <Badge type={getBadgeType(visita.estadoGeneral)}>{visita.estadoGeneral}</Badge>
                 </div>

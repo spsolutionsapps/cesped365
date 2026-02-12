@@ -53,8 +53,8 @@
       <table class="w-full whitespace-no-wrap">
         <thead>
           <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
-            <th class="px-4 py-3">Jardín</th>
             <th class="px-4 py-3">Fecha</th>
+            <th class="px-4 py-3">Jardín</th>
             <th class="px-4 py-3">Valoración del cliente</th>
             <th class="px-4 py-3">Jardinero</th>
             <th class="px-4 py-3">Estado</th>
@@ -64,9 +64,6 @@
         <tbody class="bg-white divide-y">
           {#each historial as visita}
             <tr class="text-gray-700">
-              <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                {visita.jardin || '—'}
-              </td>
               <td class="px-4 py-3">
                 <div class="flex items-center text-sm">
                   <div>
@@ -84,6 +81,9 @@
                     </p>
                   </div>
                 </div>
+              </td>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                {visita.jardin || '—'}
               </td>
               <td class="px-4 py-3 text-sm">
                 {#if visita.client_rating != null && visita.client_rating >= 1 && visita.client_rating <= 5}
@@ -129,10 +129,10 @@
               class="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between gap-2 text-left"
             >
               <div class="flex-1 min-w-0">
-                <p class="font-semibold text-gray-900 text-sm truncate">{visita.jardin || '—'}</p>
-                <p class="text-xs text-gray-600 mt-0.5">
+                <p class="font-semibold text-gray-900 text-sm">
                   {new Date(visita.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', weekday: 'short' })}
                 </p>
+                <p class="text-xs text-gray-600 mt-0.5">{visita.jardin || '—'}</p>
                 <div class="mt-1.5">
                   <Badge type={getBadgeType(visita.estadoGeneral)}>{visita.estadoGeneral}</Badge>
                 </div>

@@ -31,7 +31,12 @@
   <div
     class="fixed inset-0 z-50 overflow-y-auto"
     on:click={handleBackdropClick}
-    on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClose(); } }}
+    on:keydown={(e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+        e.preventDefault();
+        onClose();
+      }
+    }}
     role="dialog"
     aria-modal="true"
     aria-label={title || 'Diálogo'}

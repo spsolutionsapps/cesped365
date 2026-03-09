@@ -70,12 +70,8 @@
       answer: "Vos asignás tu propia fecha en el panel."
     },
     {
-      question: "¿Qué incluye exactamente la visita?",
-      answer: "Corte, bordes, repaso en zonas de uso y un monitoreo del jardín."
-    },
-    {
       question: "¿Qué incluye el monitoreo?",
-      answer: `Cada suscriptor tiene un acceso personal donde puede ver el estado y la evolución de su jardín cuando quiera de manera online.
+      answer: `Cada cliente tiene un acceso personal donde puede ver el estado y la evolución de su jardín cuando quiera de manera online.
 
 El panel incluye:
 • Estado general del césped: Indicador general del jardín (Bueno / Regular / A mejorar) con detalle sobre parejidad, color, manchas, zonas desgastadas y presencia de malezas, más una nota explicativa.
@@ -99,23 +95,6 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
     {
       question: "No sé cuántos m² tiene mi jardín, ¿qué hago?",
       answer: "Escribinos y te ayudamos a definir cuál es el mejor plan."
-    },
-    {
-      question: "Mi casa tiene muy pocos m2, ¿no hay plan más chico?",
-      answer: "El Plan Urbano está pensado para jardines chicos. Si tu caso es especial, escribinos y lo evaluamos."
-    },
-    {
-      question: "¿Cuáles son los extras que hacen en CESPED365?",
-      answer: `1. Recolección y retiro de pasto (Embolsado y retiro del césped cortado)
-2. Cortes extras mensuales (Cortes adicionales fuera del incluido en la suscripción con descuento)
-3. Resiembra o siembra de césped (Reparación de zonas peladas o dañadas)
-4. Aireado del césped (Perforación del suelo para mejorar oxigenación y drenaje)
-5. Nivelación simple del terreno (Corrección de pequeños pozos o desniveles)
-6. Fertilización básica del césped (Aplicación de fertilizante estacional)
-7. Desmalezado de canteros (Eliminación de malezas en zonas plantadas)
-8. Reposición de tierra, corteza o chips
-9. Limpieza de hojas (Recolección de hojas caídas)
-10. Corte de arbustos bajos (Mantenimiento liviano sin poda grande)`
     }
   ];
 </script>
@@ -300,7 +279,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           <!-- CTA Button -->
           <div data-aos-duration="1000" data-aos="fade-up-left" class="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 mt-[50px]">
             <a href="#categorias" on:click={(e) => smoothScrollToSection(e, 'categorias')} class="w-full sm:w-auto sm:mr-4 text-white px-8 py-4 rounded-full hover:bg-gray-800 font-semibold text-lg transition-all shadow-xl flex items-center justify-center gap-3 group bg-black">
-              Elegir mi categoría
+             Ver nuestros servicios
 
               <div class="w-10 h-10 rounded-full bg-[#58bf53] flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -329,98 +308,115 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
 
 
-<!-- Beneficios Exclusivos del Suscriptor -->
+<!-- Nuestros Servicios -->
 <section class="py-20" id="beneficios">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid lg:grid-cols-2 gap-16 items-center">
       <!-- Left side - Content -->
       <div data-aos="fade-right" data-aos-duration="1000">
         <h2 class="text-2xl md:text-[48px] md:leading-[50px] font-bold text-gray-900 mb-6">
-          Beneficios exclusivos del <span class="text-green-600">suscriptor</span>
+          NUESTROS <span class="text-green-600">SERVICIOS</span>
         </h2>
         
-
         <!-- Benefits list -->
         <div class="space-y-4">
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Visitas programadas y cumplimiento real</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Corte de césped, Cortes semanales, quincenales o mensuales según tu necesidad.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Un corte de césped mensual incluido</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Canteros, bordes, hoyas, desmalezado, control de hormigas, aplicación de fungicidas e insecticidas.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Jardín prolijo y parejo todo el año incluido bordes</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Nivelación y recuperación de terreno, movimiento de suelo, aporte de tierra negra y mejoras del terreno.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Monitoreo del jardín: seguimiento mensual, fotos y recomendaciones estacionales</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Siembra y resembrado, semillas de pasto, recuperación de zonas dañadas.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Pago automático, sin llamadas ni coordinaciones</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Colocación de panes de pasto, Instalación profesional y puesta en marcha.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Precio mensual congelado todo el año</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Poda de cercos y plantas, formación, limpieza y mantenimiento estético.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">20% de descuento en cortes adicionales y servicios complementarios</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Sistemas de riego, instalación de riego por goteo y por aspersión.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Menos molestias y cero preocupaciones por el mantenimiento del césped</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Diseño y paisajismo, asesoramiento profesional en diseño de jardines y espacios verdes.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center mt-1">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-gray-700 font-medium lg:text-xl">Podés cancelar la suscripción cuando quieras, sin contratos</p>
+            <p class="text-gray-700 font-medium lg:text-xl">Espacios verdes para oficinas, creación de jardines internos y paredes verdes.</p>
+          </div>
+          
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p class="text-gray-700 font-medium lg:text-xl">Plantas y vivero, trabajamos con los viveros más importantes de Tandil para ofrecerte todas las especies que necesites.</p>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 mt-1">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p class="text-gray-700 font-medium lg:text-xl">Hacemos limpieza de terrenos.</p>
           </div>
         </div>
       </div>
@@ -446,17 +442,14 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
 
 
-  <!-- Qué incluye el servicio por suscripción -->
+  <!-- ¿POR QUÉ ELEGIR CÉSPED 365? -->
   <section class="py-20 bg-gradient-to-br from-green-50 to-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-16">
         <h2 class="text-2xl md:text-5xl font-bold text-gray-900 mb-4">
-          ¿Qué incluye el servicio por <span class="text-green-600">suscripción</span>?
+          ¿POR QUÉ ELEGIR <span class="text-green-600">CÉSPED 365</span>?
         </h2>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-          Todo lo que necesitás para mantener tu jardín impecable, sin complicaciones
-        </p>
       </div>
 
       <!-- Features Grid -->
@@ -465,12 +458,12 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div data-aos-duration="1000" data-aos="fade-right" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <h3  class="text-xl font-bold text-gray-900 mb-3">Corte programado mensual</h3>
+          <h3  class="text-xl font-bold text-gray-900 mb-3">Seguimiento online único en Tandil</h3>
           <p class="text-gray-600 leading-relaxed">
-            Un corte programado por mes + bordes + repaso de zonas de uso. Sin coordinar, sin llamadas.
+            Después de cada visita podés ver fotos, tareas realizadas y la evolución de tu jardín desde tu propio panel exclusivo. Transparencia total y control real del servicio.
           </p>
         </div>
 
@@ -478,12 +471,12 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div data-aos-duration="1000" data-aos="fade-down" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">Pago automático</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Elegís vos la fecha</h3>
           <p class="text-gray-600 leading-relaxed">
-            Débito automático mensual. Olvidate de estar pendiente de pagos y facturas.
+            La visita se coordina según tu disponibilidad. No nos adaptamos nosotros, nos adaptamos a vos.
           </p>
         </div>
 
@@ -494,9 +487,9 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">Precio congelado</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Precio claro y estable</h3>
           <p class="text-gray-600 leading-relaxed">
-            Tu precio mensual se mantiene fijo todo el año. Sin sorpresas ni aumentos.
+            Sin sorpresas. Presupuesto definido desde el inicio.
           </p>
         </div>
 
@@ -504,12 +497,12 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div data-aos-duration="1000" data-aos="fade-up-right" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">20% de descuento exclusivo</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Múltiples medios de pago</h3>
           <p class="text-gray-600 leading-relaxed">
-            Descuento del 20% en cortes extras y servicios complementarios solo para suscriptores.
+            Transferencia, débito, tarjeta de crédito, Mercado Pago o efectivo.
           </p>
         </div>
 
@@ -517,12 +510,12 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <div data-aos-duration="1000" data-aos="fade-up" class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-green-100">
           <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">Monitoreo del jardín</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Descuentos exclusivos</h3>
           <p class="text-gray-600 leading-relaxed">
-            Seguimiento mensual con fotos, evolución del césped y recomendaciones estacionales personalizadas.
+            Beneficios especiales en trabajos adicionales.
           </p>
         </div>
 
@@ -533,9 +526,9 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">Visitas garantizadas</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Visita garantizada</h3>
           <p class="text-gray-600 leading-relaxed">
-            Visitas programadas con cumplimiento real. Sabés exactamente cuándo vamos sin tener que coordinar.
+            Cumplimos la fecha acordada.
           </p>
         </div>
       </div>
@@ -548,7 +541,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
   
 
-  <!-- Elegí la categoría de tu jardín -->
+  <!-- ELEGÍ TU PLAN -->
   <section class="py-20" id="categorias">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
@@ -557,95 +550,36 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Plan de Precios</span>
+          <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">PLANES</span>
         </div>
-        <h2 class="text-2xl md:text-5xl font-bold text-gray-900 mb-4">Elegí la categoría de tu jardín</h2>
+        <h2 class="text-2xl md:text-5xl font-bold text-gray-900 mb-4">ELEGÍ TU PLAN</h2>
       </div>
 
       <!-- Pricing Cards -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Card 1: Urbano -->
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Card 1: Plan Esencial -->
         <div data-aos-duration="1000" data-aos="fade-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-4">Urbano</h3>
-          <div class="mb-6">
-            <span class="text-3xl font-bold text-green-600">$60.000</span>
-            <span class="text-gray-600">/mes</span>
-          </div>
-          <p class="text-gray-600 mb-6 text-xl">Hasta 500 m² de tu jardín</p>
-          <div class="mt-auto">
-            <button 
-            on:click={() => seleccionarPlan('Urbano')}
-            class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2"
-          >
-           Suscribirse
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </button> 
-          <!-- <a 
-          href="https://wa.me/5491170985242" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2"
-        >
-         Consultar
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-          </svg>
-        </a> -->
-          </div>
-        </div>
-
-        <!-- Card 2: Residencial -->
-        <div data-aos-duration="1000" data-aos="fade-up-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-4">Residencial</h3>
-          <div class="mb-6">
-            <span class="text-3xl font-bold text-green-600">$90.000</span>
-            <span class="text-gray-600">/mes</span>
-          </div>
-          <p class="text-gray-600 mb-6 text-xl">500 a 2.500 m² de tu jardín</p>
-          <div class="mt-auto">
-            <button
-            on:click={() => seleccionarPlan('Residencial')}
-            class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2"
-          >
-           Suscribirse
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </button> 
-   
-          </div>
-        </div>
-
-        <!-- Card 3: Parque / Quintas -->
-        <div data-aos-duration="1000" data-aos="fade-right" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-4">Parque / Quintas</h3>
-          <div class="mb-6">
-            <span class="text-3xl font-bold text-green-600">$120.000</span>
-            <span class="text-gray-600">/mes</span>
-          </div>
-          <p class="text-gray-600 mb-6 md:text-lg">2.500 a 4.000 m² de tu jardín</p>
-          <div class="mt-auto">
-            <button 
-            on:click={() => seleccionarPlan('Parque')}
-            class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2"
-          >
-           Suscribirse
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </button> 
-          </div>
-        </div>
-
-        <!-- Card 4: Campo de Deportes / Consultar -->
-        <div data-aos-duration="1000" data-aos="fade-up-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-4">Especiales</h3>
-   
-          <p class="text-gray-600 mb-2">Campos de deportes</p>
-          <p class="text-gray-600 mb-2">Limpieza de Terrenos</p>
-          <p class="text-gray-600 mb-6">Áreas Públicas</p>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">PLAN ESENCIAL</h3>
+          <ul class="text-gray-600 mb-6 text-xl space-y-3">
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Corte de césped según necesidad</span>
+            </li>
+            <li class="text-sm ml-10">Mensual, quincenal o semanal</li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Bordes y prolijidad general</span>
+            </li>
+          </ul>
+          <p class="text-gray-600 mb-6 text-lg">Ideal para mantener tu jardín siempre ordenado y cuidado.</p>
           <div class="mt-auto">
             <a 
               href="https://wa.me/5491170985242" 
@@ -653,188 +587,219 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
               rel="noopener noreferrer"
               class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2"
             >
-             Consultar
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-              </svg>
+             CONSULTAR MI PLAN POR WHATSAPP
             </a>
           </div>
         </div>
 
-    
+        <!-- Card 2: Plan Integral -->
+        <div data-aos-duration="1000" data-aos="fade-up-left" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">PLAN INTEGRAL</h3>
+          <ul class="text-gray-600 mb-6 text-xl space-y-3">
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Corte de césped mensual, quincenal o semanal</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Bordes y prolijidad general del jardín</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758L5 19m0-14l4.121 4.121" />
+                </svg>
+              </div>
+              <span>Poda profesional de plantas y cercos</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <span>Mantenimiento y renovación de canteros</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <span>Control preventivo de plagas y enfermedades</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <span>Asesoramiento en diseño y planificación del jardín</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <span>Recuperación y mejora integral de espacios verdes</span>
+            </li>
+          </ul>
+          <div class="mt-auto">
+            <a 
+              href="https://wa.me/5491170985242" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2"
+            >
+             CONSULTAR MI PLAN POR WHATSAPP
+            </a>
+          </div>
+        </div>
 
-      </div>
+        <!-- Card 3: Plan Especial -->
+        <div data-aos-duration="1000" data-aos="fade-right" class="bg-white border-green-100 border-2 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">PLAN ESPECIAL</h3>
+          <p class="text-gray-600 mb-6 text-lg">Servicios para superficies amplias y proyectos específicos.</p>
+          <ul class="text-gray-600 mb-6 text-xl space-y-3">
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <span>Limpieza y desmalezado de terrenos</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2 2 2 0 012 2v.657M7 20h11a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span>Mantenimiento de campos y grandes extensiones</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2 2 2 0 012 2v.657M7 20h11a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span>Mantenimiento de campos deportivos</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <span>Áreas públicas y espacios institucionales</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span>Proyectos integrales para empresas y desarrollos</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span>Presupuesto personalizado según superficie y necesidad.</span>
+            </li>
+          </ul>
+          <div class="mt-auto">
+            <a 
+              href="https://wa.me/5491170985242" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2"
+            >
+             CONSULTAR MI PLAN POR WHATSAPP
+            </a>
+          </div>
+        </div>
 
-      <div class="flex flex-col md:flex-row gap-6 mt-8 w-full">
-        <p class="text-gray-600 text-lg"><em>Podes cancelar cuando quieras. <br>
-          Sin contratos. Sin permanencia</em></p>
-
-        <p class="text-gray-600 md:ml-auto md:text-right text-base opacity-80"><strong>IMPORTANTE:</strong>  No necesitas saber los metros exactos de tu jardín.
-          Elegí la categoría que mejor lo represente. <br>
-          Si en la primera visita vemos que corresponde a otra categoría, lo ajustamos sin problema. </p>
       </div>
     </div>
   </section>
 
 
 
-<!-- Características principales - Cómo funciona -->
+<!-- Cómo funciona -->
 <section class="py-20 bg-gray-100" id="como-funciona">
   <div data-aos-duration="1000" data-aos="fade-up" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <h2 class="text-2xl md:text-4xl font-bold text-gray-900">¿Cómo funciona?</h2>
-      <p class="mt-4 text-xl text-gray-600">Simple, profesional y confiable</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 justify-items-center">
-      <!-- 1. Elegís el plan -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-10 justify-items-center">
+      <!-- 1. Conocé resultados reales -->
       <div class="text-center w-full max-w-xs">
-        <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 00-2 2z" />
           </svg>
         </div>
-        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">1. Elegís el plan</h6>
-        <p class="text-gray-600 text-sm lg:text-base">Seleccionás el plan que mejor se adapta a tu jardín o parque.</p>
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">1. Conocé resultados reales</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Antes de decidir, mirá nuestros trabajos y clientes reales. Podés ver todo en nuestras redes y validar la calidad del servicio.</p>
+        <a href="https://www.instagram.com/cesped365/" target="_blank" class="text-green-600 font-bold">👉 Botón a Instagram</a>
       </div>
 
-      <!-- 2. Cargás tus datos -->
+      <!-- 2. Escribinos y coordinamos la visita -->
       <div class="text-center w-full max-w-xs">
-        <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
-        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">2. Cargás tus datos</h6>
-        <p class="text-gray-600 text-sm lg:text-base">Ingresás tus datos para recibir reportes, fotos y acceder al panel de gestión.</p>
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">2. Escribinos y coordinamos la visita</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Nos mandás un mensaje y agendamos una visita el día que a vos te quede cómodo. Simple. Directo. Sin complicaciones.</p>
       </div>
 
-      <!-- 3. Pagás el servicio -->
+      <!-- 3. Evaluamos tu jardín en persona -->
       <div class="text-center w-full max-w-xs">
-        <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </div>
-        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">3. Pagás el servicio</h6>
-        <p class="text-gray-600 text-sm lg:text-base">Podés pagar con tarjeta de crédito o débito, Mercado Pago o transferencia.</p>
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">3. Evaluamos tu jardín en persona</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Visitamos tu espacio, analizamos lo que necesitás y te asesoramos según el estado real del jardín. Cada jardín es distinto. Por eso la visita es clave.</p>
       </div>
 
-      <!-- 4. Elegís la fecha de la visita -->
+      <!-- 4. Te enviamos tu propuesta personalizada -->
       <div class="text-center w-full max-w-xs">
-        <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">4. Elegís la fecha de la visita</h6>
-        <p class="text-gray-600 text-sm lg:text-base">Desde el panel o por WhatsApp seleccionás el día en que querés que se realice el servicio.</p>
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">4. Te enviamos tu propuesta personalizada</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Después de la visita, te enviamos el presupuesto y el plan recomendado para tu jardín. Claro, detallado y sin sorpresas.</p>
       </div>
 
-      <!-- Fila 2: últimos 3 ítems centrados respecto a los 4 de arriba -->
-      <div class="col-span-full flex flex-wrap justify-center gap-10 mt-0">
-        <!-- 5. Realizamos el servicio -->
-        <div class="text-center w-full max-w-xs">
-          <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">5. Realizamos el servicio</h6>
-          <p class="text-gray-600 text-sm lg:text-base">Nuestro equipo va en la fecha acordada y realiza el trabajo.</p>
+      <!-- 5. Manos a la obra -->
+      <div class="text-center w-full max-w-xs">
+        <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
         </div>
-
-        <!-- 6. Seguimiento y control -->
-        <div class="text-center w-full max-w-xs">
-          <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">6. Seguimiento y control</h6>
-          <p class="text-gray-600 text-sm lg:text-base">Después de cada visita tenés el registro del trabajo realizado, con fotos y evaluación del estado del parque.</p>
-        </div>
-
-        <!-- 7. ¿Necesitás otra visita? -->
-        <div class="text-center w-full max-w-xs">
-          <div class="bg-primary-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">7. ¿Necesitás otra visita?</h6>
-          <p class="text-gray-600 text-sm lg:text-base">La solicitás directamente desde el panel o por WhatsApp.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Beneficios del servicio -->
-<section id="beneficios" class="py-20 bg-gray-100">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid md:grid-cols-2 gap-12 items-center">
-      <div data-aos-duration="1000" data-aos="fade-right">
-        <h2 class="text-3xl lg:text-[34px] font-bold text-gray-900 mb-6 w-[80%] md:w-auto">Servicios complementarios  <span class="text-green-600">para tu jardín</span></h2>
-     
-
-              <p class="mt-2 text-gray-600 lg:text-xl">Además del corte mensual incluido, los suscriptores pueden acceder a servicios complementarios para el mantenimiento del jardín, con prioridad y un descuento del 20%. </p>
-          
-      </div>
-
-      <div data-aos-duration="1000" data-aos="fade-left" class="verdeDegrade rounded-2xl p-8 text-white">
-        <ul class="space-y-4 mb-8">
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Recolección y retiro de pasto
-            </li>
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Fertilización de tu jardín
-            </li>
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Cortes extras mensuales
-            </li>
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Desmalezado de canteros
-            </li>
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Resiembra o siembra de césped
-            </li>
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Limpieza de hojas
-            </li>
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Aireado del césped
-            </li>
-            <li class="flex items-center lg:text-xl">
-              <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Corte de arbustos-cercos
-            </li>
-        </ul>
-
+        <h6 class="font-bold text-gray-900 mb-2 lg:text-xl">5. Manos a la obra</h6>
+        <p class="text-gray-600 text-sm lg:text-base">Una vez aprobado, comenzamos. Después de cada visita podés ver el trabajo realizado y el seguimiento de tu jardín en tu panel online.</p>
       </div>
     </div>
   </div>
@@ -916,18 +881,16 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
 
           <!-- Main title -->
           <h2 class="text-2xl md:text-5xl font-bold text-gray-900 mb-6">
-           Quienes somos
+           QUIÉNES SOMOS
           </h2>
 
           <!-- Paragraph 1 -->
           <p class="text-gray-600 text-lg mb-6 leading-relaxed">
-            Somos un equipo que se dedica al mantenimiento de jardines, pensamos este servicio para que tu casa tenga el jardín cuidado todo el año sin que tengas que estar pendiente. <br><br>
-            Armamos CÉSPED 365 porque muchas veces el jardín queda para después y termina descuidándose. <br>
-            Por eso trabajamos de forma distinta, con fechas claras y mantenimiento constante. <br><br>
-            Vamos una vez por mes, en una fecha acordada, hacemos el corte, los bordes y dejamos todo prolijo. Sin vueltas. <br>
-            Además, en cada visita observamos el estado general del jardín y su evolución con el tiempo, para poder acompañarlo mejor según la época del año. <br><br>
-            Contamos con las mejores máquinas que nos permiten trabajar rápido, tratando de molestar lo menos posible. <br>
-            La idea es simple: que no tengas que pensar en el jardín ni estar escribiéndole a nadie para que venga, solo disfrutar tu casa como corresponde. </p>
+            Somos un equipo que se dedica al mantenimiento y mejora de jardines. Pensamos este servicio para que tu casa tenga el jardín cuidado todo el año, sin que tengas que estar pendiente. <br><br>
+            Creamos CÉSPED 365 porque muchas veces el jardín queda para después y termina descuidándose. Por eso trabajamos de forma distinta: con organización, fechas claras y mantenimiento constante. <br><br>
+            Trabajamos con visitas programadas según la necesidad de cada jardín. Realizamos el corte, los bordes y dejamos todo prolijo, pero además evaluamos el estado general del espacio para acompañar su evolución durante el año y anticiparnos a posibles problemas. <br><br>
+            También diseñamos jardines, instalamos sistemas de riego y desarrollamos proyectos de paisajismo para hogares y oficinas. No solo mantenemos jardines: los mejoramos y los llevamos a su mejor versión. <br><br>
+            Contamos con maquinaria profesional que nos permite trabajar de forma eficiente y prolija, generando el menor impacto posible. La idea es simple: que no tengas que pensar en el jardín ni coordinar cada visita, sino disfrutar tu casa como corresponde. </p>
         </div>
 
         <!-- Right side - Image Grid -->
@@ -962,7 +925,7 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
             
           </div>
           <p class="text-gray-300 mb-4">
-            Servicio de mantenimiento de jardines por suscripción mensual. 
+            Servicio profesional de mantenimiento y diseño de jardines. 
           </p>
           <p class="text-sm">
             <span class="inline-flex items-center" style="color:#f9fd82 !important">

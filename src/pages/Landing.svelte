@@ -321,100 +321,78 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
         <!-- Benefits list -->
         <div class="space-y-4">
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🌱
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Corte de césped, Cortes semanales, quincenales o mensuales según tu necesidad.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🌿
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Canteros, bordes, hoyas, desmalezado, control de hormigas, aplicación de fungicidas e insecticidas.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🟫
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Nivelación y recuperación de terreno, movimiento de suelo, aporte de tierra negra y mejoras del terreno.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🌾
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Siembra y resembrado, semillas de pasto, recuperación de zonas dañadas.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🧩
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Colocación de panes de pasto, Instalación profesional y puesta en marcha.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              ✂️
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Poda de cercos y plantas, formación, limpieza y mantenimiento estético.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              💧
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Sistemas de riego, instalación de riego por goteo y por aspersión.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🏡
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Diseño y paisajismo, asesoramiento profesional en diseño de jardines y espacios verdes.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🌳
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Espacios verdes para oficinas, creación de jardines internos y paredes verdes.</p>
           </div>
           
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🪴
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Plantas y vivero, trabajamos con los viveros más importantes de Tandil para ofrecerte todas las especies que necesites.</p>
           </div>
 
           <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex-shrink-0 mt-1 text-2xl">
+              🧹
             </div>
             <p class="text-gray-700 font-medium lg:text-xl">Hacemos limpieza de terrenos.</p>
           </div>
@@ -562,19 +540,15 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           <h3 class="text-xl font-bold text-gray-900 mb-4">PLAN ESENCIAL</h3>
           <ul class="text-gray-600 mb-6 text-xl space-y-3">
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🌱
               </div>
               <span>Corte de césped según necesidad</span>
             </li>
             <li class="text-sm ml-10">Mensual, quincenal o semanal</li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                📏
               </div>
               <span>Bordes y prolijidad general</span>
             </li>
@@ -597,58 +571,44 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           <h3 class="text-xl font-bold text-gray-900 mb-4">PLAN INTEGRAL</h3>
           <ul class="text-gray-600 mb-6 text-xl space-y-3">
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🌱
               </div>
               <span>Corte de césped mensual, quincenal o semanal</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                📏
               </div>
               <span>Bordes y prolijidad general del jardín</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758L5 19m0-14l4.121 4.121" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                ✂️
               </div>
               <span>Poda profesional de plantas y cercos</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🌿
               </div>
               <span>Mantenimiento y renovación de canteros</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🐜
               </div>
               <span>Control preventivo de plagas y enfermedades</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🎨
               </div>
               <span>Asesoramiento en diseño y planificación del jardín</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🌳
               </div>
               <span>Recuperación y mejora integral de espacios verdes</span>
             </li>
@@ -671,50 +631,38 @@ Aclaración: El monitoreo es informativo y forma parte de la suscripción. Los t
           <p class="text-gray-600 mb-6 text-lg">Servicios para superficies amplias y proyectos específicos.</p>
           <ul class="text-gray-600 mb-6 text-xl space-y-3">
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🧹
               </div>
               <span>Limpieza y desmalezado de terrenos</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2 2 2 0 012 2v.657M7 20h11a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🌳
               </div>
               <span>Mantenimiento de campos y grandes extensiones</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2 2 2 0 012 2v.657M7 20h11a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                ⚽
               </div>
               <span>Mantenimiento de campos deportivos</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                🏢
               </div>
               <span>Áreas públicas y espacios institucionales</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                💼
               </div>
               <span>Proyectos integrales para empresas y desarrollos</span>
             </li>
             <li class="flex items-start gap-3">
-              <div class="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              <div class="flex-shrink-0 mt-1 text-xl">
+                📝
               </div>
               <span>Presupuesto personalizado según superficie y necesidad.</span>
             </li>
